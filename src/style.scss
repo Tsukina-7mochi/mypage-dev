@@ -1,0 +1,46 @@
+$color-fg: #404040;
+$color-bg: #ffffff;
+$color-highlight-1: #54c3c9;
+$color-highlight-2: #216477;
+
+body {
+  margin: 0;
+  padding: 0;
+  color: $color-fg;
+  background-color: $color-bg;
+  font-family: "Zen Maru Gothic", serif;
+  line-height: 1.7em;
+}
+
+main {
+  max-width: 40em;
+  margin: 0 auto;
+  padding: 2em 1em;
+}
+
+section {
+  &:first-of-type {
+    padding-bottom: 1em;
+    border-bottom: 1px solid $color-fg;
+  }
+}
+
+p {
+  text-indent: 1em;
+}
+
+a {
+  color: $color-highlight-1;
+
+  &:visited {
+    color: $color-highlight-2;
+  }
+}
+
+code {
+  padding: 0 0.5em;
+  border-radius: 4px;
+  background-color: darken($color-bg, 5%);
+  font: inherit;
+}
+

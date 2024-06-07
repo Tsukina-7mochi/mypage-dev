@@ -605,7 +605,7 @@
     "https://deno.land/x/denoflate@1.2.1/pkg/denoflate.js": "b9f9ad9457d3f12f28b1fb35c555f57443427f74decb403113d67364e4f2caf4",
     "https://deno.land/x/denoflate@1.2.1/pkg/denoflate_bg.wasm.js": "d581956245407a2115a3d7e8d85a9641c032940a8e810acbd59ca86afd34d44d",
     "https://deno.land/x/esbuild@v0.19.2/mod.js": "d619154b9c1cc70e8ee4b8db94fb01f00767c9e83089c135cede0cd3edd342a0",
-    "https://deno.land/x/esbuild@v0.20.1/mod.js": "aa4b0bd707c4260410abc0caf31374728fec9722b7c8956d679b5628656b6522",
+    "https://deno.land/x/esbuild@v0.20.1/mod.js": "d50e500b53ce67e31116beba3916b0f9275c0e1cc20bc5cadc0fc1b7a3b06fd9",
     "https://deno.land/x/esbuild@v0.21.4/mod.js": "2baa2fee0098fe9cec9c1a5e66e394afce85ccb966a9be52d7c617ea5c67769f",
     "https://deno.land/x/esbuild_cache_plugin@v1.3.1/deps.ts": "f25fd39cd5c7f6940f59fcd4b9d1be5f2597186db74390a1a74fc7511e6db0dd",
     "https://deno.land/x/esbuild_cache_plugin@v1.3.1/mod.ts": "ec840017285dc54ee4e1214ca027cdf6849f27cc687dcffacac255810ceac120",

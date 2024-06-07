@@ -1,0 +1,42 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "strict": true,
+    "strictNullChecks": true,
+    "noImplicitThis": true,
+    "noImplicitAny": true,
+    "noUnusedParameters": true,
+    "lib": [
+      "DOM",
+      "ESNext",
+      "deno.window"
+    ]
+  },
+  "lint": {
+    "include": [
+      "src/"
+    ],
+    "rules": {
+      "tags": [
+        "recommended"
+      ]
+    }
+  },
+  "fmt": {
+    "include": [
+      "src/"
+    ],
+    "singleQuote": true
+  },
+  "exclude": [
+    "dist/"
+  ],
+  "importMap": "import_map.json",
+  "tasks": {
+    "build": "deno run --allow-run --allow-read --allow-write --allow-env --allow-net ./build.ts",
+    "dev": "deno run --allow-run --allow-read --allow-write --allow-env --allow-net ./build.ts --dev",
+    "watch": "deno run --allow-run --allow-read --allow-write --allow-env --allow-net ./build.ts --dev --watch",
+    "serve": "deno run --allow-run --allow-read --allow-write --allow-env --allow-net ./build.ts --dev --serve",
+    "clean": "rm -rf ./dist && rm -rf ./.cache"
+  }
+}

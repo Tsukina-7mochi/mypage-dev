@@ -1,6 +1,6 @@
 ## Delichon
 
-<gh-card slug="Tsukina-7mochi/delichon"></gh-card>
+<gh-repo-card name="Tsukina-7mochi/delichon"></gh-repo-card>
 
 <!-- 使った言語・技術 -->
 <tech-tags>

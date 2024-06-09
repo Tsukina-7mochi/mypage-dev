@@ -1,6 +1,6 @@
 ## Turing Complete Unofficial
 
-<gh-card slug="Tsukina-7mochi/turing-complete-unofficial"></gh-card>
+<gh-repo-card name="Tsukina-7mochi/turing-complete-unofficial"></gh-repo-card>
 
 <!-- 使った言語・技術 -->
 <tech-tags>

@@ -1,6 +1,6 @@
 ## Glitch Shader
 
-<gh-card slug="Tsukina-7mochi/glitch-shader"></gh-card>
+<gh-repo-card name="Tsukina-7mochi/glitch-shader"></gh-repo-card>
 
 <!-- 使った言語・技術 -->
 <tech-tags>

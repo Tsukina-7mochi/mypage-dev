@@ -1,6 +1,6 @@
 ## Aseprite Type Definition
 
-<gh-card slug="Tsukina-7mochi/aseprite-type-definition"></gh-card>
+<gh-repo-card name="Tsukina-7mochi/aseprite-type-definition"></gh-repo-card>
 
 <tech-tags>
 Lua

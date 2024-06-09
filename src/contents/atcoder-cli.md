@@ -1,6 +1,6 @@
 ## AtCoder CLI
 
-<gh-card slug="Tsukina-7mochi/atcoder-cli"></gh-card>
+<gh-repo-card name="Tsukina-7mochi/atcoder-cli"></gh-repo-card>
 
 <!-- 使った言語・技術 -->
 <tech-tags>

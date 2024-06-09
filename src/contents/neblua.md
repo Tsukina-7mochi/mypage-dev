@@ -1,6 +1,6 @@
 ## neblua
 
-<gh-card slug="Tsukina-7mochi/neblua"></gh-card>
+<gh-repo-card name="Tsukina-7mochi/neblua"></gh-repo-card>
 
 <!-- 使った言語・技術 -->
 <tech-tags>

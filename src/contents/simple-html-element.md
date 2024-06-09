@@ -1,6 +1,6 @@
 ## Simple HTML Element
 
-<gh-card slug="Tsukina-7mochi/simple-html-element"></gh-card>
+<gh-repo-card name="Tsukina-7mochi/simple-html-element"></gh-repo-card>
 
 <!-- 使った言語・技術 -->
 <tech-tags>

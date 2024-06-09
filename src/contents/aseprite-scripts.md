@@ -1,6 +1,6 @@
 ## Aseprite Scripts
 
-<gh-card slug="Tsukina-7mochi/aseprite-scripts"></gh-card>
+<gh-repo-card name="Tsukina-7mochi/aseprite-scripts"></gh-repo-card>
 
 <tech-tags>
 Lua

@@ -17,16 +17,13 @@ class TechTags extends LitElement {
       display: none;
     }
     :host {
-      display: flex;
       align-items: center;
     }
     i {
-      padding-top: 0.3em;
-      padding-right: 0.5em;
+      vertical-align: middle;
     }
-    div {
-      display: flex;
-      gap: 0.5em;
+    span+span {
+      margin-left: 0.5em;
     }
   `;
 
@@ -58,7 +55,7 @@ class TechTags extends LitElement {
     return html`
       ${style_links}
       <i class="fa-solid fa-tags"></i>
-      <div>${tag_elements}</div>
+      ${tag_elements}
       <slot @slotchange=${this.handleSlotchange}></slot>
     `;
   }

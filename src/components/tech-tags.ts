@@ -37,7 +37,6 @@ class TechTags extends LitElement {
 
   handleSlotchange(e: SlotchangeEvent) {
     const children = e.target.assignedNodes({ flatten: true });
-    console.log(children);
     const tags = children
       .flatMap((v) => (v.textContent ?? '').split(',').map((s) => s.trim()))
       .filter((v) => v.length > 0);
@@ -50,7 +49,6 @@ class TechTags extends LitElement {
         <span>${tag}</span>
       `;
     });
-    console.log(tag_elements);
 
     return html`
       ${style_links}

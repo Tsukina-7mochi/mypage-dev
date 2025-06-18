@@ -2,9 +2,9 @@
 
 <gh-repo-card name="Tsukina-7mochi/aseprite-scripts"></gh-repo-card>
 
-<tech-tags>
+<div class="tech-tags">
 Lua
-</tech-tags>
+</div>
 
 ドット絵エディタ Aseprite の自分で開発したスクリプトをまとめたレポジトリです。
 スプライトの PSD (Photoshop File Format) 出力や Windows 向けアイコン・カーソル出力、作品に効果を適用するフィルタなどがあります。

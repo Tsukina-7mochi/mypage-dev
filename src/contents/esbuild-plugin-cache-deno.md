@@ -3,9 +3,9 @@
 <gh-repo-card name="Tsukina-7mochi/esbuild-plugin-cache-deno"></gh-repo-card>
 
 <!-- 使った言語・技術 -->
-<tech-tags>
-TypeScript, esbuild, Deno
-</tech-tags>
+<div class="tech-tags">
+TypeScript esbuild Deno
+</div>
 
 <!-- 概要 -->
 

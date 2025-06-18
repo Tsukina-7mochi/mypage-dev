@@ -3,9 +3,9 @@
 <gh-repo-card name="Tsukina-7mochi/neblua"></gh-repo-card>
 
 <!-- 使った言語・技術 -->
-<tech-tags>
+<div class="tech-tags">
 Lua
-</tech-tags>
+</div>
 
 <!-- 概要 -->
 Lua で記述された Lua のバンドラです。

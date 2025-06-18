@@ -2,9 +2,9 @@
 
 <gh-repo-card name="Tsukina-7mochi/aseprite-type-definition"></gh-repo-card>
 
-<tech-tags>
+<div class="tech-tags">
 Lua
-</tech-tags>
+</div>
 
 Aseprite の Lua API の lua-language-server 用の型定義です。
 

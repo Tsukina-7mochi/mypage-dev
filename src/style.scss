@@ -47,3 +47,11 @@ code {
 gh-repo-card {
   font-size: 0.8em;
 }
+
+div.tech-tags {
+  &:before {
+    font: var(--fa-font-solid);
+    content: "\f02c";
+    -webkit-font-smoothing: antialiased;
+  }
+}

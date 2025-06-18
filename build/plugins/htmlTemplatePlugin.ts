@@ -1,5 +1,5 @@
 import * as esbuild from 'esbuild';
-import * as path from 'std/path/mod.ts';
+import * as path from '@std/path';
 import { marked } from 'marked';
 
 type HtmlTemplatePluginOptions = {

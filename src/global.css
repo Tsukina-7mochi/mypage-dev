@@ -1,13 +1,17 @@
-$color-fg: #404040;
-$color-bg: #ffffff;
-$color-highlight-1: #54c3c9;
-$color-highlight-2: #216477;
+:root {
+  --color-background: #ffffff;
+  --color-background-code: #f0f0f0;
+  --color-border: #404040;
+  --color-text-primary: #404040;
+  --color-text-link: #54c3c9;
+  --color-text-link-visited: #216477;
+}
 
 body {
   margin: 0;
   padding: 0;
-  color: $color-fg;
-  background-color: $color-bg;
+  color: var(--color-text-primary);
+  background-color: var(--color-background);
   font-family: "Zen Maru Gothic", serif;
   line-height: 1.7em;
 }
@@ -21,7 +25,7 @@ main {
 section {
   &:first-of-type {
     padding-bottom: 1em;
-    border-bottom: 1px solid $color-fg;
+    border-bottom: 1px solid var(--color-border);
   }
 }
 
@@ -30,17 +34,17 @@ p {
 }
 
 a {
-  color: $color-highlight-1;
+  color: var(--color-text-link);
 
   &:visited {
-    color: $color-highlight-2;
+    color: var(--color-text-link-visited);
   }
 }
 
 code {
   padding: 0 0.5em;
   border-radius: 4px;
-  background-color: darken($color-bg, 5%);
+  background-color: var(--color-background-code);
   font: inherit;
 }
 

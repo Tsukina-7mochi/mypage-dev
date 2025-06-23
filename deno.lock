@@ -2,14 +2,23 @@
   "version": "5",
   "specifiers": {
     "jsr:@std/bytes@^1.0.6": "1.0.6",
+    "jsr:@std/fs@1.0.18": "1.0.18",
     "jsr:@std/path@1.1.0": "1.1.0",
+    "jsr:@std/path@^1.1.0": "1.1.0",
     "jsr:@std/streams@1.0.10": "1.0.10",
+    "jsr:@std/yaml@1.0.8": "1.0.8",
     "npm:esbuild@~0.25.5": "0.25.5",
     "npm:marked@15.0.12": "15.0.12"
   },
   "jsr": {
     "@std/bytes@1.0.6": {
       "integrity": "f6ac6adbd8ccd99314045f5703e23af0a68d7f7e58364b47d2c7f408aeb5820a"
+    },
+    "@std/fs@1.0.18": {
+      "integrity": "24bcad99eab1af4fde75e05da6e9ed0e0dce5edb71b7e34baacf86ffe3969f3a",
+      "dependencies": [
+        "jsr:@std/path@^1.1.0"
+      ]
     },
     "@std/path@1.1.0": {
       "integrity": "ddc94f8e3c275627281cbc23341df6b8bcc874d70374f75fec2533521e3d6886"
@@ -19,6 +28,9 @@
       "dependencies": [
         "jsr:@std/bytes"
       ]
+    },
+    "@std/yaml@1.0.8": {
+      "integrity": "90b8aab62995e929fa0ea5f4151c287275b63e321ac375c35ff7406ca60c169d"
     }
   },
   "npm": {
@@ -283,8 +295,10 @@
   },
   "workspace": {
     "dependencies": [
+      "jsr:@std/fs@1.0.18",
       "jsr:@std/path@1.1.0",
       "jsr:@std/streams@1.0.10",
+      "jsr:@std/yaml@1.0.8",
       "npm:esbuild@~0.25.5",
       "npm:marked@15.0.12"
     ]

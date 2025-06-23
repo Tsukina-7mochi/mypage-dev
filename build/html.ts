@@ -1,7 +1,6 @@
 import type * as esbuild from 'esbuild';
 import * as path from '@std/path';
-
-import htmlTemplatePlugin from './plugins/htmlTemplatePlugin.ts';
+import { markdownPlugin } from './plugins/markdownPlugin.ts';
 
 export type BuildOptionsOptions = {
   srcPath: string;
@@ -12,10 +11,10 @@ export const buildOptions = (
   options: BuildOptionsOptions,
 ): esbuild.BuildOptions => ({
   entryPoints: [
-    path.join(options.srcPath, 'index.html'),
+    path.join(options.srcPath, 'index.md'),
   ],
-  outdir: options.destPath,
-  plugins: [htmlTemplatePlugin({
-    root: path.join(options.srcPath, 'contents'),
+  outfile: path.join(options.destPath, 'index.html'),
+  plugins: [markdownPlugin({
+    templatePath: path.join(options.srcPath, 'template.html'),
   })],
 });

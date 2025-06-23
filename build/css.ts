@@ -11,7 +11,7 @@ export const buildOptions = (
   options: BuildOptionsOptions,
 ): esbuild.BuildOptions => ({
   entryPoints: [
-    path.join(options.srcPath, 'global.css'),
+    { in: path.join(options.srcPath, 'global.css'), out: 'index' },
   ],
   outdir: options.destPath,
   bundle: true,

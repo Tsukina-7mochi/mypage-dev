@@ -1,3 +1,27 @@
+@layer base, utils, components;
+
+@import "https://cdn.jsdelivr.net/npm/@webtui/css@0.0.5/dist/full.css";
+@import "./styles/theme/nord/index.css";
+
+@import "./styles/components/index.css";
+@import "./styles/util/index.css";
+@import "./styles/font.css";
+
+:root {
+  --font-family: 'Myrica M', monospace;
+  font-family: var(--font-family);
+
+  --line-height: 1.25em;
+  line-height: var(--line-height);
+}
+
+main {
+  max-width: 40em;
+  margin: 0 auto;
+  padding: 0 2ch 1lh;
+}
+
+/*
 :root {
   --color-background: #ffffff;
   --color-background-code: #f0f0f0;
@@ -16,11 +40,6 @@ body {
   line-height: 1.7em;
 }
 
-main {
-  max-width: 40em;
-  margin: 0 auto;
-  padding: 2em 1em;
-}
 
 section {
   &:first-of-type {
@@ -59,3 +78,4 @@ div.tech-tags {
     -webkit-font-smoothing: antialiased;
   }
 }
+*/

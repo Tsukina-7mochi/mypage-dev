@@ -13,6 +13,11 @@ export const markdownPlugin = (
   setup(build) {
     let template: string | null = null;
 
+    marked.use({
+      async: true,
+      gfm: true,
+    });
+
     build.onStart(async () => {
       template = await Deno.readTextFile(options.templatePath);
     });

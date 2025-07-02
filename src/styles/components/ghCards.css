@@ -1,0 +1,11 @@
+@layer components {
+  gh-repo-card {
+    --color-background: var(--background0);
+    --color-background-hover: var(--background1);
+    --color-background-active: var(--background2);
+    --color-text-primary: var(--foreground0);
+    --color-text-secondary: var(--foreground1);
+    --color-text-link: var(--nord7);
+    --radius: 0;
+  }
+}

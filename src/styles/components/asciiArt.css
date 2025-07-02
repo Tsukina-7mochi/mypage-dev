@@ -1,0 +1,7 @@
+@layer components {
+  .ascii-art {
+    letter-spacing: -0.2em;
+    line-height: 0.9em;
+    transform: translateX(-25%) scaleX(50%);
+  }
+}

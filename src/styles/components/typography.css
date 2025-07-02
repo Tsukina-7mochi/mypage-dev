@@ -1,0 +1,8 @@
+h2,
+h3 {
+  margin: 1lh 0;
+}
+
+strong {
+  color: var(--nord7);
+}

@@ -1,4 +1,5 @@
-import * as path from 'std/path/mod.ts';
+import * as fs from '@std/fs';
+import * as path from '@std/path';
 import { Command } from 'cliffy';
 import * as esbuild from 'esbuild';
 import { TextLineStream } from '@std/streams';
@@ -6,7 +7,6 @@ import { TextLineStream } from '@std/streams';
 import { buildOptions as javascriptBuildOptions } from './javascript.ts';
 import { buildOptions as cssBuildOptions } from './css.ts';
 import { buildOptions as htmlBuildOptions } from './html.ts';
-import { buildOptions as assetsBuildOptions } from './assets.ts';
 
 const srcPath = path.resolve('./src');
 const destPath = path.resolve('./dist');
@@ -23,11 +23,11 @@ const buildOptions = [
   javascriptBuildOptions({ srcPath, destPath, dev }),
   cssBuildOptions({ srcPath, destPath, dev }),
   htmlBuildOptions({ srcPath, destPath }),
-  await assetsBuildOptions({ srcPath, destPath }),
 ];
 
 if (!(options.watch || options.serve)) {
   await Promise.all(buildOptions.map((option) => esbuild.build(option)));
+  await fs.copy('./assets', destPath, { overwrite: true });
   Deno.exit();
 }
 
@@ -39,10 +39,10 @@ await Promise.all(contexts.map((ctx) => ctx.watch()));
 console.log('Watching...');
 
 if (options.serve) {
-  const { host, port } = await contexts[0].serve({
+  const { port } = await contexts[0].serve({
     servedir: destPath,
   });
-  console.log(`Serving on ${host}:${port}`);
+  console.log(`Serving on port ${port}`);
 }
 
 const lines = Deno.stdin.readable
@@ -52,6 +52,7 @@ const lines = Deno.stdin.readable
 for await (const _ of lines) {
   // rebuild
   await Promise.all(contexts.map((ctx) => ctx.rebuild().catch(() => {})));
+  await fs.copy('./assets', destPath, { overwrite: true });
 }
 
 await esbuild.stop();

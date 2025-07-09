@@ -3,9 +3,9 @@
 <gh-repo-card name="Tsukina-7mochi/github-cards"></gh-repo-card>
 
 <!-- 使った言語・技術 -->
-<tech-tags>
-Lit, esbuild, TypeScript, babel
-</tech-tags>
+<div class="tech-tags">
+Lit esbuild TypeScript babel
+</div>
 
 <!-- 概要 -->
 GitHub のカードをウェブサイトに埋め込むための custom component です。

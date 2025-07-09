@@ -3,9 +3,9 @@
 <gh-repo-card name="Tsukina-7mochi/delichon"></gh-repo-card>
 
 <!-- 使った言語・技術 -->
-<tech-tags>
+<div class="tech-tags">
 TypeScript
-</tech-tags>
+</div>
 
 <!-- 概要 -->
 npm, Deno のプロジェクトで使用している依存関係の更新をチェックする CLI ツールで、手動で実行できる Dependabot や Renovate のようなものです。

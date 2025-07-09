@@ -1,4 +1,15 @@
-import('live-reload-plugin');
-import TechTags from './components/tech-tags.ts';
+import { initUptimeDisplay } from './uptime-display.ts';
+import { initKeyboard } from './keyboard.ts';
 
-customElements.define('tech-tags', TechTags);
+import('live-reload-plugin');
+
+function init() {
+  initUptimeDisplay();
+  initKeyboard();
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}

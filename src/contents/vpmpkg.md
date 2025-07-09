@@ -3,9 +3,9 @@
 <gh-repo-card name="Tsukina-7mochi/vpmpkg"></gh-repo-card>
 
 <!-- 使った言語・技術 -->
-<tech-tags>
-TypeScript, Hono, Vite, Lit, HTML, CSS
-</tech-tags>
+<div class="tech-tags">
+TypeScript Hono Vite Lit HTML CSS
+</div>
 
 <!-- 概要 -->
 <!-- 作った理由 -->

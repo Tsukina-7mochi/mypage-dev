@@ -3,9 +3,9 @@
 <gh-repo-card name="Tsukina-7mochi/atcoder-cli"></gh-repo-card>
 
 <!-- 使った言語・技術 -->
-<tech-tags>
-Rust, clap, serde, scraper, ureq
-</tech-tags>
+<div class="tech-tags">
+Rust clap serde scraper ureq
+</div>
 
 <!-- 概要 -->
 AtCoder の問題提出・ワークスペース初期化のための CLI アプリケーションです。

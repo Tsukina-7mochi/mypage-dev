@@ -3,9 +3,9 @@
 <gh-repo-card name="Tsukina-7mochi/turing-complete-unofficial"></gh-repo-card>
 
 <!-- 使った言語・技術 -->
-<tech-tags>
-TypeScript, HTML, Sass, Webpack
-</tech-tags>
+<div class="tech-tags">
+TypeScript HTML Sass Webpack
+</div>
 
 <!-- 概要 -->
 <!-- 作った理由 -->

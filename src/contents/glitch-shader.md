@@ -3,9 +3,9 @@
 <gh-repo-card name="Tsukina-7mochi/glitch-shader"></gh-repo-card>
 
 <!-- 使った言語・技術 -->
-<tech-tags>
-HLSL, C#, Unity
-</tech-tags>
+<div class="tech-tags">
+HLSL C# Unity
+</div>
 
 <!-- 概要 -->
 Unity で post processing を使わずにマテリアルに設定するだけでグリッチ・走査線・色収差エフェクトを得られるシェーダーです。

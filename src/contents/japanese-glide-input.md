@@ -3,9 +3,9 @@
 (大学で作成したプロジェクトのため公開できません)
 
 <!-- 使った言語・技術 -->
-<tech-tags>
-TypeScript, HTML, Sass, Webpack, Python, FastAPI, pipenv, docker
-</tech-tags>
+<div class="tech-tags">
+TypeScript HTML Sass Webpack Python FastAPI pipenv docker
+</div>
 
 <!-- 概要 -->
 キーボード上をなぞって (指をスライドさせて) 入力することができるキーボードの実装です。

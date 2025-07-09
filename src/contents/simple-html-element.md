@@ -3,9 +3,9 @@
 <gh-repo-card name="Tsukina-7mochi/simple-html-element"></gh-repo-card>
 
 <!-- 使った言語・技術 -->
-<tech-tags>
+<div class="tech-tags">
 TypeScript
-</tech-tags>
+</div>
 
 <!-- 概要 -->
 <!-- 作った理由 -->

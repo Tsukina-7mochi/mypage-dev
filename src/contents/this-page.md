@@ -3,9 +3,9 @@
 <gh-repo-card name="Tsukina-7mochi/mypage-dev"></gh-repo-card>
 
 <!-- 使った言語・技術 -->
-<tech-tags>
-Lit, esbuild, HTML, Sass, TypeScript
-</tech-tags>
+<div class="tech-tags">
+Lit esbuild HTML Sass TypeScript
+</div>
 
 <!-- 概要 -->
 技術系のプロダクトをまとめるためのポートフォリオページです。

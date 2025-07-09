@@ -1,6 +1,5 @@
 import type * as esbuild from 'esbuild';
 import * as path from '@std/path';
-import { denoPlugins } from 'esbuild-deno-loader';
 
 import liveReloadPlugin from './plugins/liveReloadPlugin.ts';
 
@@ -23,6 +22,5 @@ export const buildOptions = (
   platform: 'browser',
   plugins: [
     liveReloadPlugin({ enabled: options.dev }),
-    ...denoPlugins(),
   ],
 });

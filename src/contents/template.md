@@ -3,8 +3,8 @@
 <gh-repo-card name="Tsukina-7mochi/"></gh-repo-card>
 
 <!-- 使った言語・技術 -->
-<tech-tags>
-</tech-tags>
+<div class="tech-tags">
+</div>
 
 <!-- 概要 -->
 

@@ -1,0 +1,5 @@
+@font-face {
+  font-family: "Myrica M";
+  src: url("/fonts/myrica-m.woff2") format("woff2"),
+       url("/fonts/myrica-m.woff") format("woff");
+}

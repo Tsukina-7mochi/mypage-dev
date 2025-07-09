@@ -6,3 +6,9 @@ h3 {
 strong {
   color: var(--nord7);
 }
+
+p {
+  & > * {
+    text-indent: 0;
+  }
+}

@@ -1,10 +1,8 @@
-export default (
-  <>
+export default function () {
+  return (
     <div>
-      Hello from Client Island!
+      <div>Hello from Client Island!</div>
+      <div>User Agent: {navigator.userAgent}</div>
     </div>
-    <div>
-      User Agent: {navigator.userAgent}
-    </div>
-  </>
-);
+  );
+}

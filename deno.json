@@ -1,16 +1,29 @@
 {
-  "exclude": [
-    "dist/"
-  ],
+  "compilerOptions": {
+    "lib": ["deno.window", "DOM", "DOM.iterable", "ESNext"],
+    "jsx": "react-jsx",
+    "jsxImportSource": "react"
+  },
+  "exclude": ["dist/"],
   "imports": {
+    "@deno/esbuild-plugin": "jsr:@deno/esbuild-plugin@^1.2.1",
     "@std/fs": "jsr:@std/fs@1.0.18",
+    "@std/http": "jsr:@std/http@^1.1.0",
     "@std/path": "jsr:@std/path@1.1.0",
     "@std/yaml": "jsr:@std/yaml@1.0.8",
+    "@types/react": "npm:@types/react@^19.2.14",
+    "@types/react-dom": "npm:@types/react-dom@^19.2.3",
     "esbuild": "npm:esbuild@^0.25.5",
     "cliffy": "https://deno.land/x/cliffy@v0.25.7/mod.ts",
-    "marked": "npm:marked@15.0.12"
+    "marked": "npm:marked@15.0.12",
+    "parse5": "npm:parse5@^8.0.0",
+    "react": "npm:react@^19.2.5",
+    "react-dom": "npm:react-dom@^19.2.5",
+    "simple-html-element": "jsr:@tsukina-7mochi/simple-html-element@^2.1.0"
   },
   "tasks": {
-    "clean": "rm -rf ./dist"
+    "build": "deno -RWE --allow-run ./build.ts",
+    "clean": "rm -rf ./dist",
+    "serve": "deno serve --allow-read=dist ./serve.ts"
   }
 }

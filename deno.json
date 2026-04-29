@@ -13,6 +13,8 @@
     "@std/yaml": "jsr:@std/yaml@1.0.8",
     "@types/react": "npm:@types/react@^19.2.14",
     "@types/react-dom": "npm:@types/react-dom@^19.2.3",
+    "llyn": "./package/llyn/index.ts",
+    "llyn/": "./package/llyn/",
     "esbuild": "npm:esbuild@^0.25.5",
     "cliffy": "https://deno.land/x/cliffy@v0.25.7/mod.ts",
     "marked": "npm:marked@15.0.12",
@@ -22,8 +24,8 @@
     "simple-html-element": "jsr:@tsukina-7mochi/simple-html-element@^2.1.0"
   },
   "tasks": {
-    "build": "deno -RWE --allow-run ./build.ts",
+    "build": "deno -RWE --allow-run ./build/build.ts",
     "clean": "rm -rf ./dist",
-    "serve": "deno serve --allow-read=dist ./serve.ts"
+    "serve": "deno serve --allow-read=dist ./build/serve.ts"
   }
 }

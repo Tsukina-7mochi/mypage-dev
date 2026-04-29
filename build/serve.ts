@@ -6,7 +6,7 @@ export default {
     const pathname = url.pathname;
 
     if (pathname.startsWith("/_islands/")) {
-      const islandWorker = (await import("./dist/worker.js")).default;
+      const islandWorker = (await import("../dist/worker.js")).default;
       return islandWorker.fetch(req);
     }
 

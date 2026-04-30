@@ -6,6 +6,8 @@ import * as html from "./html/index.ts";
 import * as island from "./island/index.ts";
 import { IdProvider } from "./idProvider.ts";
 import { virtualFilePlugin } from "./esbuildPlugin/virtualFilePlugin.ts";
+import { Island } from "./island/prerender.ts";
+import { llynRuntimePlugin } from "./esbuildPlugin/llynRuntimePlugin.ts";
 
 function pathWithoutExt(pathname: string): string {
   const extname = path.extname(pathname);
@@ -15,15 +17,16 @@ function pathWithoutExt(pathname: string): string {
 export async function build(
   srcPath: string,
   distPath: string,
-  entriePaths: string[],
+  entryPaths: string[],
+  workerEntryPath: string,
 ) {
   const idp = new IdProvider();
   const bootstraps = new Map<string, string>();
-  const workerFragments: string[] = [];
+  const allServerIslands: Island[] = [];
 
   const staticPath = path.join(distPath, "static");
 
-  const entries = entriePaths.map((entryPath) => {
+  const entries = entryPaths.map((entryPath) => {
     const outPath = path.join(staticPath, path.relative(srcPath, entryPath));
     const bootstrapSrc = `./${pathWithoutExt(path.basename(entryPath))}-bootstrap.js`;
     const bootstrapOutPath = pathWithoutExt(path.basename(bootstrapSrc));
@@ -50,6 +53,7 @@ export async function build(
     for (const ild of serverIslands) {
       const prerender = await island.prerender(ild);
       html.replaceNodeWithHtml(ild.element, prerender);
+      allServerIslands.push(ild);
     }
     html.addBootstrapScript(document, entry.bootstrapSrc);
 
@@ -61,14 +65,7 @@ export async function build(
       serverIslands,
     );
     bootstraps.set(entry.bootstrapOutPath, bootstrap);
-
-    for (const ild of serverIslands) {
-      const worker = island.renderWorkerFragment(ild);
-      workerFragments.push(worker);
-    }
   }
-
-  const worker = await island.renderWorker(workerFragments);
 
   await esbuild.build({
     entryPoints: [...bootstraps.entries()].map(([outPath, _]) => ({
@@ -94,18 +91,11 @@ export async function build(
   });
 
   await esbuild.build({
-    entryPoints: ["__worker.ts"],
+    entryPoints: [workerEntryPath],
     outfile: path.join(distPath, "worker.js"),
     format: "esm",
     bundle: true,
-    plugins: [
-      denoPlugin(),
-      virtualFilePlugin({
-        files: {
-          "__worker.ts": worker,
-        },
-      }),
-    ],
+    plugins: [llynRuntimePlugin({ islands: allServerIslands }), denoPlugin()],
   });
 
   esbuild.stop();

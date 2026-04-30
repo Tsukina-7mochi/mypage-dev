@@ -6,7 +6,7 @@ export type Island = {
   props: Record<string, string>;
 };
 
-export function renderWorkerFragment(island: Island): string {
+function rendererTemplate(island: Island): string {
   return `
 import("${island.path}").then(({ default: component }) => {
   islands["${island.id}"] = React.createElement(component, ${JSON.stringify(island.props)});
@@ -14,12 +14,12 @@ import("${island.path}").then(({ default: component }) => {
   `;
 }
 
-export async function renderWorker(fragments: string[]): Promise<string> {
+export async function renderServerRenderer(islands: Island[]): Promise<string> {
   const templatePath = path.resolve(
     path.dirname(import.meta.filename ?? ""),
-    "./workerTemplate.ts",
+    "./serverRendererTemplate.ts",
   );
   const template = await Deno.readTextFile(templatePath);
 
-  return [template, ...fragments].join("\n");
+  return [template, ...islands.map(rendererTemplate)].join("\n");
 }

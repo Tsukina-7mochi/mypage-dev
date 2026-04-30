@@ -14,7 +14,7 @@
     "@types/react": "npm:@types/react@^19.2.14",
     "@types/react-dom": "npm:@types/react-dom@^19.2.3",
     "llyn": "./package/llyn/index.ts",
-    "llyn/": "./package/llyn/",
+    "llyn/runtime": "./package/llyn/runtime/index.ts",
     "esbuild": "npm:esbuild@^0.25.5",
     "cliffy": "https://deno.land/x/cliffy@v0.25.7/mod.ts",
     "marked": "npm:marked@15.0.12",
@@ -26,6 +26,6 @@
   "tasks": {
     "build": "deno -RWE --allow-run ./build/build.ts",
     "clean": "rm -rf ./dist",
-    "serve": "deno serve --allow-read=dist ./build/serve.ts"
+    "serve": "deno serve --port=8080 --allow-read ./dist/worker.js"
   }
 }

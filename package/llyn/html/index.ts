@@ -3,7 +3,7 @@ import { selectAll, selectOne } from "./selector.ts";
 
 type ChildNode = parse5.DefaultTreeAdapterTypes.ChildNode;
 type Element = parse5.DefaultTreeAdapterTypes.Element;
-type Document = parse5.DefaultTreeAdapterTypes.Document;
+export type Document = parse5.DefaultTreeAdapterTypes.Document;
 
 type IslandElement = {
   path: string;
@@ -11,10 +11,17 @@ type IslandElement = {
   element: Element;
 };
 
-export async function parse(filepath: string): Promise<Document> {
-  const content = await Deno.readTextFile(filepath);
-  return parse5.parse(content);
-}
+type ElementWithPath = {
+  path: string;
+  element: Element;
+};
+
+type ResourceReferences = {
+  clientIslands: IslandElement[];
+  serverIslands: IslandElement[];
+  scripts: ElementWithPath[];
+  css: ElementWithPath[];
+};
 
 function getIslandFromElement(element: Element): IslandElement {
   const attrs = Object.fromEntries(
@@ -24,18 +31,49 @@ function getIslandFromElement(element: Element): IslandElement {
   return { path: src, props, element };
 }
 
-export function getClientIslands(document: Document): IslandElement[] {
-  return selectAll(document, {
+export function getAttribute(element: Element, name: string): string | null {
+  return element.attrs.find((attr) => attr.name === name)?.value ?? null;
+}
+
+export function setAttribute(element: Element, name: string, value: string) {
+  const attr = element.attrs.find((attr) => attr.name === name);
+  if (attr !== undefined) {
+    attr.value = value;
+  } else {
+    element.attrs.push({ name, value });
+  }
+}
+
+export async function parse(filepath: string): Promise<Document> {
+  const content = await Deno.readTextFile(filepath);
+  return parse5.parse(content);
+}
+
+export function getResourceReferences(document: Document): ResourceReferences {
+  const clientIslands = selectAll(document, {
     tag: "script",
     attributes: { type: "application/client-island" },
   }).map(getIslandFromElement);
-}
-
-export function getServerIslands(document: Document): IslandElement[] {
-  return selectAll(document, {
+  const serverIslands = selectAll(document, {
     tag: "script",
     attributes: { type: "application/server-island" },
   }).map(getIslandFromElement);
+  const scripts = selectAll(document, {
+    tag: "script",
+  })
+    .filter((element) => getAttribute(element, "type") !== "text/javascript")
+    .map((element) => ({ element, path: getAttribute(element, "src") ?? "" }));
+  const css = selectAll(document, {
+    tag: "link",
+    attributes: { rel: "stylesheet" },
+  }).map((element) => ({ element, path: getAttribute(element, "href") ?? "" }));
+
+  return {
+    clientIslands,
+    serverIslands,
+    scripts,
+    css,
+  };
 }
 
 export function replaceNodeWithHtml(element: ChildNode, html: string) {

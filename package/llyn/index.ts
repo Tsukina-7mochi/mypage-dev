@@ -26,7 +26,7 @@ function pathWithoutExt(pathname: string): string {
 export async function build(options: BuildOptions) {
   const idp = new IdProvider();
   const bootstraps = new Map<string, string>();
-  const allServerIslands: Island[] = [];
+  const serverIslands: Island[] = [];
 
   const staticPath = path.join(options.outdir, "static");
 
@@ -42,25 +42,29 @@ export async function build(options: BuildOptions) {
 
   for (const entry of documents) {
     const document = await html.parse(entry.path);
-    const clientIslands = html.getClientIslands(document).map((island) => ({
-      ...island,
-      path: path.resolve(path.dirname(entry.path), island.path),
-      id: `island-${idp.generate()}`,
-    }));
-    const serverIslands = html.getServerIslands(document).map((island) => ({
-      ...island,
-      path: path.resolve(path.dirname(entry.path), island.path),
-      id: `island-${idp.generate()}`,
-    }));
+    const resources_ = html.getResourceReferences(document);
+    const resources = {
+      ...resources_,
+      clientIslands: resources_.clientIslands.map((island) => ({
+        ...island,
+        path: path.resolve(path.dirname(entry.path), island.path),
+        id: `island-${idp.generate()}`,
+      })),
+      serverIslands: resources_.serverIslands.map((island) => ({
+        ...island,
+        path: path.resolve(path.dirname(entry.path), island.path),
+        id: `island-${idp.generate()}`,
+      })),
+    };
 
-    for (const ild of clientIslands) {
+    for (const ild of resources.clientIslands) {
       const prerender = await island.prerender(ild);
       html.replaceNodeWithHtml(ild.element, prerender);
     }
-    for (const ild of serverIslands) {
+    for (const ild of resources.serverIslands) {
       const prerender = await island.prerender(ild);
       html.replaceNodeWithHtml(ild.element, prerender);
-      allServerIslands.push(ild);
+      serverIslands.push(ild);
     }
     html.addBootstrapScript(document, entry.bootstrapSrc);
 
@@ -68,8 +72,8 @@ export async function build(options: BuildOptions) {
     await Deno.writeTextFile(entry.outPath, html.stringify(document));
 
     const bootstrap = await island.renderBootstrap(
-      clientIslands,
-      serverIslands,
+      resources.clientIslands,
+      resources.serverIslands,
     );
     bootstraps.set(entry.bootstrapOutPath, bootstrap);
   }
@@ -102,7 +106,7 @@ export async function build(options: BuildOptions) {
     outdir: options.outdir,
     format: "esm",
     bundle: true,
-    plugins: [llynRuntimePlugin({ islands: allServerIslands }), denoPlugin()],
+    plugins: [llynRuntimePlugin({ islands: serverIslands }), denoPlugin()],
   });
 
   esbuild.stop();

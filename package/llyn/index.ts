@@ -9,31 +9,38 @@ import { virtualFilePlugin } from "./esbuildPlugin/virtualFilePlugin.ts";
 import { Island } from "./types.ts";
 import { llynRuntimePlugin } from "./esbuildPlugin/llynRuntimePlugin.ts";
 
+type BuildOptions = {
+  entries: {
+    documents: string[];
+    worker: string;
+  };
+  root: string;
+  outdir: string;
+};
+
 function pathWithoutExt(pathname: string): string {
   const extname = path.extname(pathname);
   return pathname.slice(0, -extname.length);
 }
 
-export async function build(
-  srcPath: string,
-  distPath: string,
-  entryPaths: string[],
-  workerEntryPath: string,
-) {
+export async function build(options: BuildOptions) {
   const idp = new IdProvider();
   const bootstraps = new Map<string, string>();
   const allServerIslands: Island[] = [];
 
-  const staticPath = path.join(distPath, "static");
+  const staticPath = path.join(options.outdir, "static");
 
-  const entries = entryPaths.map((entryPath) => {
-    const outPath = path.join(staticPath, path.relative(srcPath, entryPath));
-    const bootstrapSrc = `./${pathWithoutExt(path.basename(entryPath))}-bootstrap.js`;
+  const documents = options.entries.documents.map((filename) => {
+    const outPath = path.join(
+      staticPath,
+      path.relative(options.root, filename),
+    );
+    const bootstrapSrc = `./${pathWithoutExt(path.basename(filename))}-bootstrap.js`;
     const bootstrapOutPath = pathWithoutExt(path.basename(bootstrapSrc));
-    return { path: entryPath, outPath, bootstrapSrc, bootstrapOutPath };
+    return { path: filename, outPath, bootstrapSrc, bootstrapOutPath };
   });
 
-  for (const entry of entries) {
+  for (const entry of documents) {
     const document = await html.parse(entry.path);
     const clientIslands = html.getClientIslands(document).map((island) => ({
       ...island,
@@ -91,8 +98,8 @@ export async function build(
   });
 
   await esbuild.build({
-    entryPoints: [workerEntryPath],
-    outfile: path.join(distPath, "worker.js"),
+    entryPoints: [{ in: options.entries.worker, out: "worker" }],
+    outdir: options.outdir,
     format: "esm",
     bundle: true,
     plugins: [llynRuntimePlugin({ islands: allServerIslands }), denoPlugin()],

@@ -6,7 +6,7 @@ import * as html from "./html/index.ts";
 import * as island from "./island/index.ts";
 import { IdProvider } from "./idProvider.ts";
 import { virtualFilePlugin } from "./esbuildPlugin/virtualFilePlugin.ts";
-import { Island } from "./island/prerender.ts";
+import { Island } from "./types.ts";
 import { llynRuntimePlugin } from "./esbuildPlugin/llynRuntimePlugin.ts";
 
 function pathWithoutExt(pathname: string): string {

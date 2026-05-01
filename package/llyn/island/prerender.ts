@@ -1,12 +1,6 @@
 import React from "react";
 import { renderToString } from "react-dom/server";
-
-export type Island = {
-  id: string;
-  path: string;
-  // Props are provided as attributes in the HTML, so they are always strings.
-  props: Record<string, string>;
-};
+import { Island } from "../types.ts";
 
 export async function prerender(island: Island): Promise<string> {
   const module = await import(island.path);

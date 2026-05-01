@@ -1,15 +1,7 @@
 import * as path from "@std/path";
+import { Island } from "../types.ts";
 
-export type ClientIsland = {
-  id: string;
-  path: string;
-  props: Record<string, string>;
-};
-export type ServerIsland = {
-  id: string;
-};
-
-function clientIslandBootstrap(island: ClientIsland): string {
+function clientIslandBootstrap(island: Island): string {
   return `
 import("${island.path}").then(({ default: component }) => {
   bootstrapClientIsland("${island.id}", component, ${JSON.stringify(island.props)})
@@ -17,13 +9,13 @@ import("${island.path}").then(({ default: component }) => {
   `;
 }
 
-function serverIslandBootstrap(island: ServerIsland): string {
+function serverIslandBootstrap(island: Island): string {
   return `bootstrapServerIsland("${island.id}");`;
 }
 
 export async function renderBootstrap(
-  clientIslands: ClientIsland[],
-  serverIslands: ServerIsland[],
+  clientIslands: Island[],
+  serverIslands: Island[],
 ): Promise<string> {
   const templatePath = path.resolve(
     path.dirname(import.meta.filename ?? ""),

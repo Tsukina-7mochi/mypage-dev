@@ -5,7 +5,7 @@ type ChildNode = parse5.DefaultTreeAdapterTypes.ChildNode;
 type Element = parse5.DefaultTreeAdapterTypes.Element;
 type Document = parse5.DefaultTreeAdapterTypes.Document;
 
-type Island = {
+type IslandElement = {
   path: string;
   props: Record<string, string>;
   element: Element;
@@ -16,7 +16,7 @@ export async function parse(filepath: string): Promise<Document> {
   return parse5.parse(content);
 }
 
-function getIslandFromElement(element: Element): Island {
+function getIslandFromElement(element: Element): IslandElement {
   const attrs = Object.fromEntries(
     element.attrs.map((attr) => [attr.name, attr.value]),
   );
@@ -24,14 +24,14 @@ function getIslandFromElement(element: Element): Island {
   return { path: src, props, element };
 }
 
-export function getClientIslands(document: Document): Island[] {
+export function getClientIslands(document: Document): IslandElement[] {
   return selectAll(document, {
     tag: "script",
     attributes: { type: "application/client-island" },
   }).map(getIslandFromElement);
 }
 
-export function getServerIslands(document: Document): Island[] {
+export function getServerIslands(document: Document): IslandElement[] {
   return selectAll(document, {
     tag: "script",
     attributes: { type: "application/server-island" },
@@ -57,8 +57,7 @@ export function addBootstrapScript(document: Document, src: string) {
     throw Error("body not found");
   }
   body.childNodes.push(
-    parse5.parseFragment(`<script defer src="${src}"></script>`)
-      .childNodes[0],
+    parse5.parseFragment(`<script defer src="${src}"></script>`).childNodes[0],
   );
 }
 

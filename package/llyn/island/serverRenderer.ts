@@ -1,10 +1,5 @@
 import * as path from "@std/path";
-
-export type Island = {
-  id: string;
-  path: string;
-  props: Record<string, string>;
-};
+import { Island } from "../types.ts";
 
 function rendererTemplate(island: Island): string {
   return `

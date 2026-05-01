@@ -1,13 +1,8 @@
 import * as esbuild from "esbuild";
 import * as island from "../island/index.ts";
+import { Island } from "../types.ts";
 
 const namespace = "worker-fetch-island-plugin";
-
-export type Island = {
-  id: string;
-  path: string;
-  props: Record<string, string>;
-};
 
 export type PluginOptions = {
   islands: Island[];

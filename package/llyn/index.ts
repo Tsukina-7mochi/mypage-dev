@@ -9,13 +9,23 @@ import { virtualFilePlugin } from "./esbuildPlugin/virtualFilePlugin.ts";
 import { Island } from "./types.ts";
 import { llynRuntimePlugin } from "./esbuildPlugin/llynRuntimePlugin.ts";
 
-type BuildOptions = {
+export type BuildOptions = {
   entries: {
     documents: string[];
     worker: string;
   };
   root: string;
   outdir: string;
+};
+
+type SourceFile = {
+  in: string;
+  out: string;
+};
+type VirtualFile = {
+  in: string;
+  out: string;
+  content: string;
 };
 
 function pathWithoutExt(pathname: string): string {
@@ -25,7 +35,8 @@ function pathWithoutExt(pathname: string): string {
 
 export async function build(options: BuildOptions) {
   const idp = new IdProvider();
-  const bootstraps = new Map<string, string>();
+  const sourceFiles: SourceFile[] = [];
+  const virtualFiles: VirtualFile[] = [];
   const serverIslands: Island[] = [];
 
   const staticPath = path.join(options.outdir, "static");
@@ -75,28 +86,25 @@ export async function build(options: BuildOptions) {
       resources.clientIslands,
       resources.serverIslands,
     );
-    bootstraps.set(entry.bootstrapOutPath, bootstrap);
+    virtualFiles.push({
+      in: `__virtual_${path.basename(entry.bootstrapOutPath)}.ts`,
+      out: entry.bootstrapOutPath,
+      content: bootstrap,
+    });
   }
 
   await esbuild.build({
-    entryPoints: [...bootstraps.entries()].map(([outPath, _]) => ({
-      in: `__virtual_${path.basename(outPath)}.ts`,
-      out: outPath,
-    })),
+    entryPoints: [
+      ...sourceFiles,
+      ...virtualFiles.map(({ content: _, ...entry }) => entry),
+    ],
     outdir: staticPath,
     platform: "browser",
     bundle: true,
     plugins: [
       denoPlugin(),
       virtualFilePlugin({
-        files: Object.fromEntries(
-          bootstraps
-            .entries()
-            .map(([outPath, content]) => [
-              `__virtual_${path.basename(outPath)}.ts`,
-              content,
-            ]),
-        ),
+        files: Object.fromEntries(virtualFiles.map((f) => [f.in, f.content])),
       }),
     ],
   });

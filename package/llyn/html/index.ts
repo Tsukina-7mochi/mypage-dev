@@ -1,5 +1,5 @@
 import * as parse5 from "parse5";
-import { selectAll, selectOne } from "./selector.ts";
+import { selectAll, selectOne, getAttribute } from "parse5-dom";
 
 type ChildNode = parse5.DefaultTreeAdapterTypes.ChildNode;
 type Element = parse5.DefaultTreeAdapterTypes.Element;
@@ -31,19 +31,6 @@ function getIslandFromElement(element: Element): IslandElement {
   return { path: src, props, element };
 }
 
-export function getAttribute(element: Element, name: string): string | null {
-  return element.attrs.find((attr) => attr.name === name)?.value ?? null;
-}
-
-export function setAttribute(element: Element, name: string, value: string) {
-  const attr = element.attrs.find((attr) => attr.name === name);
-  if (attr !== undefined) {
-    attr.value = value;
-  } else {
-    element.attrs.push({ name, value });
-  }
-}
-
 export async function parse(filepath: string): Promise<Document> {
   const content = await Deno.readTextFile(filepath);
   return parse5.parse(content);
@@ -60,7 +47,7 @@ export function getResourceReferences(document: Document): ResourceReferences {
   }).map(getIslandFromElement);
   const scripts = selectAll(document, {
     tag: "script",
-  })
+  } as const)
     .filter((element) => getAttribute(element, "type") !== "text/javascript")
     .map((element) => ({ element, path: getAttribute(element, "src") ?? "" }));
   const css = selectAll(document, {

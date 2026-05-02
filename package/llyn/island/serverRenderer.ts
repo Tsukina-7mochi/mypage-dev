@@ -4,7 +4,9 @@ import { Island } from "../types.ts";
 function rendererTemplate(island: Island): string {
   return `
 import("${island.path}").then(({ default: component }) => {
-  islands["${island.id}"] = React.createElement(component, ${JSON.stringify(island.props)});
+  islands["${island.id}"] = React.createElement(component, ${
+    JSON.stringify(island.props)
+  });
 });
   `;
 }

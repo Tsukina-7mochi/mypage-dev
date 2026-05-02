@@ -4,7 +4,9 @@ import { Island } from "../types.ts";
 function clientIslandBootstrap(island: Island): string {
   return `
 import("${island.path}").then(({ default: component }) => {
-  bootstrapClientIsland("${island.id}", component, ${JSON.stringify(island.props)})
+  bootstrapClientIsland("${island.id}", component, ${
+    JSON.stringify(island.props)
+  })
 });
   `;
 }

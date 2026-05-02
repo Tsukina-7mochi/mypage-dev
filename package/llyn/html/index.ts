@@ -1,5 +1,5 @@
 import * as parse5 from "parse5";
-import { selectAll, selectOne, getAttribute } from "parse5-dom";
+import { getAttribute, selectAll, selectOne } from "parse5-dom";
 
 type ChildNode = parse5.DefaultTreeAdapterTypes.ChildNode;
 type Element = parse5.DefaultTreeAdapterTypes.Element;
@@ -45,9 +45,12 @@ export function getResourceReferences(document: Document): ResourceReferences {
     tag: "script",
     attributes: { type: "application/server-island" },
   }).map(getIslandFromElement);
-  const scripts = selectAll(document, {
-    tag: "script",
-  } as const)
+  const scripts = selectAll(
+    document,
+    {
+      tag: "script",
+    } as const,
+  )
     .filter((element) => getAttribute(element, "type") !== "text/javascript")
     .map((element) => ({ element, path: getAttribute(element, "src") ?? "" }));
   const css = selectAll(document, {

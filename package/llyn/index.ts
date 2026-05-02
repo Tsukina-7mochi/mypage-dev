@@ -46,7 +46,9 @@ export async function build(options: BuildOptions) {
       staticPath,
       path.relative(options.root, filename),
     );
-    const bootstrapSrc = `./${pathWithoutExt(path.basename(filename))}-bootstrap.js`;
+    const bootstrapSrc = `./${
+      pathWithoutExt(path.basename(filename))
+    }-bootstrap.js`;
     const bootstrapOutPath = pathWithoutExt(path.basename(bootstrapSrc));
     return { path: filename, outPath, bootstrapSrc, bootstrapOutPath };
   });

@@ -20,7 +20,7 @@ type ResourceReferences = {
   clientIslands: IslandElement[];
   serverIslands: IslandElement[];
   scripts: ElementWithPath[];
-  css: ElementWithPath[];
+  styles: ElementWithPath[];
 };
 
 function getIslandFromElement(element: Element): IslandElement {
@@ -51,7 +51,7 @@ export function getResourceReferences(document: Document): ResourceReferences {
       return type === null || type === "application/javascript";
     })
     .map((element) => ({ element, path: getAttribute(element, "src") ?? "" }));
-  const css = selectAll(document, {
+  const styles = selectAll(document, {
     tag: "link",
     attributes: { rel: "stylesheet" },
   }).map((element) => ({ element, path: getAttribute(element, "href") ?? "" }));
@@ -60,7 +60,7 @@ export function getResourceReferences(document: Document): ResourceReferences {
     clientIslands,
     serverIslands,
     scripts,
-    css,
+    styles,
   };
 }
 

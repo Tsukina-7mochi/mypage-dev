@@ -46,9 +46,11 @@ export async function build(options: BuildOptions) {
       staticPath,
       path.relative(options.root, filename),
     );
-    const bootstrapSrc = `./${pathWithoutExt(
-      path.basename(filename),
-    )}-bootstrap.js`;
+    const bootstrapSrc = `./${
+      pathWithoutExt(
+        path.basename(filename),
+      )
+    }-bootstrap.js`;
     const bootstrapOutPath = pathWithoutExt(path.basename(bootstrapSrc));
     return { path: filename, outPath, bootstrapSrc, bootstrapOutPath };
   });
@@ -57,7 +59,6 @@ export async function build(options: BuildOptions) {
     const document = await html.parse(entry.path);
     const resources_ = html.getResourceReferences(document);
     const resources = {
-      ...resources_,
       clientIslands: resources_.clientIslands.map((island) => ({
         ...island,
         path: path.resolve(path.dirname(entry.path), island.path),
@@ -71,6 +72,10 @@ export async function build(options: BuildOptions) {
       scripts: resources_.scripts.map((script) => ({
         ...script,
         path: path.resolve(path.dirname(entry.path), script.path),
+      })),
+      styles: resources_.styles.map((style) => ({
+        ...style,
+        path: path.resolve(path.dirname(entry.path), style.path),
       })),
     };
 
@@ -106,6 +111,19 @@ export async function build(options: BuildOptions) {
         `<script src="${newSrc}"></script>`,
       );
       sourceFiles.push({ in: script.path, out: outName });
+    }
+
+    for (const style of resources.styles) {
+      const outName = pathWithoutExt(path.relative(options.root, style.path));
+      const newPath = path.relative(
+        path.dirname(entry.outPath),
+        path.join(staticPath, outName + ".css"),
+      );
+      html.replaceNodeWithHtml(
+        style.element,
+        `<link rel="stylesheet" href="${newPath}">`,
+      );
+      sourceFiles.push({ in: style.path, out: outName });
     }
 
     await fs.ensureDir(path.dirname(entry.outPath));

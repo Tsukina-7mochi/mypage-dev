@@ -45,13 +45,11 @@ export function getResourceReferences(document: Document): ResourceReferences {
     tag: "script",
     attributes: { type: "application/server-island" },
   }).map(getIslandFromElement);
-  const scripts = selectAll(
-    document,
-    {
-      tag: "script",
-    } as const,
-  )
-    .filter((element) => getAttribute(element, "type") !== "text/javascript")
+  const scripts = selectAll(document, { tag: "script" })
+    .filter((element) => {
+      const type = getAttribute(element, "type");
+      return type === null || type === "application/javascript";
+    })
     .map((element) => ({ element, path: getAttribute(element, "src") ?? "" }));
   const css = selectAll(document, {
     tag: "link",

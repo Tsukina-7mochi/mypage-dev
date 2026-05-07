@@ -46,9 +46,9 @@ export async function build(options: BuildOptions) {
       staticPath,
       path.relative(options.root, filename),
     );
-    const bootstrapSrc = `./${
-      pathWithoutExt(path.basename(filename))
-    }-bootstrap.js`;
+    const bootstrapSrc = `./${pathWithoutExt(
+      path.basename(filename),
+    )}-bootstrap.js`;
     const bootstrapOutPath = pathWithoutExt(path.basename(bootstrapSrc));
     return { path: filename, outPath, bootstrapSrc, bootstrapOutPath };
   });
@@ -68,6 +68,10 @@ export async function build(options: BuildOptions) {
         path: path.resolve(path.dirname(entry.path), island.path),
         id: `island-${idp.generate()}`,
       })),
+      scripts: resources_.scripts.map((script) => ({
+        ...script,
+        path: path.resolve(path.dirname(entry.path), script.path),
+      })),
     };
 
     for (const ild of resources.clientIslands) {
@@ -81,9 +85,6 @@ export async function build(options: BuildOptions) {
     }
     html.addBootstrapScript(document, entry.bootstrapSrc);
 
-    await fs.ensureDir(path.dirname(entry.outPath));
-    await Deno.writeTextFile(entry.outPath, html.stringify(document));
-
     const bootstrap = await island.renderBootstrap(
       resources.clientIslands,
       resources.serverIslands,
@@ -93,6 +94,22 @@ export async function build(options: BuildOptions) {
       out: entry.bootstrapOutPath,
       content: bootstrap,
     });
+
+    for (const script of resources.scripts) {
+      const outName = pathWithoutExt(path.relative(options.root, script.path));
+      const newSrc = path.relative(
+        path.dirname(entry.outPath),
+        path.join(staticPath, outName + ".js"),
+      );
+      html.replaceNodeWithHtml(
+        script.element,
+        `<script src="${newSrc}"></script>`,
+      );
+      sourceFiles.push({ in: script.path, out: outName });
+    }
+
+    await fs.ensureDir(path.dirname(entry.outPath));
+    await Deno.writeTextFile(entry.outPath, html.stringify(document));
   }
 
   await esbuild.build({

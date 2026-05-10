@@ -20,7 +20,7 @@ function bootstrapServerIsland(id: string) {
   if (!element) throw Error(`Element ${id} is not found`);
 
   (async () => {
-    const res = await fetch(`_islands/${id}`);
+    const res = await fetch(`/_islands/${id}`);
     if (!res.ok) {
       throw Error(
         `Failed to fetch server island ${id}: ${res.status} ${res.statusText}`,

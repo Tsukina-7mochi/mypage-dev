@@ -22,7 +22,8 @@
     "parse5-dom": "./package/parse5-dom/index.ts",
     "react": "npm:react@^19.2.5",
     "react-dom": "npm:react-dom@^19.2.5",
-    "simple-html-element": "jsr:@tsukina-7mochi/simple-html-element@^2.1.0"
+    "simple-html-element": "jsr:@tsukina-7mochi/simple-html-element@^2.1.0",
+    "valibot": "jsr:@valibot/valibot@^1.4.0"
   },
   "tasks": {
     "build": "deno -RWE --allow-run ./build/build.ts",

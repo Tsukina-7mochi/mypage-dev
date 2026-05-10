@@ -1,3 +1,4 @@
+import * as parse5 from "parse5";
 import * as path from "@std/path";
 import * as fs from "@std/fs";
 import * as esbuild from "esbuild";
@@ -8,6 +9,7 @@ import { IdProvider } from "./idProvider.ts";
 import { virtualFilePlugin } from "./esbuildPlugin/virtualFilePlugin.ts";
 import { Island } from "./types.ts";
 import { llynRuntimePlugin } from "./esbuildPlugin/llynRuntimePlugin.ts";
+import * as markdown from "./markdown/index.ts";
 
 export type BuildOptions = {
   entries: {
@@ -16,6 +18,7 @@ export type BuildOptions = {
   };
   root: string;
   outdir: string;
+  markdownTemplate: string;
 };
 
 type SourceFile = {
@@ -27,6 +30,8 @@ type VirtualFile = {
   out: string;
   content: string;
 };
+
+type Document = parse5.DefaultTreeAdapterTypes.Document;
 
 function pathWithoutExt(pathname: string): string {
   const extname = path.extname(pathname);
@@ -44,19 +49,28 @@ export async function build(options: BuildOptions) {
   const documents = options.entries.documents.map((filename) => {
     const outPath = path.join(
       staticPath,
-      path.relative(options.root, filename),
+      pathWithoutExt(path.relative(options.root, filename)) + ".html",
     );
-    const bootstrapSrc = `./${
-      pathWithoutExt(
-        path.basename(filename),
-      )
-    }-bootstrap.js`;
-    const bootstrapOutPath = pathWithoutExt(path.basename(bootstrapSrc));
+    const bootstrapName = `${pathWithoutExt(path.basename(filename))}-bootstrap`;
+    const bootstrapSrc = bootstrapName + ".js";
+    const bootstrapOutPath = path.relative(
+      staticPath,
+      path.join(path.dirname(outPath), bootstrapName),
+    );
     return { path: filename, outPath, bootstrapSrc, bootstrapOutPath };
   });
 
   for (const entry of documents) {
-    const document = await html.parse(entry.path);
+    let document: Document;
+    if (entry.path.endsWith(".md")) {
+      document = await markdown.render(entry.path, options.markdownTemplate);
+    } else {
+      document = await html.parse(entry.path);
+    }
+
+    // WANTFIX: path is resolved based of markdown entry path
+    // resources referenced in template won't be resolved correctly
+
     const resources_ = html.getResourceReferences(document);
     const resources = {
       clientIslands: resources_.clientIslands.map((island) => ({

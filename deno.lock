@@ -20,6 +20,7 @@
     "jsr:@std/streams@^1.1.0": "1.1.0",
     "jsr:@std/yaml@1.0.8": "1.0.8",
     "jsr:@tsukina-7mochi/simple-html-element@^2.1.0": "2.1.0",
+    "jsr:@valibot/valibot@^1.4.0": "1.4.0",
     "npm:@types/react-dom@^19.2.3": "19.2.3_@types+react@19.2.14",
     "npm:@types/react@^19.2.14": "19.2.14",
     "npm:esbuild@~0.25.5": "0.25.5",
@@ -109,6 +110,9 @@
       "dependencies": [
         "npm:html-entities"
       ]
+    },
+    "@valibot/valibot@1.4.0": {
+      "integrity": "3ff610571ed279b5e0cd03476664c37701f83657b9de0dfc3c8d3061af342707"
     }
   },
   "npm": {
@@ -685,6 +689,7 @@
       "jsr:@std/path@1.1.0",
       "jsr:@std/yaml@1.0.8",
       "jsr:@tsukina-7mochi/simple-html-element@^2.1.0",
+      "jsr:@valibot/valibot@^1.4.0",
       "npm:@types/react-dom@^19.2.3",
       "npm:@types/react@^19.2.14",
       "npm:esbuild@~0.25.5",

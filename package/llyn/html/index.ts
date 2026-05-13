@@ -1,5 +1,11 @@
 import * as parse5 from "parse5";
-import { getAttribute, selectAll, selectOne } from "parse5-dom";
+import {
+  getAttribute,
+  pushNodesTo,
+  replaceNodeWith,
+  selectAll,
+  selectOne,
+} from "parse5-dom";
 
 type ChildNode = parse5.DefaultTreeAdapterTypes.ChildNode;
 type Element = parse5.DefaultTreeAdapterTypes.Element;
@@ -65,16 +71,7 @@ export function getResourceReferences(document: Document): ResourceReferences {
 }
 
 export function replaceNodeWithHtml(element: ChildNode, html: string) {
-  const nodes = parse5.parseFragment(html).childNodes;
-  for (const node of nodes) {
-    node.parentNode = element.parentNode;
-  }
-
-  if (!element.parentNode) {
-    throw Error("The element has no parent node");
-  }
-  const index = element.parentNode.childNodes.indexOf(element);
-  element.parentNode.childNodes.splice(index, 1, ...nodes);
+  replaceNodeWith(element, ...parse5.parseFragment(html).childNodes);
 }
 
 export function addBootstrapScript(document: Document, src: string) {
@@ -82,7 +79,8 @@ export function addBootstrapScript(document: Document, src: string) {
   if (!body) {
     throw Error("body not found");
   }
-  body.childNodes.push(
+  pushNodesTo(
+    body,
     parse5.parseFragment(`<script defer src="${src}"></script>`).childNodes[0],
   );
 }

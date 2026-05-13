@@ -55,17 +55,17 @@ export async function render(
     throw Error("head not found");
   }
 
-  const parsedContent = await marked.parse(content);
-  const contentFragment = parse5.parseFragment(parsedContent);
-  main.childNodes.push(...contentFragment.childNodes);
-  for (const node of contentFragment.childNodes) {
-    node.parentNode = main;
-  }
-
   const titleHtml = `<title>${frontmatter.title}</title>`;
-  const title = parse5.parseFragment(titleHtml).childNodes[0];
-  header.childNodes.push(title);
-  title.parentNode = header;
+  const parsedContent = await marked.parse(content);
+
+  parse5Dom.pushNodesTo(
+    header,
+    parse5.parseFragment(titleHtml).childNodes[0],
+  );
+  parse5Dom.pushNodesTo(
+    main,
+    ...parse5.parseFragment(parsedContent).childNodes,
+  );
 
   return document;
 }

@@ -1,5 +1,5 @@
 import type { DefaultTreeAdapterTypes, Token } from "parse5";
-import { Entries } from "./types.ts";
+import { ObjectEntries } from "./types.ts";
 
 type Attribute = Token.Attribute;
 type Element = DefaultTreeAdapterTypes.Element;
@@ -13,7 +13,8 @@ export type SelectedElement<S extends Selector> = Element & {
   tag: S["tag"] extends string ? S["tag"] : string;
   attrs:
     & Attribute[]
-    & (S["attributes"] extends Record<string, string> ? Entries<S["attributes"]>
+    & (S["attributes"] extends Record<string, string>
+      ? ObjectEntries<S["attributes"]>
       : Attribute[]);
 };
 

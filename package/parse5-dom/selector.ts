@@ -3,7 +3,7 @@ import { ObjectEntries } from "./types.ts";
 
 type Attribute = Token.Attribute;
 type Element = DefaultTreeAdapterTypes.Element;
-type Document = DefaultTreeAdapterTypes.Document;
+type ParentNode = DefaultTreeAdapterTypes.ParentNode;
 
 export type Selector = {
   tag?: string;
@@ -35,7 +35,7 @@ function elementMatches<S extends Selector>(
 }
 
 export function selectOne<S extends Selector>(
-  element: Element | Document,
+  element: ParentNode,
   selector: S,
 ): SelectedElement<S> | null {
   for (const node of element.childNodes) {
@@ -53,7 +53,7 @@ export function selectOne<S extends Selector>(
 }
 
 export function selectAll<S extends Selector>(
-  element: Element | Document,
+  element: ParentNode,
   selector: S,
 ): SelectedElement<S>[] {
   const result: SelectedElement<S>[] = [];

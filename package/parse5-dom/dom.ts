@@ -4,7 +4,7 @@ type Node = DefaultTreeAdapterTypes.Node;
 type ParentNode = Node & { childNodes: Node[] };
 type ChildNode = Node & { parentNode: ParentNode | null };
 
-export function pushNodesTo(node: ParentNode, ...newNodes: ChildNode[]) {
+export function appendNodesTo(node: ParentNode, ...newNodes: ChildNode[]) {
   node.childNodes.push(...newNodes);
   for (const n of newNodes) {
     n.parentNode = node;

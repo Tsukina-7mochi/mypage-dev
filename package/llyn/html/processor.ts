@@ -2,6 +2,7 @@ import * as fs from "@std/fs";
 import * as parse5 from "parse5";
 import * as path from "@std/path";
 import * as parse5Dom from "parse5-dom";
+import * as htmlnano from "htmlnano";
 
 import { Context as ProcessorContext } from "../processor.ts";
 import {
@@ -144,7 +145,21 @@ export async function htmlFileProcessor(
 
   const rawContent = await Deno.readTextFile(url);
   const document = await ctx.process["html-document"](url, rawContent, ctx);
-  const content = parse5.serialize(document);
+  let content = parse5.serialize(document);
+
+  if (!ctx.dev) {
+    content = (await htmlnano.process(
+      content,
+      {
+        minifyCss: false,
+        minifyJs: false,
+        minifySvg: false,
+        skipConfigLoading: true,
+        skipInternalWarnings: true,
+      },
+      htmlnano.presets.safe,
+    )).html;
+  }
 
   await fs.ensureDir(path.dirname(outPath));
   await Deno.writeTextFile(outPath, content);

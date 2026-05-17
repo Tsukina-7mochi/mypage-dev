@@ -24,6 +24,7 @@ const processors = {
 type TProcessors = typeof processors;
 
 export type Context = {
+  dev: boolean;
   root: URL;
   dist: URL;
   staticDist: URL;

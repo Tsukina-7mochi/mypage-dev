@@ -1,6 +1,7 @@
 import * as llyn from "llyn";
 
 await llyn.build({
+  dev: false,
   root: "./src/",
   dist: "./dist",
   entries: {

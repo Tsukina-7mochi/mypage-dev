@@ -11,6 +11,7 @@ export type Island = {
 };
 
 export type BuildOptions = {
+  dev: boolean;
   entries: {
     documents: string[];
     worker: string;

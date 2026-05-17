@@ -36,6 +36,7 @@ export async function build(options: BuildOptions) {
   const serverIslands: Island[] = [];
 
   const ctx = createContext({
+    dev: options.dev,
     root,
     dist,
     staticDist,
@@ -76,6 +77,8 @@ export async function build(options: BuildOptions) {
       }),
       denoPlugin(),
     ],
+    minify: !options.dev,
+    sourcemap: options.dev ? "inline" : "linked",
   });
 
   await esbuild.build({
@@ -84,6 +87,8 @@ export async function build(options: BuildOptions) {
     format: "esm",
     bundle: true,
     plugins: [llynRuntimePlugin({ islands: serverIslands }), denoPlugin()],
+    minify: !options.dev,
+    sourcemap: options.dev ? "inline" : "linked",
   });
 
   esbuild.stop();

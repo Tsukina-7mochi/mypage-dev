@@ -1,6 +1,6 @@
 import * as esbuild from "esbuild";
-import * as island from "../island/index.ts";
 import { Island } from "../types.ts";
+import { renderServerRenderer } from "../island/serverRenderer.ts";
 
 const namespace = "worker-fetch-island-plugin";
 
@@ -14,7 +14,7 @@ export function llynRuntimePlugin(options: PluginOptions): esbuild.Plugin {
     setup: (build) => {
       let serverRenderer = "";
       build.onStart(async () => {
-        serverRenderer = await island.renderServerRenderer(options.islands);
+        serverRenderer = await renderServerRenderer(options.islands);
       });
 
       build.onResolve({ filter: /^llyn\/runtime$/ }, (args) => {

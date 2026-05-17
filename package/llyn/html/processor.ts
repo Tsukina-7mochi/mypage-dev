@@ -10,11 +10,6 @@ import {
   getServerIslands,
   getStylesheets,
 } from "./helper.ts";
-import {
-  clientIslandProcessor,
-  serverIslandProcessor,
-} from "../island/processor.ts";
-import { buildAssetProcessor } from "../buildAsset/processor.ts";
 import { renderBootstrap } from "../island/bootstrap.ts";
 import { decomposeExtension } from "../util/path.ts";
 

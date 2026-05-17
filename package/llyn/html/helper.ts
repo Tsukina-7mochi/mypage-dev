@@ -16,13 +16,6 @@ type ElementWithPath = {
   element: Element;
 };
 
-type ResourceReferences = {
-  clientIslands: IslandElement[];
-  serverIslands: IslandElement[];
-  scripts: ElementWithPath[];
-  styles: ElementWithPath[];
-};
-
 function getIslandFromElement(element: Element): IslandElement {
   const attrs = Object.fromEntries(
     element.attrs.map((attr) => [attr.name, attr.value]),

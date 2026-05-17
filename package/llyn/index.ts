@@ -3,21 +3,9 @@ import * as esbuild from "esbuild";
 import { denoPlugin } from "@deno/esbuild-plugin";
 import { IdProvider } from "./idProvider.ts";
 import { virtualFilePlugin } from "./esbuildPlugin/virtualFilePlugin.ts";
-import { Island } from "./types.ts";
+import { BuildOptions, Island } from "./types.ts";
 import { llynRuntimePlugin } from "./esbuildPlugin/llynRuntimePlugin.ts";
-import { htmlFileProcessor } from "./html/processor.ts";
-import { markdownProcessor } from "./markdown/processor.ts";
 import { createContext } from "./processor.ts";
-
-export type BuildOptions = {
-  entries: {
-    documents: string[];
-    worker: string;
-  };
-  root: string;
-  dist: string;
-  markdownTemplate: string;
-};
 
 type SourceFile = {
   in: string;

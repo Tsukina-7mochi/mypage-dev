@@ -1,6 +1,6 @@
 import * as path from "@std/path";
 
-import { BuildAssetProcessor, ProcessContext } from "../types.ts";
+import { Context as ProcessorContext } from "../processor.ts";
 import { decomposeExtension } from "../util/path.ts";
 
 const extensionConversion = {
@@ -11,29 +11,26 @@ const extensionConversion = {
   ".cjs": ".js",
 };
 
-export const buildAssetProcessor = {
-  type: "build-asset",
-  process(
-    url: URL,
-    ctx: ProcessContext,
-  ): { outFile: URL } {
-    const filepath = url.pathname;
-    const rootPath = ctx.options.root.pathname;
-    const staticDistPath = ctx.options.staticDist.pathname;
-    const outPathPreExt = path.join(
-      staticDistPath,
-      path.relative(rootPath, filepath),
-    );
+export function buildAssetProcessor(
+  url: URL,
+  ctx: ProcessorContext,
+): { outFile: URL } {
+  const filepath = url.pathname;
+  const rootPath = ctx.root.pathname;
+  const staticDistPath = ctx.staticDist.pathname;
+  const outPathPreExt = path.join(
+    staticDistPath,
+    path.relative(rootPath, filepath),
+  );
 
-    let outPath = outPathPreExt;
-    const [outName, outExt] = decomposeExtension(outPathPreExt);
-    if (outExt in extensionConversion) {
-      outPath = outName +
-        extensionConversion[outExt as keyof typeof extensionConversion];
-    }
+  let outPath = outPathPreExt;
+  const [outName, outExt] = decomposeExtension(outPathPreExt);
+  if (outExt in extensionConversion) {
+    outPath = outName +
+      extensionConversion[outExt as keyof typeof extensionConversion];
+  }
 
-    ctx.registerSourceFile(filepath, outName);
+  ctx.registerSourceFile(filepath, outName);
 
-    return { outFile: new URL(`file://${outPath}`) };
-  },
-} satisfies BuildAssetProcessor;
+  return { outFile: new URL(`file://${outPath}`) };
+}

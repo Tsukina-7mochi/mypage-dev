@@ -3,12 +3,7 @@ import * as parse5 from "parse5";
 import * as path from "@std/path";
 import * as parse5Dom from "parse5-dom";
 
-import {
-  HtmlDocumentFragmentProcessor,
-  HtmlDocumentProcessor,
-  HtmlFileProcessor,
-  ProcessContext,
-} from "../types.ts";
+import { Context as ProcessorContext } from "../processor.ts";
 import {
   getClientIslands,
   getScripts,
@@ -29,11 +24,11 @@ type DocumentFragment = parse5.DefaultTreeAdapterTypes.DocumentFragment;
 async function processDocument<T extends Document | DocumentFragment>(
   entryUrl: URL,
   document: T,
-  ctx: ProcessContext,
+  ctx: ProcessorContext,
 ): Promise<T> {
   const entryPath = entryUrl.pathname;
-  const rootPath = ctx.options.root.pathname;
-  const staticDistPath = ctx.options.staticDist.pathname;
+  const rootPath = ctx.root.pathname;
+  const staticDistPath = ctx.staticDist.pathname;
   const entryOutPath = path.join(
     staticDistPath,
     path.relative(rootPath, entryPath),
@@ -52,7 +47,7 @@ async function processDocument<T extends Document | DocumentFragment>(
       const url = new URL(el.src, entryUrl);
       const island = { id, url, props: el.props };
 
-      const { prerender } = await clientIslandProcessor.process(
+      const { prerender } = await ctx.process["client-island"](
         island,
         ctx,
       );
@@ -66,7 +61,7 @@ async function processDocument<T extends Document | DocumentFragment>(
       const url = new URL(el.src, entryUrl);
       const island = { id, url, props: el.props };
 
-      const { prerender } = await serverIslandProcessor.process(
+      const { prerender } = await ctx.process["server-island"](
         island,
         ctx,
       );
@@ -77,14 +72,14 @@ async function processDocument<T extends Document | DocumentFragment>(
 
   const scripts = getScripts(document).map((el) => {
     const url = new URL(el.path, entryUrl);
-    const { outFile } = buildAssetProcessor.process(url, ctx);
+    const { outFile } = ctx.process["build-asset"](url, ctx);
     const newSrc = path.relative(entryOutPath, outFile.pathname);
     return { element: el.element, newSrc };
   });
 
   const stylesheets = getStylesheets(document).map((el) => {
     const url = new URL(el.path, entryUrl);
-    const { outFile } = buildAssetProcessor.process(url, ctx);
+    const { outFile } = ctx.process["build-asset"](url, ctx);
     const newHref = path.relative(entryOutPath, outFile.pathname);
     return { element: el.element, newHref };
   });
@@ -122,51 +117,40 @@ async function processDocument<T extends Document | DocumentFragment>(
   return document;
 }
 
-export const htmlDocumentFragmentProcessor = {
-  type: "html-document-fragment",
-  async process(
-    { url, content }: { url: URL; content: string },
-    ctx: ProcessContext,
-  ): Promise<{ documentFragment: DocumentFragment }> {
-    const documentFragment = parse5.parseFragment(content);
-    return {
-      documentFragment: await processDocument(url, documentFragment, ctx),
-    };
-  },
-} satisfies HtmlDocumentFragmentProcessor;
+export async function htmlDocumentFragmentProcessor(
+  file: URL,
+  content: string,
+  ctx: ProcessorContext,
+): Promise<DocumentFragment> {
+  const documentFragment = parse5.parseFragment(content);
+  return await processDocument(file, documentFragment, ctx);
+}
 
-export const htmlDocumentProcessor = {
-  type: "html-document",
-  async process(
-    { url, content }: { url: URL; content: string },
-    ctx: ProcessContext,
-  ): Promise<{ document: Document }> {
-    const document = parse5.parse(content);
-    return {
-      document: await processDocument(url, document, ctx),
-    };
-  },
-} satisfies HtmlDocumentProcessor;
+export async function htmlDocumentProcessor(
+  file: URL,
+  content: string,
+  ctx: ProcessorContext,
+): Promise<Document> {
+  const document = parse5.parse(content);
+  return await processDocument(file, document, ctx);
+}
 
-export const htmlFileProcessor = {
-  type: "html",
-  async process(url: URL, ctx: ProcessContext): Promise<void> {
-    const filepath = url.pathname;
-    const rootPath = ctx.options.root.pathname;
-    const staticDistPath = ctx.options.staticDist.pathname;
-    const outPath = path.join(
-      staticDistPath,
-      path.relative(rootPath, filepath),
-    );
+export async function htmlFileProcessor(
+  url: URL,
+  ctx: ProcessorContext,
+): Promise<void> {
+  const filepath = url.pathname;
+  const rootPath = ctx.root.pathname;
+  const staticDistPath = ctx.staticDist.pathname;
+  const outPath = path.join(
+    staticDistPath,
+    path.relative(rootPath, filepath),
+  );
 
-    const rawContent = await Deno.readTextFile(url);
-    const { document } = await htmlDocumentProcessor.process(
-      { url, content: rawContent },
-      ctx,
-    );
-    const content = parse5.serialize(document);
+  const rawContent = await Deno.readTextFile(url);
+  const document = await ctx.process["html-document"](url, rawContent, ctx);
+  const content = parse5.serialize(document);
 
-    await fs.ensureDir(path.dirname(outPath));
-    await Deno.writeTextFile(outPath, content);
-  },
-} satisfies HtmlFileProcessor;
+  await fs.ensureDir(path.dirname(outPath));
+  await Deno.writeTextFile(outPath, content);
+}

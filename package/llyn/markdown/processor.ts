@@ -10,7 +10,7 @@ import {
   htmlDocumentFragmentProcessor,
   htmlDocumentProcessor,
 } from "../html/processor.ts";
-import { MarkdownProcessor, ProcessContext } from "../types.ts";
+import { Context as ProcessorContext } from "../processor.ts";
 import { decomposeExtension } from "../util/path.ts";
 
 marked.use({ async: true, gfm: true });
@@ -40,58 +40,54 @@ async function parseDocument(content: string): Promise<MarkdownDocument> {
   return { body, frontmatter };
 }
 
-export const markdownProcessor = {
-  type: "markdown",
-  async process(
-    { file, template: templateFile }: { file: URL; template: URL },
-    ctx: ProcessContext,
-  ): Promise<void> {
-    const filePath = file.pathname;
-    const rootPath = ctx.options.root.pathname;
-    const staticDistPath = ctx.options.staticDist.pathname;
-    const outPath = decomposeExtension(path.join(
-      staticDistPath,
-      path.relative(rootPath, filePath),
-    ))[0] + ".html";
+export async function markdownProcessor(
+  file: URL,
+  templateFile: URL,
+  ctx: ProcessorContext,
+): Promise<void> {
+  const filePath = file.pathname;
+  const rootPath = ctx.root.pathname;
+  const staticDistPath = ctx.staticDist.pathname;
+  const outPath = decomposeExtension(path.join(
+    staticDistPath,
+    path.relative(rootPath, filePath),
+  ))[0] + ".html";
 
-    const [markdownContent, templateContent] = await Promise.all([
-      Deno.readTextFile(file),
-      Deno.readTextFile(templateFile),
-    ]);
-    const { body: content, frontmatter } = await parseDocument(markdownContent);
-    if (!frontmatter) {
-      throw Error("Frontmatter is required");
-    }
+  const [markdownContent, templateContent] = await Promise.all([
+    Deno.readTextFile(file),
+    Deno.readTextFile(templateFile),
+  ]);
+  const { body: content, frontmatter } = await parseDocument(markdownContent);
+  if (!frontmatter) {
+    throw Error("Frontmatter is required");
+  }
 
-    const markdownDoc = (await htmlDocumentFragmentProcessor.process({
-      url: file,
-      content: content,
-    }, ctx)).documentFragment;
-    const templateDoc = (await htmlDocumentProcessor.process({
-      url: templateFile,
-      content: templateContent,
-    }, ctx)).document;
+  const markdownDoc = await ctx.process["html-fragment"](file, content, ctx);
+  const templateDoc = await ctx.process["html-document"](
+    templateFile,
+    templateContent,
+    ctx,
+  );
 
-    const main = parse5Dom.selectOne(templateDoc, { tag: "main" });
-    if (!main) {
-      throw Error("main not found");
-    }
-    parse5Dom.appendNodesTo(
-      main,
-      ...markdownDoc.childNodes,
-    );
+  const main = parse5Dom.selectOne(templateDoc, { tag: "main" });
+  if (!main) {
+    throw Error("main not found");
+  }
+  parse5Dom.appendNodesTo(
+    main,
+    ...markdownDoc.childNodes,
+  );
 
-    const header = parse5Dom.selectOne(templateDoc, { tag: "head" });
-    if (!header) {
-      throw Error("head not found");
-    }
-    const titleHtml = `<title>${frontmatter.title}</title>`;
-    parse5Dom.appendNodesTo(
-      header,
-      parse5.parseFragment(titleHtml).childNodes[0],
-    );
+  const header = parse5Dom.selectOne(templateDoc, { tag: "head" });
+  if (!header) {
+    throw Error("head not found");
+  }
+  const titleHtml = `<title>${frontmatter.title}</title>`;
+  parse5Dom.appendNodesTo(
+    header,
+    parse5.parseFragment(titleHtml).childNodes[0],
+  );
 
-    await fs.ensureDir(path.dirname(outPath));
-    await Deno.writeTextFile(outPath, parse5.serialize(templateDoc));
-  },
-} satisfies MarkdownProcessor;
+  await fs.ensureDir(path.dirname(outPath));
+  await Deno.writeTextFile(outPath, parse5.serialize(templateDoc));
+}

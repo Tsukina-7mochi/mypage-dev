@@ -3,10 +3,11 @@ import * as esbuild from "esbuild";
 import { denoPlugin } from "@deno/esbuild-plugin";
 import { IdProvider } from "./idProvider.ts";
 import { virtualFilePlugin } from "./esbuildPlugin/virtualFilePlugin.ts";
-import { Island, ProcessContext } from "./types.ts";
+import { Island } from "./types.ts";
 import { llynRuntimePlugin } from "./esbuildPlugin/llynRuntimePlugin.ts";
 import { htmlFileProcessor } from "./html/processor.ts";
 import { markdownProcessor } from "./markdown/processor.ts";
+import { createContext } from "./processor.ts";
 
 export type BuildOptions = {
   entries: {
@@ -46,8 +47,10 @@ export async function build(options: BuildOptions) {
   const virtualFiles: VirtualFile[] = [];
   const serverIslands: Island[] = [];
 
-  const ctx = {
-    options: { root, dist, staticDist },
+  const ctx = createContext({
+    root,
+    dist,
+    staticDist,
     idProvider: new IdProvider(),
     registerSourceFile(input, output) {
       sourceFiles.push({ in: input, out: output });
@@ -58,17 +61,14 @@ export async function build(options: BuildOptions) {
     registerServerIsland(island) {
       serverIslands.push(island);
     },
-  } satisfies ProcessContext;
+  });
 
   await Promise.all(options.entries.documents.map(async (filePath) => {
     const fileUrl = toFileUrl(filePath);
     if (fileUrl.pathname.endsWith(".html")) {
-      await htmlFileProcessor.process(fileUrl, ctx);
+      await ctx.process["html"](fileUrl, ctx);
     } else if (fileUrl.pathname.endsWith(".md")) {
-      await markdownProcessor.process({
-        file: fileUrl,
-        template: markdownTemplate,
-      }, ctx);
+      await ctx.process["markdown"](fileUrl, markdownTemplate, ctx);
     } else {
       throw Error(`Unknown file type: ${fileUrl}`);
     }

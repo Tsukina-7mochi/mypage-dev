@@ -1,7 +1,7 @@
 import React from "react";
 import { Island } from "../types.ts";
-import { prerender } from "react-dom/static";
-import { renderToStaticMarkup } from "react-dom/server";
+import { prerender } from "react-dom/static.node";
+import { renderToStaticMarkup } from "react-dom/server.node";
 
 export async function prerenderClientIsland(island: Island): Promise<string> {
   const module = await import(island.url.pathname);

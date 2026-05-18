@@ -63,7 +63,7 @@ export async function build(options: BuildOptions) {
     }
   }));
 
-  await esbuild.build({
+  const clientContext = await esbuild.context({
     entryPoints: [
       ...sourceFiles,
       ...virtualFiles.map(({ content: _, ...entry }) => entry),
@@ -81,7 +81,7 @@ export async function build(options: BuildOptions) {
     sourcemap: options.dev ? "inline" : "linked",
   });
 
-  await esbuild.build({
+  const serverContext = await esbuild.context({
     entryPoints: [{ in: options.entries.worker, out: "worker" }],
     outdir: dist.pathname,
     format: "esm",
@@ -91,6 +91,13 @@ export async function build(options: BuildOptions) {
     sourcemap: options.dev ? "inline" : "linked",
   });
 
+  await Promise.all([
+    clientContext.rebuild(),
+    serverContext.rebuild(),
+  ]);
+
+  clientContext.dispose();
+  serverContext.dispose();
   esbuild.stop();
 
   console.log("build finished");

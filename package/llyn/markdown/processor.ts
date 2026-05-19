@@ -6,10 +6,6 @@ import * as parse5 from "parse5";
 import * as path from "@std/path";
 import * as fs from "@std/fs";
 
-import {
-  htmlDocumentFragmentProcessor,
-  htmlDocumentProcessor,
-} from "../html/processor.ts";
 import { Context as ProcessorContext } from "../processor.ts";
 import { decomposeExtension } from "../util/path.ts";
 
@@ -53,21 +49,22 @@ export async function markdownProcessor(
     path.relative(rootPath, filePath),
   ))[0] + ".html";
 
-  const [markdownContent, templateContent] = await Promise.all([
+  const [rawMarkdownContent, templateContent] = await Promise.all([
     Deno.readTextFile(file),
     Deno.readTextFile(templateFile),
   ]);
-  const { body: content, frontmatter } = await parseDocument(markdownContent);
+  const { body: markdownContent, frontmatter } = await parseDocument(
+    rawMarkdownContent,
+  );
   if (!frontmatter) {
     throw Error("Frontmatter is required");
   }
 
-  const markdownDoc = await ctx.process["html-fragment"](file, content, ctx);
-  const templateDoc = await ctx.process["html-document"](
-    templateFile,
-    templateContent,
-    ctx,
-  );
+  const markdownDoc = parse5.parse(markdownContent);
+  const templateDoc = parse5.parse(templateContent);
+
+  await ctx.process["html-node"](file, markdownDoc, ctx);
+  await ctx.process["html-node"](templateFile, templateDoc, ctx);
 
   const main = parse5Dom.selectOne(templateDoc, { tag: "main" });
   if (!main) {

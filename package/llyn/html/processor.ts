@@ -14,10 +14,9 @@ import {
 import { renderBootstrap } from "../island/bootstrap.ts";
 import { decomposeExtension } from "../util/path.ts";
 
-type Document = parse5.DefaultTreeAdapterTypes.Document;
-type DocumentFragment = parse5.DefaultTreeAdapterTypes.DocumentFragment;
+type ParentNode = parse5.DefaultTreeAdapterTypes.ParentNode;
 
-async function processDocument<T extends Document | DocumentFragment>(
+export async function htmlNodeProcessor<T extends ParentNode>(
   entryUrl: URL,
   document: T,
   ctx: ProcessorContext,
@@ -113,24 +112,6 @@ async function processDocument<T extends Document | DocumentFragment>(
   return document;
 }
 
-export async function htmlDocumentFragmentProcessor(
-  file: URL,
-  content: string,
-  ctx: ProcessorContext,
-): Promise<DocumentFragment> {
-  const documentFragment = parse5.parseFragment(content);
-  return await processDocument(file, documentFragment, ctx);
-}
-
-export async function htmlDocumentProcessor(
-  file: URL,
-  content: string,
-  ctx: ProcessorContext,
-): Promise<Document> {
-  const document = parse5.parse(content);
-  return await processDocument(file, document, ctx);
-}
-
 export async function htmlFileProcessor(
   url: URL,
   ctx: ProcessorContext,
@@ -144,7 +125,8 @@ export async function htmlFileProcessor(
   );
 
   const rawContent = await Deno.readTextFile(url);
-  const document = await ctx.process["html-document"](url, rawContent, ctx);
+  const document = parse5.parse(rawContent);
+  await ctx.process["html-node"](url, document, ctx);
   let content = parse5.serialize(document);
 
   if (!ctx.dev) {

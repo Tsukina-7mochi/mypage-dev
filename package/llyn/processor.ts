@@ -1,10 +1,6 @@
 import { Island } from "./types.ts";
 import { IdProvider } from "./idProvider.ts";
-import {
-  htmlDocumentFragmentProcessor,
-  htmlDocumentProcessor,
-  htmlFileProcessor,
-} from "./html/processor.ts";
+import { htmlFileProcessor, htmlNodeProcessor } from "./html/processor.ts";
 import { markdownProcessor } from "./markdown/processor.ts";
 import {
   clientIslandProcessor,
@@ -14,8 +10,7 @@ import { buildAssetProcessor } from "./buildAsset/processor.ts";
 
 const processors = {
   "html": htmlFileProcessor,
-  "html-document": htmlDocumentProcessor,
-  "html-fragment": htmlDocumentFragmentProcessor,
+  "html-node": htmlNodeProcessor,
   "markdown": markdownProcessor,
   "client-island": clientIslandProcessor,
   "server-island": serverIslandProcessor,

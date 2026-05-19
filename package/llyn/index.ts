@@ -1,11 +1,12 @@
-import * as path from "@std/path";
 import * as esbuild from "esbuild";
 import { denoPlugin } from "@deno/esbuild-plugin";
+
 import { IdProvider } from "./idProvider.ts";
 import { virtualFilePlugin } from "./esbuildPlugin/virtualFilePlugin.ts";
 import { BuildOptions, Island } from "./types.ts";
 import { llynRuntimePlugin } from "./esbuildPlugin/llynRuntimePlugin.ts";
 import { createContext } from "./processor.ts";
+import * as pathUtil from "./util/path.ts";
 
 type SourceFile = {
   in: string;
@@ -17,19 +18,11 @@ type VirtualFile = {
   content: string;
 };
 
-function toFileUrl(filePath: string) {
-  return new URL(`file://${path.resolve(filePath)}`);
-}
-
-function toDirectoryFileUrl(filePath: string) {
-  return new URL(`file://${path.resolve(filePath)}/`);
-}
-
 export async function build(options: BuildOptions) {
-  const root = toDirectoryFileUrl(options.root);
-  const dist = toDirectoryFileUrl(options.dist);
+  const root = pathUtil.toDirectoryFileUrl(options.root);
+  const dist = pathUtil.toDirectoryFileUrl(options.dist);
   const staticDist = new URL("static/", dist);
-  const markdownTemplate = toFileUrl(options.markdownTemplate);
+  const markdownTemplate = pathUtil.toFileUrl(options.markdownTemplate);
 
   const sourceFiles: SourceFile[] = [];
   const virtualFiles: VirtualFile[] = [];
@@ -53,7 +46,7 @@ export async function build(options: BuildOptions) {
   });
 
   await Promise.all(options.entries.documents.map(async (filePath) => {
-    const fileUrl = toFileUrl(filePath);
+    const fileUrl = pathUtil.toFileUrl(filePath);
     if (fileUrl.pathname.endsWith(".html")) {
       await ctx.process["html"](fileUrl, ctx);
     } else if (fileUrl.pathname.endsWith(".md")) {

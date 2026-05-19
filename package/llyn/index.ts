@@ -12,7 +12,6 @@ import {
 } from "./types.ts";
 import { llynRuntimePlugin } from "./esbuildPlugin/llynRuntimePlugin.ts";
 import { createContext } from "./processor.ts";
-import * as pathUtil from "./util/path.ts";
 
 type SourceFile = {
   in: string;
@@ -25,9 +24,7 @@ type VirtualFile = {
 };
 
 async function runBuild(options: ParsedBuildOptions) {
-  const root = pathUtil.toDirectoryFileUrl(options.root);
-  const dist = pathUtil.toDirectoryFileUrl(options.dist);
-  const staticDist = new URL("static/", dist);
+  const staticDist = new URL("static/", options.dist);
 
   const sourceFiles: SourceFile[] = [];
   const virtualFiles: VirtualFile[] = [];
@@ -35,8 +32,8 @@ async function runBuild(options: ParsedBuildOptions) {
 
   const ctx = createContext({
     dev: options.dev,
-    root,
-    dist,
+    root: options.root,
+    dist: options.dist,
     staticDist,
     idProvider: new IdProvider(),
     registerSourceFile(input, output) {
@@ -51,16 +48,12 @@ async function runBuild(options: ParsedBuildOptions) {
   });
 
   await Promise.all(options.entries.documents.map(async (entry) => {
-    if (typeof entry === "string") {
-      const fileUrl = pathUtil.toFileUrl(entry);
-      await ctx.process["html"](fileUrl, ctx);
+    if (entry instanceof URL) {
+      await ctx.process["html"](entry, ctx);
     } else if (entry.type === "html") {
-      const fileUrl = pathUtil.toFileUrl(entry.path);
-      await ctx.process["html"](fileUrl, ctx);
+      await ctx.process["html"](entry.path, ctx);
     } else if (entry.type === "markdown") {
-      const fileUrl = pathUtil.toFileUrl(entry.path);
-      const templateUrl = pathUtil.toFileUrl(entry.template);
-      await ctx.process["markdown"](fileUrl, templateUrl, ctx);
+      await ctx.process["markdown"](entry.path, entry.template, ctx);
     } else {
       throw Error(`Unknown entry type: ${JSON.stringify(entry)}`);
     }
@@ -85,8 +78,8 @@ async function runBuild(options: ParsedBuildOptions) {
   });
 
   const serverContext = await esbuild.context({
-    entryPoints: [{ in: options.entries.worker, out: "worker" }],
-    outdir: dist.pathname,
+    entryPoints: [{ in: options.entries.worker.pathname, out: "worker" }],
+    outdir: options.dist.pathname,
     format: "esm",
     bundle: true,
     plugins: [llynRuntimePlugin({ islands: serverIslands }), denoPlugin()],

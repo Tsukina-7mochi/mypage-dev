@@ -1,12 +1,17 @@
 import * as llyn from "llyn";
 
 await llyn.build({
-  dev: false,
   root: "./src/",
   dist: "./dist",
   entries: {
-    documents: ["./src/index.html", "./src/blog/test.md"],
+    documents: [
+      "./src/index.html",
+      {
+        type: "markdown",
+        path: "./src/blog/test.md",
+        template: "./src/blog/template.html",
+      },
+    ],
     worker: "./src/worker.ts",
   },
-  markdownTemplate: "./src/blog/template.html",
 });

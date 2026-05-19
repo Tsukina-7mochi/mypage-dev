@@ -1,9 +1,15 @@
+import * as v from "valibot";
 import * as esbuild from "esbuild";
 import { denoPlugin } from "@deno/esbuild-plugin";
 
 import { IdProvider } from "./idProvider.ts";
 import { virtualFilePlugin } from "./esbuildPlugin/virtualFilePlugin.ts";
-import { BuildOptions, Island } from "./types.ts";
+import {
+  BuildOptions,
+  BuildOptionsSchema,
+  Island,
+  ParsedBuildOptions,
+} from "./types.ts";
 import { llynRuntimePlugin } from "./esbuildPlugin/llynRuntimePlugin.ts";
 import { createContext } from "./processor.ts";
 import * as pathUtil from "./util/path.ts";
@@ -18,11 +24,10 @@ type VirtualFile = {
   content: string;
 };
 
-export async function build(options: BuildOptions) {
+async function runBuild(options: ParsedBuildOptions) {
   const root = pathUtil.toDirectoryFileUrl(options.root);
   const dist = pathUtil.toDirectoryFileUrl(options.dist);
   const staticDist = new URL("static/", dist);
-  const markdownTemplate = pathUtil.toFileUrl(options.markdownTemplate);
 
   const sourceFiles: SourceFile[] = [];
   const virtualFiles: VirtualFile[] = [];
@@ -45,14 +50,19 @@ export async function build(options: BuildOptions) {
     },
   });
 
-  await Promise.all(options.entries.documents.map(async (filePath) => {
-    const fileUrl = pathUtil.toFileUrl(filePath);
-    if (fileUrl.pathname.endsWith(".html")) {
+  await Promise.all(options.entries.documents.map(async (entry) => {
+    if (typeof entry === "string") {
+      const fileUrl = pathUtil.toFileUrl(entry);
       await ctx.process["html"](fileUrl, ctx);
-    } else if (fileUrl.pathname.endsWith(".md")) {
-      await ctx.process["markdown"](fileUrl, markdownTemplate, ctx);
+    } else if (entry.type === "html") {
+      const fileUrl = pathUtil.toFileUrl(entry.path);
+      await ctx.process["html"](fileUrl, ctx);
+    } else if (entry.type === "markdown") {
+      const fileUrl = pathUtil.toFileUrl(entry.path);
+      const templateUrl = pathUtil.toFileUrl(entry.template);
+      await ctx.process["markdown"](fileUrl, templateUrl, ctx);
     } else {
-      throw Error(`Unknown file type: ${fileUrl}`);
+      throw Error(`Unknown entry type: ${JSON.stringify(entry)}`);
     }
   }));
 
@@ -92,6 +102,10 @@ export async function build(options: BuildOptions) {
   clientContext.dispose();
   serverContext.dispose();
   esbuild.stop();
+}
 
+export async function build(options: BuildOptions) {
+  const parsedOptions = v.parse(BuildOptionsSchema, options);
+  await runBuild(parsedOptions);
   console.log("build finished");
 }

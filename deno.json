@@ -29,6 +29,7 @@
   "tasks": {
     "build": "deno -RWE --allow-run --allow-sys=homedir ./build/build.ts",
     "clean": "rm -rf ./dist",
+    "dev": "deno -RWEN --allow-run --allow-sys=homedir ./build/build.ts --dev",
     "serve": "deno serve --port=8080 --allow-read ./dist/worker.js"
   }
 }

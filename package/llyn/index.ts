@@ -1,6 +1,7 @@
 import * as v from "valibot";
 import * as esbuild from "esbuild";
 import { denoPlugin } from "@deno/esbuild-plugin";
+import * as path from "@std/path";
 
 import { IdProvider } from "./idProvider.ts";
 import { virtualFilePlugin } from "./esbuildPlugin/virtualFilePlugin.ts";
@@ -9,6 +10,8 @@ import {
   BuildOptionsSchema,
   Island,
   ParsedBuildOptions,
+  ServerOptions,
+  ServerOptionSchema,
 } from "./types.ts";
 import { llynRuntimePlugin } from "./esbuildPlugin/llynRuntimePlugin.ts";
 import { createContext } from "./processor.ts";
@@ -31,7 +34,7 @@ async function runBuild(options: ParsedBuildOptions) {
   const serverIslands: Island[] = [];
 
   const ctx = createContext({
-    dev: options.dev,
+    dev: !!options.dev,
     root: options.root,
     dist: options.dist,
     staticDist,
@@ -102,3 +105,52 @@ export async function build(options: BuildOptions) {
   await runBuild(parsedOptions);
   console.log("build finished");
 }
+
+export async function startDevServer(
+  options: BuildOptions,
+  serverOptions?: ServerOptions,
+) {
+  const parsedOptions = v.parse(BuildOptionsSchema, options);
+  const { host: hostname, port } = v.parse(
+    ServerOptionSchema,
+    serverOptions ?? {},
+  );
+
+  let ac = new AbortController();
+  (async () => {
+    const watcher = Deno.watchFs(parsedOptions.root.pathname, {
+      recursive: true,
+    });
+    for await (const _ of watcher) {
+      ac.abort();
+    }
+  })();
+
+  try {
+    await runBuild(parsedOptions);
+    console.log("build finished");
+  } catch (err) {
+    console.error("build ended wihth error\n", err);
+  }
+
+  while (true) {
+    if (!ac.signal.aborted) {
+      const moduleName = path.join(parsedOptions.dist.pathname, "worker.js");
+      const server = Deno.serve(
+        { signal: ac.signal, hostname, port },
+        (await import(moduleName)).default.fetch,
+      );
+      await server.finished;
+    }
+
+    ac = new AbortController();
+    try {
+      await runBuild(parsedOptions);
+      console.log("rebuild finished");
+    } catch (err) {
+      console.error("rebuild ended wihth error\n", err);
+    }
+  }
+}
+
+export type { BuildOptions };

@@ -41,3 +41,11 @@ export const BuildOptionsSchema = v.object({
 
 export type BuildOptions = v.InferInput<typeof BuildOptionsSchema>;
 export type ParsedBuildOptions = v.InferOutput<typeof BuildOptionsSchema>;
+
+export const ServerOptionSchema = v.object({
+  host: v.optional(v.string()),
+  port: v.optional(v.number()),
+});
+
+export type ServerOptions = v.InferInput<typeof ServerOptionSchema>;
+export type ParsedServerOptions = v.InferOutput<typeof ServerOptionSchema>;

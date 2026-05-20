@@ -4,7 +4,7 @@ import * as path from "@std/path";
 import * as parse5Dom from "parse5-dom";
 import * as htmlnano from "htmlnano";
 
-import { Context as ProcessorContext } from "../processor.ts";
+import { Context as ProcessorContext } from "../../processor.ts";
 import {
   getClientIslands,
   getScripts,
@@ -12,7 +12,7 @@ import {
   getStylesheets,
 } from "./helper.ts";
 import { renderBootstrap } from "../island/bootstrap.ts";
-import { decomposeExtension } from "../util/path.ts";
+import { decomposeExtension } from "../../util/path.ts";
 
 type ParentNode = parse5.DefaultTreeAdapterTypes.ParentNode;
 

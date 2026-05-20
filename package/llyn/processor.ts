@@ -1,12 +1,15 @@
 import { Island } from "./types.ts";
 import { IdProvider } from "./idProvider.ts";
-import { htmlFileProcessor, htmlNodeProcessor } from "./html/processor.ts";
-import { markdownProcessor } from "./markdown/processor.ts";
+import {
+  htmlFileProcessor,
+  htmlNodeProcessor,
+} from "./resources/html/processor.ts";
+import { markdownProcessor } from "./resources/markdown/processor.ts";
 import {
   clientIslandProcessor,
   serverIslandProcessor,
-} from "./island/processor.ts";
-import { buildAssetProcessor } from "./buildAsset/processor.ts";
+} from "./resources/island/processor.ts";
+import { buildAssetProcessor } from "./resources/buildAsset/processor.ts";
 
 const processors = {
   "html": htmlFileProcessor,

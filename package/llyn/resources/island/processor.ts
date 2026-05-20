@@ -1,6 +1,6 @@
 import { prerenderClientIsland, prerenderServerIsland } from "./prerender.ts";
-import { Context as ProcessorContext } from "../processor.ts";
-import { Island } from "../types.ts";
+import { Context as ProcessorContext } from "../../processor.ts";
+import { Island } from "../../types.ts";
 
 export async function clientIslandProcessor(
   island: Island,

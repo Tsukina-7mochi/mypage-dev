@@ -1,5 +1,5 @@
 import React from "react";
-import { Island } from "../types.ts";
+import { Island } from "../../types.ts";
 import { prerender } from "react-dom/static.node";
 import { renderToStaticMarkup } from "react-dom/server.node";
 

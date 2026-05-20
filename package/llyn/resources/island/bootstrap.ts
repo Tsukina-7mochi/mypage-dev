@@ -1,5 +1,5 @@
 import * as path from "@std/path";
-import { Island } from "../types.ts";
+import { Island } from "../../types.ts";
 
 function clientIslandBootstrap(island: Island): string {
   return `

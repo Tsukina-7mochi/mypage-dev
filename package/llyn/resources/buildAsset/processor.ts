@@ -1,7 +1,7 @@
 import * as path from "@std/path";
 
-import { Context as ProcessorContext } from "../processor.ts";
-import { decomposeExtension } from "../util/path.ts";
+import { Context as ProcessorContext } from "../../processor.ts";
+import { decomposeExtension } from "../../util/path.ts";
 
 const extensionConversion = {
   ".ts": ".js",

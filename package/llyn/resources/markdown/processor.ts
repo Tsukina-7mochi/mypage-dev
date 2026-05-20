@@ -6,8 +6,8 @@ import * as parse5 from "parse5";
 import * as path from "@std/path";
 import * as fs from "@std/fs";
 
-import { Context as ProcessorContext } from "../processor.ts";
-import { decomposeExtension } from "../util/path.ts";
+import { Context as ProcessorContext } from "../../processor.ts";
+import { decomposeExtension } from "../../util/path.ts";
 
 marked.use({ async: true, gfm: true });
 

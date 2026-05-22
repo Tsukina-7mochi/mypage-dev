@@ -13,6 +13,7 @@ import {
 } from "./helper.ts";
 import { renderBootstrap } from "../island/bootstrap.ts";
 import { decomposeExtension } from "../../util/path.ts";
+import { liveReloadScript } from "./liveReload.ts";
 
 type ParentNode = parse5.DefaultTreeAdapterTypes.ParentNode;
 
@@ -98,6 +99,12 @@ export async function htmlNodeProcessor<T extends ParentNode>(
     ...parse5.parseFragment(`<script src="${bootstrapSrc}"></script>`)
       .childNodes,
   );
+  if (ctx.liveReload) {
+    parse5Dom.appendNodesTo(
+      document,
+      ...parse5.parseFragment(liveReloadScript()).childNodes,
+    );
+  }
 
   const bootstrapScript = await renderBootstrap(
     clientIslands.map((i) => i.island),

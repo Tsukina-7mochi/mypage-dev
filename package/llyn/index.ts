@@ -15,6 +15,7 @@ import {
 } from "./types.ts";
 import { llynRuntimePlugin } from "./esbuildPlugin/llynRuntimePlugin.ts";
 import { createContext } from "./processor.ts";
+import { DebounceLatestStream, watchFs } from "./util/stream.ts";
 
 type SourceFile = {
   in: string;
@@ -26,7 +27,14 @@ type VirtualFile = {
   content: string;
 };
 
-async function runBuild(options: ParsedBuildOptions) {
+type InternalOptions = {
+  liveReload: boolean;
+};
+
+async function runBuild(
+  options: ParsedBuildOptions,
+  internalOptions: InternalOptions,
+) {
   const staticDist = new URL("static/", options.dist);
 
   const sourceFiles: SourceFile[] = [];
@@ -35,6 +43,7 @@ async function runBuild(options: ParsedBuildOptions) {
 
   const ctx = createContext({
     dev: !!options.dev,
+    liveReload: internalOptions.liveReload,
     root: options.root,
     dist: options.dist,
     staticDist,
@@ -95,14 +104,16 @@ async function runBuild(options: ParsedBuildOptions) {
     serverContext.rebuild(),
   ]);
 
-  clientContext.dispose();
-  serverContext.dispose();
-  esbuild.stop();
+  await clientContext.dispose();
+  await serverContext.dispose();
+  await esbuild.stop();
 }
 
 export async function build(options: BuildOptions) {
   const parsedOptions = v.parse(BuildOptionsSchema, options);
-  await runBuild(parsedOptions);
+  await runBuild(parsedOptions, {
+    liveReload: false,
+  });
   console.log("build finished");
 }
 
@@ -116,40 +127,84 @@ export async function startDevServer(
     serverOptions ?? {},
   );
 
+  let server: Deno.HttpServer | null = null;
+  let reloadStreamWriters: WritableStreamDefaultWriter[] = [];
   let ac = new AbortController();
+
   (async () => {
-    const watcher = Deno.watchFs(parsedOptions.root.pathname, {
-      recursive: true,
-    });
-    for await (const _ of watcher) {
+    const fsStream = watchFs(
+      parsedOptions.root.pathname,
+      { recursive: true },
+    ).pipeThrough(new DebounceLatestStream(500));
+
+    for await (const _ of fsStream) {
       ac.abort();
     }
-  })();
-
-  try {
-    await runBuild(parsedOptions);
-    console.log("build finished");
-  } catch (err) {
-    console.error("build ended wihth error\n", err);
-  }
+  })().catch((e) => {
+    console.error(e);
+  });
 
   while (true) {
-    if (!ac.signal.aborted) {
-      const moduleName = path.join(parsedOptions.dist.pathname, "worker.js");
-      const server = Deno.serve(
-        { signal: ac.signal, hostname, port },
-        (await import(moduleName)).default.fetch,
-      );
-      await server.finished;
+    ac = new AbortController();
+
+    try {
+      await runBuild(parsedOptions, { liveReload: true });
+      console.log("build finished");
+    } catch (err) {
+      console.error("build ended wihth error\n", err);
     }
 
-    ac = new AbortController();
-    try {
-      await runBuild(parsedOptions);
-      console.log("rebuild finished");
-    } catch (err) {
-      console.error("rebuild ended wihth error\n", err);
-    }
+    if (ac.signal.aborted) continue;
+
+    await Promise.all(reloadStreamWriters.map(async (writer) => {
+      try {
+        const event = "event: reload\ndata: {}\n\n";
+        const payload = new TextEncoder().encode(event);
+        await writer.write(payload);
+        await writer.close();
+      } catch {
+        // already closed
+      }
+    }));
+    reloadStreamWriters = [];
+
+    await server?.shutdown();
+
+    const moduleName = path.join(
+      parsedOptions.dist.pathname,
+      `worker.js?${Date.now()}`,
+    );
+    server = Deno.serve(
+      { hostname, port },
+      async (req: Request) => {
+        if (new URL(req.url).pathname === "/__reload") {
+          const { readable, writable } = new TransformStream<string>();
+          const writer = writable.getWriter();
+          reloadStreamWriters.push(writer);
+
+          req.signal.addEventListener("close", () => {
+            writer.close().catch(() => {/* already closed */});
+          });
+
+          return new Response(
+            readable,
+            {
+              status: 200,
+              headers: {
+                "Content-Type": "text/event-stream",
+                "Cache-Control": "no-cache",
+                "Connection": "keep-alive",
+              },
+            },
+          );
+        }
+        return (await import(moduleName)).default.fetch(req);
+      },
+    );
+
+    await new Promise((resolve) => {
+      ac.signal.addEventListener("abort", resolve);
+    });
   }
 }
 

@@ -23,6 +23,7 @@ type TProcessors = typeof processors;
 
 export type Context = {
   dev: boolean;
+  liveReload: boolean;
   root: URL;
   dist: URL;
   staticDist: URL;

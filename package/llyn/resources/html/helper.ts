@@ -43,7 +43,11 @@ export function getScripts(node: ParentNode): ElementWithPath[] {
     tag: "script",
   }).filter((element) => {
     const type = parse5Dom.getAttribute(element, "type");
-    return type === null || (!type.startsWith("application/"));
+    if (type !== null && type.startsWith("application/")) {
+      return false;
+    }
+    const src = parse5Dom.getAttribute(element, "src");
+    return /^\.?\.?\//.test(src);
   }).map((element) => {
     const src = parse5Dom.getAttribute(element, "src");
     if (!src) {
@@ -57,6 +61,9 @@ export function getStylesheets(node: ParentNode): ElementWithPath[] {
   return parse5Dom.selectAll(node, {
     tag: "link",
     attributes: { rel: "stylesheet" },
+  }).filter((element) => {
+    const href = parse5Dom.getAttribute(element, "href");
+    return /^\.?\.?\//.test(href);
   }).map((element) => {
     const href = parse5Dom.getAttribute(element, "href");
     if (!href) {

@@ -7,16 +7,10 @@ import * as path from "@std/path";
 import * as fs from "@std/fs";
 
 import { Context as ProcessorContext } from "../../processor.ts";
+import { Frontmatter, FrontmatterSchema } from "../../types.ts";
 import { decomposeExtension } from "../../util/path.ts";
 
 marked.use({ async: true, gfm: true });
-
-const FrontmatterSchema = v.object({
-  title: v.string(),
-  createdAt: v.date(),
-  updatedAt: v.date(),
-});
-type Frontmatter = v.InferOutput<typeof FrontmatterSchema>;
 
 type MarkdownDocument = {
   body: string;

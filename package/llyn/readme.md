@@ -25,6 +25,10 @@ resources is as follows:
   with a regular `type`
 - css: CSS files loaded via `<link rel="stylesheet">`
 
+Markdown frontmatter is written in YAML and is dynamically inserted into the
+HTML according to the keys, rather than using placeholders. Please refer to
+types.ts for the supported keys.
+
 ### Worker
 
 Another entry point for Llyn is the Web Worker. When the `llyn/runtime` module

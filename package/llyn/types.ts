@@ -7,6 +7,13 @@ export type Island = {
   props: Record<string, string>;
 };
 
+export const FrontmatterSchema = v.object({
+  title: v.string(),
+  createdAt: v.date(),
+  updatedAt: v.date(),
+});
+export type Frontmatter = v.InferOutput<typeof FrontmatterSchema>;
+
 const FileUrlSchema = v.pipe(
   v.string(),
   v.transform(pathUtil.toFileUrl),

@@ -3,6 +3,7 @@ import { hydrateRoot } from "react-dom/client";
 
 export type Props = Record<string, string>;
 
+// deno-lint-ignore no-unused-vars
 function bootstrapClientIsland(id: string, component: React.FC, props: Props) {
   const element = document.getElementById(id);
   if (!element) throw Error(`Element ${id} is not found`);
@@ -15,6 +16,7 @@ function bootstrapClientIsland(id: string, component: React.FC, props: Props) {
   });
 }
 
+// deno-lint-ignore no-unused-vars
 function bootstrapServerIsland(id: string) {
   const element = document.getElementById(id);
   if (!element) throw Error(`Element ${id} is not found`);

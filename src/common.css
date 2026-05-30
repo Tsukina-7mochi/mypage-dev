@@ -1,0 +1,10 @@
+main {
+  max-width: 40em;
+  margin: 0 auto;
+}
+
+h1 {
+  font-family: "helvetica-neue-lt-pro-cond", sans-serif;
+  font-weight: 700;
+  font-style: normal;
+}

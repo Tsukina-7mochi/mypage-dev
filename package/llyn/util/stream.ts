@@ -18,7 +18,7 @@ export function watchFs(
 
 export class DebounceLatestStream<T> extends TransformStream<T, T> {
   constructor(timeout: number) {
-    let timer: number | null = null;
+    let timer: ReturnType<typeof setTimeout> | null = null;
     super({
       transform(data, controller) {
         if (timer) {

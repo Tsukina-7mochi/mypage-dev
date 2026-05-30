@@ -27,9 +27,9 @@
     "valibot": "jsr:@valibot/valibot@^1.4.0"
   },
   "tasks": {
-    "build": "deno -RWE --allow-run --allow-sys=homedir ./build/build.ts",
+    "build": "deno -RWE --allow-run --allow-sys=homedir ./build.ts",
     "clean": "rm -rf ./dist",
-    "dev": "deno -RWEN --allow-run --allow-sys=homedir ./build/build.ts --dev",
+    "dev": "deno -RWEN --allow-run --allow-sys=homedir ./build.ts --dev",
     "serve": "deno serve --port=8080 --allow-read ./dist/worker.js"
   }
 }

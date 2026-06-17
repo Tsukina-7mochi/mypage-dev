@@ -3,8 +3,10 @@ pre-commit:
 
   commands:
     check:
+      glob: "*.{ts,tsx,js,jsx}"
       run: deno check
     fmt:
-      run: deno fmt --check
+      run: deno fmt --check {staged_files}
     lint:
-      run: deno lint
+      glob: "*.{ts,tsx,js,jsx}"
+      run: deno lint {staged_files}

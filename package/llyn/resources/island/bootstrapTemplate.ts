@@ -1,5 +1,5 @@
 import * as React from "react";
-import { hydrateRoot } from "react-dom/client";
+import { createRoot } from "react-dom/client";
 
 export type Props = Record<string, string>;
 
@@ -9,7 +9,8 @@ function bootstrapClientIsland(id: string, component: React.FC, props: Props) {
   if (!element) throw Error(`Element ${id} is not found`);
 
   const reactElement = React.createElement(component, props);
-  hydrateRoot(element, reactElement);
+  const root = createRoot(element);
+  root.render(reactElement);
   (async () => {})().catch((err) => {
     const error = new Error(`Failed to bootstrap island ${id}`, { cause: err });
     console.error(error);

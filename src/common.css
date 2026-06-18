@@ -1,10 +1,50 @@
-main {
-  max-width: 40em;
-  margin: 0 auto;
+:root {
+  --c-fg: #d0d0d0;
+  --c-bg: #101010;
+  --c-bg-hover: #303030;
+  --c-accent: #ff7f50;
+
+  --c-accent-0: #d0d0d0ff;
+  --c-accent-1: #dcbcb0ff;
+  --c-accent-2: #e8a890ff;
+  --c-accent-3: #f39370ff;
+  --c-accent-4: #ff7f50ff;
+
+  --img-hash: url("data:image/svg+xml;utf8,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='6'%20height='6'%20viewBox='0%200%204%204'%3E%3Cline%20x1='4'%20y1='0'%20x2='0'%20y2='4'%20stroke='white'%20stroke-width='1'/%3E%3C/svg%3E");
 }
 
-h1 {
-  font-family: "helvetica-neue-lt-pro-cond", sans-serif;
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+
+  background-color: var(--c-bg);
+  color: var(--c-fg);
+
+  font-family: "helvetica-neue-lt-pro", "hiragino-kaku-gothic-pron", sans-serif;
+  font-weight: 400;
+  line-height: 1.25;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family:
+    "helvetica-neue-lt-pro-cond", "hiragino-kaku-gothic-pron", sans-serif;
   font-weight: 700;
   font-style: normal;
+  padding: 0;
+}
+
+a {
+  color: unset;
+  text-decoration: underline;
+}
+
+img.icon {
+  height: 1lh;
 }

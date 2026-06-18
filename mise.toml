@@ -1,3 +1,6 @@
 [tools]
 deno = "latest"
 lefthook = "latest"
+
+[env]
+_.file = ".dev.vars"

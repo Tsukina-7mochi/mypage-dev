@@ -15,6 +15,8 @@
     "@types/react-dom": "npm:@types/react-dom@^19.2.3",
     "esbuild": "npm:esbuild@^0.25.5",
     "cliffy": "https://deno.land/x/cliffy@v0.25.7/mod.ts",
+    "hono": "jsr:@hono/hono@^4.12.24",
+    "hono/": "jsr:/@hono/hono@^4.12.24/",
     "htmlnano": "npm:htmlnano@^3.3.0",
     "llyn": "./package/llyn/index.ts",
     "llyn/runtime": "./package/llyn/runtime/index.ts",
@@ -29,7 +31,7 @@
   "tasks": {
     "build": "deno -RWE --allow-run --allow-sys=homedir ./build.ts",
     "clean": "rm -rf ./dist",
-    "dev": "deno -RWEN --allow-run --allow-sys=homedir ./build.ts --dev",
-    "serve": "deno serve --port=8080 --allow-read ./dist/worker.js"
+    "dev": "deno -RWEN --allow-run --allow-sys=homedir --env-file=.dev.vars ./build.ts --dev",
+    "serve": "deno serve --port=8080 --allow-read --env-file=.dev.vars ./dist/worker.js"
   }
 }

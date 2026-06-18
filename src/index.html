@@ -1,23 +1,160 @@
 <!DOCTYPE html>
 <html lang="ja">
   <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta property="og:title" content="Mooncake Sugar">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://dev.ts7m.net">
-    <meta property="og:site_name" content="Mooncake Sugar">
-    <meta property="og:locale" content="ja_JP">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta property="og:title" content="Mooncake Sugar" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://dev.ts7m.net" />
+    <meta property="og:site_name" content="Mooncake Sugar" />
+    <meta property="og:locale" content="ja_JP" />
+
     <title>Mooncake Sugar</title>
-    <link rel="stylesheet" href="./common.css">
-    <link rel="stylesheet" href="https://use.typekit.net/ziz7wjx.css">
+
+    <link rel="stylesheet" href="./index.css" />
+    <link rel="stylesheet" href="https://use.typekit.net/ziz7wjx.css" />
+
+    <!-- GitHub Cards -->
+    <script
+      type="module"
+      async
+      src="https://esm.sh/@tsukina-7mochi/github-cards"
+    ></script>
+
+    <!-- Adobe Fonts -->
+    <script>
+      (function (d) {
+        var config = {
+            kitId: "ziz7wjx",
+            scriptTimeout: 3000,
+            async: true,
+          },
+          h = d.documentElement,
+          t = setTimeout(function () {
+            h.className = h.className.replace(/\bwf-loading\b/g, "") +
+              " wf-inactive";
+          }, config.scriptTimeout),
+          tk = d.createElement("script"),
+          f = false,
+          s = d.getElementsByTagName("script")[0],
+          a;
+        h.className += " wf-loading";
+        tk.src = "https://use.typekit.net/" + config.kitId + ".js";
+        tk.async = true;
+        tk.onload = tk.onreadystatechange = function () {
+          a = this.readyState;
+          if (f || (a && a != "complete" && a != "loaded")) return;
+          f = true;
+          clearTimeout(t);
+          try {
+            Typekit.load(config);
+          } catch (e) {}
+        };
+        s.parentNode.insertBefore(tk, s);
+      })(document);
+    </script>
   </head>
   <body>
+    <div class="cosmetic"></div>
+    <div class="cosmetic"></div>
+    <div class="cosmetic"></div>
+    <div class="cosmetic"></div>
+
+    <hgroup>
+      <h1>MOONCAKE SUGAR</h1>
+      <p>development enthusiast</p>
+    </hgroup>
+
+    <div class="cosmetic"></div>
+    <div class="cosmetic"></div>
+
     <main>
-      <hgroup>
-        <h1>Mooncake Sugar</h1>
-        <p>development enthusiast</p>
-      </hgroup>
+      <section id="links">
+        <ul>
+          <li class="icon">
+            <a href="https://x.com/Tsukina_7mochi">
+              <img class="icon" src="/public/x-logo.svg" alt="X/Twitter" />
+            </a>
+          </li>
+          <li>
+            <a href="./blog">[BLOG]</a>
+          </li>
+          <li>
+            <a href="https://github.com/Tsukina-7mochi/mypage-dev">[SOURCE]</a>
+          </li>
+          <li>
+            <a href="https://ts7m.net">[TS7M.NET]</a>
+          </li>
+          <li class="icon">
+            <a href="https://github.com/Tsukina-7mochi">
+              <img class="icon" src="/public/github-logo.svg" alt="GitHub" />
+            </a>
+          </li>
+        </ul>
+      </section>
+
+      <section id="contribution-history">
+        <script
+          type="application/client-island"
+          src="./clientIsland/contributionHistory.tsx"
+        ></script>
+      </section>
+
+      <section id="experience-and-preference">
+        <h2>Experience & Preference</h2>
+
+        <section>
+          <h3>Web</h3>
+          <p>
+            React (Vanilla, Next.js, Remix/React Router, Tanstack Router), Lit /
+            Web Components, Vanilla JS/TS, Ruby on Rails
+          </p>
+          <p>Go (Gin), Hono, Cloudflare Workers</p>
+        </section>
+
+        <section>
+          <h3>Android</h3>
+          <p>Jetpack Compose, Kotlin, Dagger-Hilt, Room</p>
+        </section>
+
+        <section>
+          <h3>Hobby</h3>
+          <p>
+            Unity (C#, HLSL, Cg, Shader LAB), Embedding (ESP32, STM32, Arduino,
+            embedding-hal, FreeRTOS), Neovim Plugins (Lua), Aseprite Plugins
+            (Lua) & others...
+          </p>
+        </section>
+      </section>
+
+      <section id="feed">
+        <h2>Feed</h2>
+
+        <section></section>
+      </section>
+
+      <section id="products">
+        <h2>Products</h2>
+        <gh-repo-card
+          name="Tsukina-7mochi/aseprite-scripts"
+          no-avatar
+        ></gh-repo-card>
+        <gh-repo-card name="Tsukina-7mochi/neblua" no-avatar></gh-repo-card>
+        <gh-repo-card name="Tsukina-7mochi/syzygy" no-avatar></gh-repo-card>
+        <gh-repo-card
+          name="Tsukina-7mochi/esbuild-plugin-cache-deno"
+          no-avatar
+        ></gh-repo-card>
+        <gh-repo-card
+          name="Tsukina-7mochi/github-cards"
+          no-avatar
+        ></gh-repo-card>
+      </section>
     </main>
+
+    <div class="cosmetic"></div>
+    <div class="cosmetic"></div>
+    <div class="cosmetic"></div>
+    <div class="cosmetic"></div>
   </body>
 </html>

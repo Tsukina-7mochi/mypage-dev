@@ -59,17 +59,19 @@ async function runBuild(
     },
   });
 
-  await Promise.all(options.entries.documents.map(async (entry) => {
-    if (entry instanceof URL) {
-      await ctx.process["html"](entry, ctx);
-    } else if (entry.type === "html") {
-      await ctx.process["html"](entry.path, ctx);
-    } else if (entry.type === "markdown") {
-      await ctx.process["markdown"](entry.path, entry.template, ctx);
-    } else {
-      throw Error(`Unknown entry type: ${JSON.stringify(entry)}`);
-    }
-  }));
+  await Promise.all(
+    options.entries.documents.map(async (entry) => {
+      if (entry instanceof URL) {
+        await ctx.process["html"](entry, ctx);
+      } else if (entry.type === "html") {
+        await ctx.process["html"](entry.path, ctx);
+      } else if (entry.type === "markdown") {
+        await ctx.process["markdown"](entry.path, entry.template, ctx);
+      } else {
+        throw Error(`Unknown entry type: ${JSON.stringify(entry)}`);
+      }
+    }),
+  );
 
   const clientContext = await esbuild.context({
     entryPoints: [
@@ -83,6 +85,14 @@ async function runBuild(
       virtualFilePlugin({
         files: Object.fromEntries(virtualFiles.map((f) => [f.in, f.content])),
       }),
+      {
+        name: "data-url",
+        setup(build) {
+          build.onResolve({ filter: /^data:/ }, (args) => {
+            return { path: args.path, external: true };
+          });
+        },
+      },
       denoPlugin(),
     ],
     minify: !options.dev,
@@ -99,10 +109,7 @@ async function runBuild(
     sourcemap: options.dev ? "inline" : "linked",
   });
 
-  await Promise.all([
-    clientContext.rebuild(),
-    serverContext.rebuild(),
-  ]);
+  await Promise.all([clientContext.rebuild(), serverContext.rebuild()]);
 
   await clientContext.dispose();
   await serverContext.dispose();
@@ -132,10 +139,9 @@ export async function startDevServer(
   let ac = new AbortController();
 
   (async () => {
-    const fsStream = watchFs(
-      parsedOptions.root.pathname,
-      { recursive: true },
-    ).pipeThrough(new DebounceLatestStream(500));
+    const fsStream = watchFs(parsedOptions.root.pathname, {
+      recursive: true,
+    }).pipeThrough(new DebounceLatestStream(500));
 
     for await (const _ of fsStream) {
       ac.abort();
@@ -156,16 +162,18 @@ export async function startDevServer(
 
     if (ac.signal.aborted) continue;
 
-    await Promise.all(reloadStreamWriters.map(async (writer) => {
-      try {
-        const event = "event: reload\ndata: {}\n\n";
-        const payload = new TextEncoder().encode(event);
-        await writer.write(payload);
-        await writer.close();
-      } catch {
-        // already closed
-      }
-    }));
+    await Promise.all(
+      reloadStreamWriters.map(async (writer) => {
+        try {
+          const event = "event: reload\ndata: {}\n\n";
+          const payload = new TextEncoder().encode(event);
+          await writer.write(payload);
+          await writer.close();
+        } catch {
+          // already closed
+        }
+      }),
+    );
     reloadStreamWriters = [];
 
     await server?.shutdown();
@@ -174,33 +182,29 @@ export async function startDevServer(
       parsedOptions.dist.pathname,
       `worker.js?${Date.now()}`,
     );
-    server = Deno.serve(
-      { hostname, port },
-      async (req: Request) => {
-        if (new URL(req.url).pathname === "/__reload") {
-          const { readable, writable } = new TransformStream<string>();
-          const writer = writable.getWriter();
-          reloadStreamWriters.push(writer);
+    server = Deno.serve({ hostname, port }, async (req: Request) => {
+      if (new URL(req.url).pathname === "/__reload") {
+        const { readable, writable } = new TransformStream<string>();
+        const writer = writable.getWriter();
+        reloadStreamWriters.push(writer);
 
-          req.signal.addEventListener("close", () => {
-            writer.close().catch(() => {/* already closed */});
+        req.signal.addEventListener("close", () => {
+          writer.close().catch(() => {
+            /* already closed */
           });
+        });
 
-          return new Response(
-            readable,
-            {
-              status: 200,
-              headers: {
-                "Content-Type": "text/event-stream",
-                "Cache-Control": "no-cache",
-                "Connection": "keep-alive",
-              },
-            },
-          );
-        }
-        return (await import(moduleName)).default.fetch(req);
-      },
-    );
+        return new Response(readable, {
+          status: 200,
+          headers: {
+            "Content-Type": "text/event-stream",
+            "Cache-Control": "no-cache",
+            Connection: "keep-alive",
+          },
+        });
+      }
+      return (await import(moduleName)).default.fetch(req);
+    });
 
     await new Promise((resolve) => {
       ac.signal.addEventListener("abort", resolve);

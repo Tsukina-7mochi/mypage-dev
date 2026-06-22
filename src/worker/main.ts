@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { logger } from "hono/logger";
 
-import apiRoute from "./api.ts";
+import apiRoute from "./api/index.ts";
 import islandRoute from "./island.ts";
 import staticRoute from "./static.ts";
 

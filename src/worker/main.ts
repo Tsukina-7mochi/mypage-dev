@@ -9,7 +9,7 @@ import type { Bindings } from "./bindings.ts";
 
 const app = new Hono<Bindings>()
   .use(logger())
-  .route("/_island", islandRoute)
+  .route("/_islands", islandRoute)
   .route("/api", apiRoute)
   .route("/", staticRoute);
 

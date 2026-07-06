@@ -39,7 +39,7 @@ main {
   border: 1px solid var(--c-fg);
 }
 
-hgroup {
+hgroup.title {
   display: flex;
   flex-direction: column;
   padding: 2.5rem 0 3rem 0;
@@ -166,11 +166,11 @@ table.contribution-calendar {
 }
 
 section#experience-and-preference,
-section#feed,
+section#feed > div,
 section#products {
+  width: 100%;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  grid-template-rows: auto auto;
 
   > * {
     border-top: 1px solid var(--c-fg);
@@ -187,6 +187,46 @@ section#products {
       padding: 0;
       padding-bottom: 0.25rem;
       color: var(--c-accent);
+    }
+  }
+
+  > hgroup {
+    h2 {
+      padding: 0;
+      padding-bottom: 0.25rem;
+    }
+
+    p {
+      margin: 0;
+    }
+  }
+
+  > div.cosmetic {
+    background-image: var(--img-hash);
+  }
+
+  > div:last-child:nth-child(2n+1).cosmetic {
+    display: none;
+  }
+}
+
+section#feed > div {
+  article {
+    min-width: 0;
+
+    h3 {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    p {
+      max-height: 3lh;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 3;
     }
   }
 }

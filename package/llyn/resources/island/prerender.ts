@@ -7,7 +7,7 @@ export function prerenderClientIsland(island: Island): Promise<string> {
 }
 
 export async function prerenderServerIsland(island: Island): Promise<string> {
-  const module = await import(island.url.pathname);
+  const module = await import(`${island.url}?prerender=true`);
   if (!("default" in module)) {
     throw Error(`No default export in ${island.url.pathname}`);
   }

@@ -1,7 +1,7 @@
 import { hc, InferResponseType, parseResponse } from "hono/client";
 import { Suspense, use, useMemo } from "react";
 
-import { type ApiType } from "../worker/api/index.ts";
+import { type ApiType } from "../src/api/index.ts";
 
 const client = hc<ApiType>("http://localhost:8080/api");
 type ContributionHistory = InferResponseType<

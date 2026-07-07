@@ -1,7 +1,7 @@
 import { hc, parseResponse } from "hono/client";
 import { Suspense, use } from "react";
 
-import { type ApiType } from "../worker/api/index.ts";
+import { type ApiType } from "../src/api/index.ts";
 
 const NUM_FEED_ITEMS = 5;
 
@@ -42,7 +42,7 @@ export default function () {
   const feedPromise = fetchFeed();
 
   return (
-    <Suspense fallback={<div className="loading">Loading...</div>}>
+    <>
       <hgroup>
         <h2>Feed</h2>
         <p>
@@ -50,8 +50,10 @@ export default function () {
         </p>
       </hgroup>
 
-      <FeedList feedPromise={feedPromise} />
+      <Suspense fallback={<div className="loading">Loading...</div>}>
+        <FeedList feedPromise={feedPromise} />
+      </Suspense>
       <div className="cosmetic" />
-    </Suspense>
+    </>
   );
 }

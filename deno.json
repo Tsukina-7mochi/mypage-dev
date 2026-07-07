@@ -29,7 +29,7 @@
     "valibot": "jsr:@valibot/valibot@^1.4.0"
   },
   "tasks": {
-    "build": "deno -RWE --allow-run --allow-sys=homedir ./build.ts",
+    "build": "deno -RWE --allow-run --allow-sys=homedir ./build.ts && cp ./routes/public ./dist/static -r",
     "clean": "rm -rf ./dist",
     "dev": "deno -RWEN --allow-run --allow-sys=homedir --env-file=.dev.vars ./build.ts --dev",
     "serve": "deno serve --port=8080 --allow-read --env-file=.dev.vars ./dist/worker.js"

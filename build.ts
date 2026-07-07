@@ -4,18 +4,18 @@ const dev = Deno.args.includes("--dev");
 
 const options: llyn.BuildOptions = {
   dev: true,
-  root: "./src/",
+  root: "./routes/",
   dist: "./dist",
   entries: {
     documents: [
-      "./src/index.html",
+      "./routes/index.html",
       {
         type: "markdown",
-        path: "./src/blog/test.md",
-        template: "./src/blog/template.html",
+        path: "./routes/blog/test.md",
+        template: "./routes/blog/template.html",
       },
     ],
-    worker: "./src/worker/main.ts",
+    worker: "./src/main.ts",
   },
 };
 

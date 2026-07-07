@@ -36,7 +36,7 @@ export default function () {
   const history = parseResponse(client.contributionHistory.$get());
 
   return (
-    <Suspense fallback={<div className="loading">Loading...</div>}>
+    <Suspense fallback={<p className="loading">Loading...</p>}>
       <Display historyPromise={history} />
     </Suspense>
   );

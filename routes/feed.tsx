@@ -50,7 +50,7 @@ export default function () {
         </p>
       </hgroup>
 
-      <Suspense fallback={<div className="loading">Loading...</div>}>
+      <Suspense fallback={<p className="loading">Loading...</p>}>
         <FeedList feedPromise={feedPromise} />
       </Suspense>
       <div className="cosmetic" />

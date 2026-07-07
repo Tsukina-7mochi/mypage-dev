@@ -167,7 +167,7 @@ table.contribution-calendar {
 
 section#experience-and-preference,
 section#feed > div,
-section#products {
+section#works {
   width: 100%;
   display: grid;
   grid-template-columns: 1fr 1fr;

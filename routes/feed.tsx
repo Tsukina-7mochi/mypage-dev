@@ -29,7 +29,7 @@ function FeedList(props: { feedPromise: ReturnType<typeof fetchFeed> }) {
   return (
     <>
       {feed.slice(0, NUM_FEED_ITEMS).map((item) => (
-        <article>
+        <article key={item.url}>
           <h3>{item.title}</h3>
           <p>{item.body}</p>
         </article>

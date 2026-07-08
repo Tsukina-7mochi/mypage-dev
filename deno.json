@@ -5,6 +5,9 @@
     "jsxImportSource": "react"
   },
   "exclude": ["dist/"],
+  "fmt": {
+    "exclude": ["routes/**/*.md"]
+  },
   "imports": {
     "@deno/esbuild-plugin": "jsr:@deno/esbuild-plugin@^1.2.1",
     "@std/fs": "jsr:@std/fs@1.0.18",

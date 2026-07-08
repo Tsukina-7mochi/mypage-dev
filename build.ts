@@ -14,6 +14,16 @@ const options: llyn.BuildOptions = {
         path: "./routes/blog/test.md",
         template: "./routes/blog/template.html",
       },
+      {
+        type: "markdown",
+        path: "./routes/blog/aseprite-scripts.md",
+        template: "./routes/blog/template.html",
+      },
+      {
+        type: "markdown",
+        path: "./routes/blog/aseprite-type-definition.md",
+        template: "./routes/blog/template.html",
+      },
     ],
     worker: "./src/main.ts",
   },

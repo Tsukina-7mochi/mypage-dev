@@ -9,16 +9,16 @@ body {
   border: 1px solid var(--c-fg);
 
   > *:nth-child(2),
-  > *:nth-child(11) {
+   > *:nth-child(11) {
     border-left: 1px solid var(--c-fg);
     border-right: 1px solid var(--c-fg);
   }
   > *:nth-child(4),
-  > *:nth-child(6) {
+   > *:nth-child(6) {
     border-top: 1px solid var(--c-fg);
   }
   > *:nth-child(7),
-  > *:nth-child(9) {
+   > *:nth-child(9) {
     border-top: 1px solid var(--c-fg);
     border-bottom: 1px solid var(--c-fg);
   }

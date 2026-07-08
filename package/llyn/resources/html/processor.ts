@@ -43,10 +43,7 @@ export async function htmlNodeProcessor<T extends ParentNode>(
       const url = new URL(el.src, entryUrl);
       const island = { id, url, props: el.props };
 
-      const { prerender } = await ctx.process["client-island"](
-        island,
-        ctx,
-      );
+      const { prerender } = await ctx.process["client-island"](island, ctx);
       return { island, element: el.element, prerender };
     }),
   );
@@ -57,10 +54,7 @@ export async function htmlNodeProcessor<T extends ParentNode>(
       const url = new URL(el.src, entryUrl);
       const island = { id, url, props: el.props };
 
-      const { prerender } = await ctx.process["server-island"](
-        island,
-        ctx,
-      );
+      const { prerender } = await ctx.process["server-island"](island, ctx);
       ctx.registerServerIsland(island);
       return { island, element: el.element, prerender };
     }),
@@ -69,14 +63,14 @@ export async function htmlNodeProcessor<T extends ParentNode>(
   const scripts = getScripts(document).map((el) => {
     const url = new URL(el.path, entryUrl);
     const { outFile } = ctx.process["build-asset"](url, ctx);
-    const newSrc = path.relative(entryOutPath, outFile.pathname);
+    const newSrc = path.relative(path.dirname(entryOutPath), outFile.pathname);
     return { element: el.element, newSrc };
   });
 
   const stylesheets = getStylesheets(document).map((el) => {
     const url = new URL(el.path, entryUrl);
     const { outFile } = ctx.process["build-asset"](url, ctx);
-    const newHref = path.relative(entryOutPath, outFile.pathname);
+    const newHref = path.relative(path.dirname(entryOutPath), outFile.pathname);
     return { element: el.element, newHref };
   });
 
@@ -126,10 +120,7 @@ export async function htmlFileProcessor(
   const filepath = url.pathname;
   const rootPath = ctx.root.pathname;
   const staticDistPath = ctx.staticDist.pathname;
-  const outPath = path.join(
-    staticDistPath,
-    path.relative(rootPath, filepath),
-  );
+  const outPath = path.join(staticDistPath, path.relative(rootPath, filepath));
 
   const rawContent = await Deno.readTextFile(url);
   const document = parse5.parse(rawContent);
@@ -137,17 +128,19 @@ export async function htmlFileProcessor(
   let content = parse5.serialize(document);
 
   if (!ctx.dev) {
-    content = (await htmlnano.process(
-      content,
-      {
-        minifyCss: false,
-        minifyJs: false,
-        minifySvg: false,
-        skipConfigLoading: true,
-        skipInternalWarnings: true,
-      },
-      htmlnano.presets.safe,
-    )).html;
+    content = (
+      await htmlnano.process(
+        content,
+        {
+          minifyCss: false,
+          minifyJs: false,
+          minifySvg: false,
+          skipConfigLoading: true,
+          skipInternalWarnings: true,
+        },
+        htmlnano.presets.safe,
+      )
+    ).html;
   }
 
   await fs.ensureDir(path.dirname(outPath));

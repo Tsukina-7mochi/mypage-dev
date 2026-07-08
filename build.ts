@@ -16,12 +16,7 @@ const options: llyn.BuildOptions = {
       },
       {
         type: "markdown",
-        path: "./routes/blog/aseprite-scripts.md",
-        template: "./routes/blog/template.html",
-      },
-      {
-        type: "markdown",
-        path: "./routes/blog/aseprite-type-definition.md",
+        path: "./routes/blog/old-page-contents.md",
         template: "./routes/blog/template.html",
       },
     ],

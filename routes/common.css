@@ -43,3 +43,27 @@ a {
 img.icon {
   height: 1lh;
 }
+
+gh-repo-card {
+  --color-background: var(--c-bg);
+  --color-background-hover: var(--c-bg-hover);
+  --color-background-active: var(--c-bg-hover);
+  --color-text-primary: var(--c-fg);
+  --color-text-secondary: var(--c-fg);
+  --color-text-link: var(--c-accent);
+  --radius: 0;
+  --color-border: var(--c-fg);
+
+  &::part(wrapper) {
+    padding: 1rem;
+    font-family:
+      "helvetica-neue-lt-pro", "hiragino-kaku-gothic-pron", sans-serif;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 1.25;
+  }
+
+  &::part(repo-name) {
+    font-weight: 700;
+  }
+}

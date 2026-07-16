@@ -1,1 +1,117 @@
 @import "../common.css";
+
+body {
+  display: grid;
+  grid-template-rows: 3rem auto auto 3rem;
+  grid-template-columns: 3rem auto 3rem;
+  max-width: 60rem;
+  margin: 0 auto;
+  border: 1px solid var(--c-fg);
+
+  > *:nth-child(2),
+   > *:nth-child(11) {
+    border-left: 1px solid var(--c-fg);
+    border-right: 1px solid var(--c-fg);
+  }
+  > *:nth-child(4),
+   > *:nth-child(6) {
+    border-top: 1px solid var(--c-fg);
+  }
+  > *:nth-child(7),
+   > *:nth-child(9) {
+    border-top: 1px solid var(--c-fg);
+    border-bottom: 1px solid var(--c-fg);
+  }
+
+  > *:nth-child(1) {
+    background-color: var(--c-accent);
+  }
+  > *:nth-child(4) {
+    background-image: var(--img-hash);
+    background-repeat: repeat;
+  }
+  > *:nth-child(12) {
+    background-color: var(--c-fg);
+  }
+}
+
+header {
+  display: flex;
+  flex-direction: column;
+  padding: 2.5rem 0 3rem 0;
+
+  border: 1px solid var(--c-fg);
+  border-bottom: none;
+  text-align: center;
+
+  > p {
+    margin: 0;
+
+    font-family: "lores-9-plus-narrow", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 4em;
+  }
+
+  > nav > ul {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    gap: 0.5rem;
+  }
+}
+
+main {
+  border: 1px solid var(--c-fg);
+
+  > * {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  > ul,
+  ol {
+    padding-left: 2rem;
+  }
+}
+
+h1,
+h2,
+h3 {
+  border-bottom: 1px solid var(--c-fg);
+
+  &::before {
+    padding: 0 0.2rem;
+    vertical-align: top;
+    content: "[1]";
+    font-size: 0.5rem;
+  }
+}
+
+h1 {
+  &::before {
+    content: "[1]";
+  }
+}
+
+h2 {
+  &::before {
+    content: "[2]";
+  }
+}
+
+h3 {
+  &::before {
+    content: "[3]";
+  }
+}
+
+span[is-="badge"] {
+  display: inline-block;
+  background-color: var(--c-accent);
+  color: var(--c-on-accent);
+  padding: 0 0.25em;
+}

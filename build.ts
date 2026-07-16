@@ -16,6 +16,11 @@ const options: llyn.BuildOptions = {
       },
       {
         type: "markdown",
+        path: "./routes/blog/index.md",
+        template: "./routes/blog/template.html",
+      },
+      {
+        type: "markdown",
         path: "./routes/blog/old-page-contents.md",
         template: "./routes/blog/template.html",
       },

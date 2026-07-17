@@ -13,7 +13,7 @@ const app = new Hono<Bindings>()
     cache({
       cacheName: "mypage-dev-api",
       cacheControl: "max-age=3600",
-      wait: !!Deno,
+      wait: typeof Deno !== "undefined",
     }),
   )
   .route("/contributionHistory", contributionHistory)

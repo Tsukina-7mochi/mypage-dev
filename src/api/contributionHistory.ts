@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import * as v from "valibot";
+import { env } from "hono/adapter";
 
 import type { Bindings } from "../bindings.ts";
 
@@ -48,7 +49,7 @@ const app = new Hono<Bindings>().get("/", async (c) => {
     method: "POST",
     headers: {
       // use Deno.env for development now
-      Authorization: `bearer ${Deno.env.get("GH_API_TOKEN")}`,
+      Authorization: `bearer ${env(c).GH_API_TOKEN}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({

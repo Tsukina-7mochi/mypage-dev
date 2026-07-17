@@ -63,14 +63,14 @@ export async function htmlNodeProcessor<T extends ParentNode>(
   const scripts = getScripts(document).map((el) => {
     const url = new URL(el.path, entryUrl);
     const { outFile } = ctx.process["build-asset"](url, ctx);
-    const newSrc = path.relative(path.dirname(entryOutPath), outFile.pathname);
+    const newSrc = "/" + path.relative(staticDistPath, outFile.pathname);
     return { element: el.element, newSrc };
   });
 
   const stylesheets = getStylesheets(document).map((el) => {
     const url = new URL(el.path, entryUrl);
     const { outFile } = ctx.process["build-asset"](url, ctx);
-    const newHref = path.relative(path.dirname(entryOutPath), outFile.pathname);
+    const newHref = "/" + path.relative(staticDistPath, outFile.pathname);
     return { element: el.element, newHref };
   });
 

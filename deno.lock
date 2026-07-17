@@ -32,6 +32,7 @@
     "npm:marked@15.0.12": "15.0.12",
     "npm:parse5@8": "8.0.0",
     "npm:react-dom@^19.2.5": "19.2.5_react@19.2.5",
+    "npm:react-error-boundary@^6.1.2": "6.1.2_react@19.2.5",
     "npm:react@^19.2.5": "19.2.5"
   },
   "jsr": {
@@ -670,6 +671,12 @@
         "scheduler"
       ]
     },
+    "react-error-boundary@6.1.2_react@19.2.5": {
+      "integrity": "sha512-3DpCr5HVdZ0caUjYE/kIHBEJN0mNP3ZCgf16c48uJ5TbWjorKVp+YG8W3XqlJ7vJAVNw6wNIImyPXmFydwmyng==",
+      "dependencies": [
+        "react"
+      ]
+    },
     "react@19.2.5": {
       "integrity": "sha512-llUJLzz1zTUBrskt2pwZgLq59AemifIftw4aB7JxOqf1HY2FDaGDxgwpAPVzHU1kdWabH7FauP4i1oEeer2WCA=="
     },
@@ -864,6 +871,7 @@
       "npm:marked@15.0.12",
       "npm:parse5@8",
       "npm:react-dom@^19.2.5",
+      "npm:react-error-boundary@^6.1.2",
       "npm:react@^19.2.5"
     ]
   }

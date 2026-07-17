@@ -1,5 +1,6 @@
 import { hc, InferResponseType, parseResponse } from "hono/client";
 import { Suspense, use, useMemo } from "react";
+import { ErrorBoundary } from "react-error-boundary";
 
 import { type ApiType } from "../src/api/index.ts";
 
@@ -36,8 +37,10 @@ export default function () {
   const history = parseResponse(client.contributionHistory.$get());
 
   return (
-    <Suspense fallback={<p className="loading">Loading...</p>}>
-      <Display historyPromise={history} />
-    </Suspense>
+    <ErrorBoundary fallback={<p className="fallback">[Load Failed]</p>}>
+      <Suspense fallback={<p className="fallback">[Loading]</p>}>
+        <Display historyPromise={history} />
+      </Suspense>
+    </ErrorBoundary>
   );
 }

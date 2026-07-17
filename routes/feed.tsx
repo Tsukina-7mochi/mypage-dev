@@ -1,5 +1,6 @@
 import { hc, parseResponse } from "hono/client";
 import { Suspense, use } from "react";
+import { ErrorBoundary } from "react-error-boundary";
 
 import { type ApiType } from "../src/api/index.ts";
 
@@ -50,9 +51,11 @@ export default function () {
         </p>
       </hgroup>
 
-      <Suspense fallback={<p className="loading">Loading...</p>}>
-        <FeedList feedPromise={feedPromise} />
-      </Suspense>
+      <ErrorBoundary fallback={<p className="fallback">[Load Failed]</p>}>
+        <Suspense fallback={<p className="fallback">Loading...</p>}>
+          <FeedList feedPromise={feedPromise} />
+        </Suspense>
+      </ErrorBoundary>
       <div className="cosmetic" />
     </>
   );

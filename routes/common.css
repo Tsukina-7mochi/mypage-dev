@@ -67,3 +67,7 @@ gh-repo-card {
     font-weight: 700;
   }
 }
+
+p.fallback {
+	text-align: center;
+}

@@ -1,30 +1,43 @@
 import * as llyn from "llyn";
+import * as fs from "@std/fs";
+import * as path from "@std/path";
 
 const dev = Deno.args.includes("--dev");
+const routeDir = "./routes";
+
+const documents = [];
+
+for await (const file of fs.expandGlob(`${routeDir}/**/*.html`)) {
+  if (file.name === "template.html") {
+    continue;
+  }
+
+  documents.push(
+    {
+      type: "html",
+      path: file.path,
+    } as const,
+  );
+}
+
+for await (const file of fs.expandGlob(`${routeDir}/**/*.md`)) {
+  documents.push(
+    {
+      type: "markdown",
+      path: file.path,
+      template: path.join(path.dirname(file.path), "template.html"),
+    } as const,
+  );
+}
+
+console.log(documents);
 
 const options: llyn.BuildOptions = {
   dev: true,
   root: "./routes/",
   dist: "./dist",
   entries: {
-    documents: [
-      "./routes/index.html",
-      {
-        type: "markdown",
-        path: "./routes/blog/test.md",
-        template: "./routes/blog/template.html",
-      },
-      {
-        type: "markdown",
-        path: "./routes/blog/index.md",
-        template: "./routes/blog/template.html",
-      },
-      {
-        type: "markdown",
-        path: "./routes/blog/old-page-contents.md",
-        template: "./routes/blog/template.html",
-      },
-    ],
+    documents,
     worker: "./src/main.ts",
   },
 };

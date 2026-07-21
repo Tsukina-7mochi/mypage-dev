@@ -10,7 +10,10 @@ import type { Bindings } from "./bindings.ts";
 const app = new Hono<Bindings>()
   .use(logger())
   .route("/_islands", islandRoute)
-  .route("/api", apiRoute)
-  .route("/", staticRoute);
+  .route("/api", apiRoute);
+
+if (typeof Deno !== "undefined") {
+  app.route("/", staticRoute);
+}
 
 export default { fetch: app.fetch };

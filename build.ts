@@ -30,8 +30,6 @@ for await (const file of fs.expandGlob(`${routeDir}/**/*.md`)) {
   );
 }
 
-console.log(documents);
-
 const options: llyn.BuildOptions = {
   dev: true,
   root: "./routes/",

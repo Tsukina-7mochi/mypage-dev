@@ -73,10 +73,18 @@ export async function markdownProcessor(
   if (!header) {
     throw Error("head not found");
   }
-  const titleHtml = `<title>${frontmatter.title}</title>`;
+
+  const htmlNodes = [
+    `<title>${frontmatter.title}</title>`,
+    `<meta property="og:title" content="${frontmatter.title}">`,
+    `<meta name="twitter:title" content="${frontmatter.title}">`,
+    ...Object.entries(frontmatter.og ?? {}).map(
+      ([key, value]) => `<meta property="og:${key}" content="${value}">`,
+    ),
+  ].join("\n");
   parse5Dom.appendNodesTo(
     header,
-    parse5.parseFragment(titleHtml).childNodes[0],
+    ...parse5.parseFragment(htmlNodes).childNodes,
   );
 
   await fs.ensureDir(path.dirname(outPath));

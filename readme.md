@@ -10,5 +10,6 @@ framework written in Deno and targeting Cloudflare Workers.
 - Support mobile devices
 - Dark mode
 - Migrate to filesystem-based configuration
-- Use `<slot>` in template
-- Use unifiedjs: satteri, remark, ...
+- Static Island
+  - Collect blog entries automatically
+- Use satteri and HTML minifier

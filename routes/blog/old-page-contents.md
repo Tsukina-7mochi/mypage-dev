@@ -1,5 +1,5 @@
 ---
-title: 旧ページアーカイブ
+title: 旧ページアーカイブ | Mooncake Blog
 createdAt: 2026-07-08
 updatedAt: 2026-07-08
 ---

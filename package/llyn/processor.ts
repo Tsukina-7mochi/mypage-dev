@@ -8,6 +8,7 @@ import { markdownProcessor } from "./resources/markdown/processor.ts";
 import {
   clientIslandProcessor,
   serverIslandProcessor,
+  staticIslandProcessor,
 } from "./resources/island/processor.ts";
 import { buildAssetProcessor } from "./resources/buildAsset/processor.ts";
 
@@ -17,6 +18,7 @@ const processors = {
   "markdown": markdownProcessor,
   "client-island": clientIslandProcessor,
   "server-island": serverIslandProcessor,
+  "static-island": staticIslandProcessor,
   "build-asset": buildAssetProcessor,
 };
 type TProcessors = typeof processors;

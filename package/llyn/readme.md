@@ -21,6 +21,8 @@ resources is as follows:
   `<script type="application/client-island">`
 - server island: JavaScript/TypeScript/JSX/TSX files loaded via
   `<script type="application/server-island">`
+- static island: JavaScript/TypeScript/JSX/TSX files loaded via
+  `<script type="application/static-island">`
 - scripts: JavaScript/TypeScript/JSX/TSX files loaded via `<script>` elements
   with a regular `type`
 - css: CSS files loaded via `<link rel="stylesheet">`
@@ -48,6 +50,11 @@ Llyn has multiple island types with different characteristics.
   into an HTML string using `renderToReadableStream`. In the client runtime, it
   is fetched lazily after the page loads and replaced with the returned content.
   You can embed fallback content at build time by using `<Suspense>`.
+- static island: It is rendered via `renderToReadableStream` at build time
+  (waiting for `stream.allReady`, so async components are supported) and
+  embedded instead of a `<script>` tag. Unlike client and server islands, the
+  rendered markup is never hydrated or re-fetched at runtime; it ships as plain
+  HTML with no bootstrap code and no worker-side `renderIsland` entry.
 
 > [!NOTE]
 > Llyn does not have server-side rendering in the sense of React. Llyn's server
@@ -98,8 +105,10 @@ changes. It is not exhaustive; read the referenced files for details.
 ### Islands
 
 - `resources/island/prerender.ts`: imports the island module, builds a React
-  element. Client islands use `prerender` and are wrapped in a `<div id>` for
-  later hydration; server islands use `renderToStaticMarkup`.
+  element. Client islands are wrapped in a `<div id>` for later hydration;
+  server islands use `renderToStaticMarkup`; static islands use
+  `renderToReadableStream` (awaiting `stream.allReady`) so async components are
+  supported, and are never hydrated or fetched at runtime.
 - `resources/island/bootstrap.ts` (+ `bootstrapTemplate.ts`): emits the
   client-side script that hydrates client islands and lazily fetches server
   islands from `/_islands/:id`.
@@ -139,7 +148,7 @@ changes. It is not exhaustive; read the referenced files for details.
       - processor.ts             frontmatter + marked + template merge
     - island/
       - processor.ts             thin prerender wrappers
-      - prerender.ts             React prerender (client) / static markup (server)
+      - prerender.ts             React prerender: client / static markup (server) / stream (static)
       - bootstrap.ts             client bootstrap script generation
       - serverRenderer.ts        worker renderIsland registry generation
     - buildAsset/

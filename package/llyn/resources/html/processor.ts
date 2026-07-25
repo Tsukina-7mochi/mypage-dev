@@ -9,6 +9,7 @@ import {
   getClientIslands,
   getScripts,
   getServerIslands,
+  getStaticIslands,
   getStylesheets,
 } from "./helper.ts";
 import { renderBootstrap } from "../island/bootstrap.ts";
@@ -60,6 +61,17 @@ export async function htmlNodeProcessor<T extends ParentNode>(
     }),
   );
 
+  const staticIslands = await Promise.all(
+    getStaticIslands(document).map(async (el) => {
+      const id = ctx.idProvider.generate();
+      const url = new URL(el.src, entryUrl);
+      const island = { id, url, props: el.props };
+
+      const { prerender } = await ctx.process["static-island"](island, ctx);
+      return { island, element: el.element, prerender };
+    }),
+  );
+
   const scripts = getScripts(document).map((el) => {
     const url = new URL(el.path, entryUrl);
     const { outFile } = ctx.process["build-asset"](url, ctx);
@@ -79,6 +91,10 @@ export async function htmlNodeProcessor<T extends ParentNode>(
     parse5Dom.replaceNodeWith(island.element, ...fragment.childNodes);
   }
   for (const island of serverIslands) {
+    const fragment = parse5.parseFragment(island.prerender);
+    parse5Dom.replaceNodeWith(island.element, ...fragment.childNodes);
+  }
+  for (const island of staticIslands) {
     const fragment = parse5.parseFragment(island.prerender);
     parse5Dom.replaceNodeWith(island.element, ...fragment.childNodes);
   }

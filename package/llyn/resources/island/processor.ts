@@ -1,4 +1,8 @@
-import { prerenderClientIsland, prerenderServerIsland } from "./prerender.ts";
+import {
+  prerenderClientIsland,
+  prerenderServerIsland,
+  prerenderStaticIsland,
+} from "./prerender.ts";
 import { Context as ProcessorContext } from "../../processor.ts";
 import { Island } from "../../types.ts";
 
@@ -15,5 +19,13 @@ export async function serverIslandProcessor(
   _: ProcessorContext,
 ): Promise<{ prerender: string }> {
   const prerendered = await prerenderServerIsland(island);
+  return { prerender: prerendered };
+}
+
+export async function staticIslandProcessor(
+  island: Island,
+  _: ProcessorContext,
+): Promise<{ prerender: string }> {
+  const prerendered = await prerenderStaticIsland(island);
   return { prerender: prerendered };
 }

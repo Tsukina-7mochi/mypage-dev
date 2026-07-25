@@ -42,6 +42,15 @@ export function getServerIslands(node: ParentNode): IslandElement[] {
     .map(getIslandFromElement);
 }
 
+export function getStaticIslands(node: ParentNode): IslandElement[] {
+  return parse5Dom
+    .selectAll(node, {
+      tag: "script",
+      attributes: { type: "application/static-island" },
+    })
+    .map(getIslandFromElement);
+}
+
 export function getScripts(node: ParentNode): ElementWithPath[] {
   return parse5Dom
     .selectAll(node, {

@@ -1,8 +1,7 @@
 # dev.ts7m.net
 
-
-Personal website built on Llyn, an internal island-architecture
-framework written in Deno and targeting Cloudflare Workers.
+Personal website built on Llyn, an internal island-architecture framework
+written in Deno and targeting Cloudflare Workers.
 
 ## Milestones
 

@@ -1,6 +1,5 @@
-import { hc, parseResponse } from "hono/client";
+import { hc, type InferResponseType, parseResponse } from "hono/client";
 import { Suspense } from "react";
-import { ErrorBoundary } from "react-error-boundary";
 
 import { type ApiType } from "../src/api/index.ts";
 
@@ -8,14 +7,21 @@ const NUM_FEED_ITEMS = 5;
 const isPrerender = !!new URL(import.meta.url).searchParams.get("prerender");
 const client = hc<ApiType>("http://localhost:8080/api");
 
-async function Feed() {
-  const feed = await parseResponse(client.feed.$get()).catch((err) => {
-    console.error("Failed to fetch feed:", err);
-    return null;
-  });
+type Feed = InferResponseType<typeof client.feed.$get, 200>;
 
+async function fetchFeed(): Promise<Feed | null> {
+  try {
+    return await parseResponse(client.feed.$get());
+  } catch (e) {
+    console.error("failed to fetch feed", e);
+    return null;
+  }
+}
+
+async function Feed() {
+  const feed = await fetchFeed();
   if (feed === null) {
-    return <div className="error">Failed to load feed</div>;
+    return <ErrorFallback />;
   }
 
   return (
@@ -34,6 +40,10 @@ function Fallback() {
   return <p className="fallback">Loading...</p>;
 }
 
+function ErrorFallback() {
+  return <p className="fallback">[Load Failed]</p>;
+}
+
 export default function () {
   return (
     <>
@@ -44,11 +54,9 @@ export default function () {
         </p>
       </hgroup>
 
-      <ErrorBoundary fallback={<p className="fallback">[Load Failed]</p>}>
-        <Suspense fallback={<Fallback />}>
-          {isPrerender ? <Fallback /> : <Feed />}
-        </Suspense>
-      </ErrorBoundary>
+      <Suspense fallback={<Fallback />}>
+        {isPrerender ? <Fallback /> : <Feed />}
+      </Suspense>
       <div className="cosmetic" />
     </>
   );

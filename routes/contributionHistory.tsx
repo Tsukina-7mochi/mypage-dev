@@ -1,20 +1,33 @@
-import { hc, InferResponseType, parseResponse } from "hono/client";
-import { Suspense, use, useMemo } from "react";
-import { ErrorBoundary } from "react-error-boundary";
+import { hc, type InferResponseType, parseResponse } from "hono/client";
+import { Suspense } from "react";
 
 import { type ApiType } from "../src/api/index.ts";
 
+const isPrerender = !!new URL(import.meta.url).searchParams.get("prerender");
 const client = hc<ApiType>("http://localhost:8080/api");
+
 type ContributionHistory = InferResponseType<
   typeof client.contributionHistory.$get,
   200
 >;
 
-function Display(props: { historyPromise: Promise<ContributionHistory> }) {
-  const { counts } = use(props.historyPromise);
-  const numCols = useMemo(() => {
-    return Math.ceil(counts.length / 7);
-  }, [counts.length]);
+async function fetchContributionHistory(): Promise<ContributionHistory | null> {
+  try {
+    return await parseResponse(client.contributionHistory.$get());
+  } catch (e) {
+    console.error(e);
+    return null;
+  }
+}
+
+async function ContributionHistory() {
+  const contributionHistory = await fetchContributionHistory();
+  if (contributionHistory === null) {
+    return <ErrorFallback />;
+  }
+
+  const { counts } = contributionHistory;
+  const numCols = Math.ceil(counts.length / 7);
 
   return (
     <>
@@ -33,14 +46,22 @@ function Display(props: { historyPromise: Promise<ContributionHistory> }) {
   );
 }
 
+function Fallback() {
+  return <p className="fallback">[Loading]</p>;
+}
+
+function ErrorFallback() {
+  return <p className="fallback">[Load Failed]</p>;
+}
+
 export default function () {
-  const history = parseResponse(client.contributionHistory.$get());
+  if (isPrerender) {
+    return <Fallback />;
+  }
 
   return (
-    <ErrorBoundary fallback={<p className="fallback">[Load Failed]</p>}>
-      <Suspense fallback={<p className="fallback">[Loading]</p>}>
-        <Display historyPromise={history} />
-      </Suspense>
-    </ErrorBoundary>
+    <Suspense fallback={<Fallback />}>
+      <ContributionHistory />
+    </Suspense>
   );
 }

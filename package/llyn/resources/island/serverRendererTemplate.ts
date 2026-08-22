@@ -1,5 +1,5 @@
 import React from "react";
-import { renderToReadableStream } from "react-dom/server";
+import { renderToReadableStream } from "react-dom/server.edge";
 
 const islands: Record<string, React.ReactNode> = {};
 

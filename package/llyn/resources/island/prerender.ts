@@ -1,7 +1,9 @@
 import React from "react";
 import { Island } from "../../types.ts";
-import { renderToStaticMarkup } from "react-dom/server.node";
-import { renderToReadableStream } from "react-dom/server";
+import {
+  renderToReadableStream,
+  renderToStaticMarkup,
+} from "react-dom/server.edge";
 
 export function prerenderClientIsland(island: Island): Promise<string> {
   return Promise.resolve(`<div id="${island.id}"></div>`);

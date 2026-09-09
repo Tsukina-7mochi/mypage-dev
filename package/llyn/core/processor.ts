@@ -1,5 +1,5 @@
 import { Island } from "./types.ts";
-import { IdProvider } from "./idProvider.ts";
+import { IdProvider } from "../idProvider.ts";
 import {
   htmlFileProcessor,
   htmlNodeProcessor,

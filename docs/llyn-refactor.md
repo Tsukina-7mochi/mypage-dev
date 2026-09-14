@@ -48,14 +48,14 @@ type IslandKind = "client" | "server" | "static";
 
 type Island = {
   id: string; // specifier から算出（後述）
-  specifier: string; // root からの相対パス "routes/feed.tsx"
+  specifier: string; // root からの相対パス "feed.tsx"
   url: URL; // 絶対 file URL（dev / build のみ）
 };
 
 type IslandInstance = {
   island: Island;
   kind: IslandKind; // 呼び出し側の <script type> で決まる
-  domId: string; // `${island.id}-${index}`（同一ページ内で一意）
+  domId: string; // `${island.id}-${index}`（処理対象内で一意）
   props: Record<string, string>; // 呼び出し側の属性
 };
 ```
@@ -67,13 +67,12 @@ type IslandInstance = {
 
 ### アイランド ID
 
-- `id = hash(specifier)` の短縮 16 進（8
-  桁）。**同期実行できる非暗号ハッシュ**（FNV-1a 32bit 等）を使う。 dev
-  の同期パス解決（`expandGlobSync`）で
-  ID→パスの逆引きを行うため、`crypto.subtle`（非同期）は使わない。
+- `id = hash(specifier)` の短縮 16 進（8 桁）。SHA-1
+  を計算し、ダイジェストの先頭 8 桁を使う。
+- `specifier` は設定の `root` からの相対パスとし、パス区切りを `/`
+  に正規化する。
 - ビルド間で安定するので、`/_islands/<id>` の URL がビルドのたびに変わらない。
-- 収集時に衝突を検出したらビルドを失敗させる（メッセージに衝突した 2 つの
-  specifier を出す）。
+- 衝突を検出したら例外を投げる（メッセージに衝突した 2 つの specifier を出す）。
 
 ### props の受け渡し
 
@@ -154,7 +153,7 @@ export function serveStaticForDev(req: Request): Promise<Response>;
 ```
 
 - `serveIsland` は dev では設定を cwd から自動探索し、islands glob
-  を同期スキャンして ID を逆引きする
+  をスキャンして ID を逆引きする
   （結果はキャッシュし、ウォッチャの世代番号で無効化）。
 - 本番では生成コードに置き換わり、静的 import + `switch`
   になるため探索もファイルシステムも不要。
@@ -248,13 +247,13 @@ export default defineConfig({
 
 ### M1. `llyn/core` の切り出しと ID のパス化（挙動不変）
 
-- [ ] `index.ts` / `processor.ts` / `resources/` / `util/` を `core/`
+- [x] `index.ts` / `processor.ts` / `resources/` / `util/` を `core/`
       配下へ移動し、内部 import を整理
-- [ ] `Island` / `IslandInstance` 型を導入し、`props` を Instance 側へ移す
-- [ ] `idProvider.ts` を廃止し、specifier
-      からの同期ハッシュ（`core/islandId.ts`）に置換。衝突検出を入れる
-- [ ] `domId` を `${id}-${index}` に（同一ページに同じ島を複数置けるようにする）
-- [ ] 公開 API（`build()` / `startDevServer()`）とビルド出力は変えない
+- [x] `Island` / `IslandInstance` 型を導入し、`props` を Instance 側へ移す
+- [x] `idProvider.ts` を廃止し、specifier から Web Crypto API の SHA-1
+      ハッシュ（`core/islandId.ts`）を生成。アイランド登録時の衝突検出を入れる
+- [x] `domId` を `${id}-${index}` に（同一ページに同じ島を複数置けるようにする）
+- [x] 公開 API（`build()` / `startDevServer()`）とビルド出力は変えない
 
 **完了条件**: 出力 HTML の差分が「island の `id` 属性の値」だけになる。
 
@@ -353,5 +352,5 @@ deno task dev                        # 同上 + routes を編集してリロー�
 - **static island の dev コスト**:
   リクエストごとに実行されるため、`routes/blog/index.tsx` の `fs.walk`
   が毎回走る。遅くなるようなら世代番号でメモ化する。
-- **ハッシュ衝突**: 非暗号ハッシュ 32bit
-  のため理論上は衝突しうる。収集時に検出して失敗させる。
+- **ハッシュ衝突**: SHA-1 ダイジェストを 32bit
+  に短縮するため理論上は衝突しうる。 アイランド登録時に検出して失敗させる。

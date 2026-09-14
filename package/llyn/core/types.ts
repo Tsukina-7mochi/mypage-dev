@@ -3,7 +3,16 @@ import * as pathUtil from "./util/path.ts";
 
 export type Island = {
   id: string;
+  specifier: string;
   url: URL;
+};
+
+export type IslandKind = "client" | "server" | "static";
+
+export type IslandInstance = {
+  island: Island;
+  kind: IslandKind;
+  domId: string;
   props: Record<string, string>;
 };
 

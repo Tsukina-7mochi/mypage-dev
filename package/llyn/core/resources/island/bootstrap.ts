@@ -1,23 +1,23 @@
 import * as path from "@std/path";
-import { Island } from "../../types.ts";
+import { IslandInstance } from "../../types.ts";
 
-function clientIslandBootstrap(island: Island): string {
+function clientIslandBootstrap(instance: IslandInstance): string {
   return `
-import("${island.url}").then(({ default: component }) => {
-  bootstrapClientIsland("${island.id}", component, ${
-    JSON.stringify(island.props)
+import("${instance.island.url}").then(({ default: component }) => {
+  bootstrapClientIsland("${instance.domId}", component, ${
+    JSON.stringify(instance.props)
   })
 });
   `;
 }
 
-function serverIslandBootstrap(island: Island): string {
-  return `bootstrapServerIsland("${island.id}");`;
+function serverIslandBootstrap(instance: IslandInstance): string {
+  return `bootstrapServerIsland("${instance.domId}");`;
 }
 
 export async function renderBootstrap(
-  clientIslands: Island[],
-  serverIslands: Island[],
+  clientIslands: IslandInstance[],
+  serverIslands: IslandInstance[],
 ): Promise<string> {
   const templatePath = path.resolve(
     path.dirname(import.meta.filename ?? ""),

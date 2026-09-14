@@ -3,12 +3,12 @@ import * as esbuild from "esbuild";
 import { denoPlugin } from "@deno/esbuild-plugin";
 import * as path from "@std/path";
 
-import { IdProvider } from "../idProvider.ts";
 import { virtualFilePlugin } from "../esbuildPlugin/virtualFilePlugin.ts";
 import {
   BuildOptions,
   BuildOptionsSchema,
   Island,
+  IslandInstance,
   ParsedBuildOptions,
   ServerOptions,
   ServerOptionSchema,
@@ -39,7 +39,8 @@ async function runBuild(
 
   const sourceFiles: SourceFile[] = [];
   const virtualFiles: VirtualFile[] = [];
-  const serverIslands: Island[] = [];
+  const islands = new Map<string, Island>();
+  const serverIslands: IslandInstance[] = [];
 
   const ctx = createContext({
     dev: !!options.dev,
@@ -47,15 +48,23 @@ async function runBuild(
     root: options.root,
     dist: options.dist,
     staticDist,
-    idProvider: new IdProvider(),
     registerSourceFile(input, output) {
       sourceFiles.push({ in: input, out: output });
     },
     registerVirtualFile(input, output, content) {
       virtualFiles.push({ in: input, out: output, content });
     },
-    registerServerIsland(island) {
-      serverIslands.push(island);
+    registerIsland(island) {
+      const registered = islands.get(island.id);
+      if (registered && registered.specifier !== island.specifier) {
+        throw new Error(
+          `Island ID collision: ${registered.specifier} and ${island.specifier}`,
+        );
+      }
+      islands.set(island.id, island);
+    },
+    registerServerIsland(instance) {
+      serverIslands.push(instance);
     },
   });
 

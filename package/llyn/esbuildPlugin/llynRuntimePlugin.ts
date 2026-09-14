@@ -1,11 +1,11 @@
 import * as esbuild from "esbuild";
-import { Island } from "../core/types.ts";
+import { IslandInstance } from "../core/types.ts";
 import { renderServerRenderer } from "../core/resources/island/serverRenderer.ts";
 
 const namespace = "worker-fetch-island-plugin";
 
 export type PluginOptions = {
-  islands: Island[];
+  islands: IslandInstance[];
 };
 
 export function llynRuntimePlugin(options: PluginOptions): esbuild.Plugin {

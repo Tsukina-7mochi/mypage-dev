@@ -1,30 +1,36 @@
 import React from "react";
-import { Island } from "../../types.ts";
+import { IslandInstance } from "../../types.ts";
 import {
   renderToReadableStream,
   renderToStaticMarkup,
 } from "react-dom/server.edge";
 
-export function prerenderClientIsland(island: Island): Promise<string> {
-  return Promise.resolve(`<div id="${island.id}"></div>`);
+export function prerenderClientIsland(
+  instance: IslandInstance,
+): Promise<string> {
+  return Promise.resolve(`<div id="${instance.domId}"></div>`);
 }
 
-export async function prerenderServerIsland(island: Island): Promise<string> {
-  const module = await import(`${island.url}?prerender=true`);
+export async function prerenderServerIsland(
+  instance: IslandInstance,
+): Promise<string> {
+  const module = await import(`${instance.island.url}?prerender=true`);
   if (!("default" in module)) {
-    throw Error(`No default export in ${island.url.pathname}`);
+    throw Error(`No default export in ${instance.island.url.pathname}`);
   }
-  const element = React.createElement(module.default, island.props);
+  const element = React.createElement(module.default, instance.props);
   const rendered = renderToStaticMarkup(element);
-  return `<div id="${island.id}">${rendered}</div>`;
+  return `<div id="${instance.domId}">${rendered}</div>`;
 }
 
-export async function prerenderStaticIsland(island: Island): Promise<string> {
-  const module = await import(`${island.url}?prerender=true`);
+export async function prerenderStaticIsland(
+  instance: IslandInstance,
+): Promise<string> {
+  const module = await import(`${instance.island.url}?prerender=true`);
   if (!("default" in module)) {
-    throw Error(`No default export in ${island.url.pathname}`);
+    throw Error(`No default export in ${instance.island.url.pathname}`);
   }
-  const element = React.createElement(module.default, island.props);
+  const element = React.createElement(module.default, instance.props);
   const stream = await renderToReadableStream(element);
   await stream.allReady;
 
@@ -33,5 +39,5 @@ export async function prerenderStaticIsland(island: Island): Promise<string> {
     rendered += chunk;
   }
 
-  return `<div id="${island.id}">${rendered}</div>`;
+  return `<div id="${instance.domId}">${rendered}</div>`;
 }

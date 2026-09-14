@@ -5,6 +5,8 @@ import * as parse5Dom from "parse5-dom";
 import * as htmlnano from "htmlnano";
 
 import { Context as ProcessorContext } from "../../processor.ts";
+import { IslandInstance, IslandKind } from "../../types.ts";
+import { generateIslandId } from "../../islandId.ts";
 import {
   getClientIslands,
   getScripts,
@@ -17,6 +19,30 @@ import { decomposeExtension } from "../../util/path.ts";
 import { liveReloadScript } from "./liveReload.ts";
 
 type ParentNode = parse5.DefaultTreeAdapterTypes.ParentNode;
+
+async function createIslandInstance(
+  src: string,
+  props: Record<string, string>,
+  kind: IslandKind,
+  index: number,
+  entryUrl: URL,
+  ctx: ProcessorContext,
+): Promise<IslandInstance> {
+  const url = new URL(src, entryUrl);
+  const specifier = path.relative(
+    path.fromFileUrl(ctx.root),
+    path.fromFileUrl(url),
+  ).replaceAll(path.SEPARATOR, "/");
+  const id = await generateIslandId(specifier);
+  const island = { id, specifier, url };
+  ctx.registerIsland(island);
+  return {
+    island,
+    kind,
+    domId: `${island.id}-${index}`,
+    props,
+  };
+}
 
 export async function htmlNodeProcessor<T extends ParentNode>(
   entryUrl: URL,
@@ -37,38 +63,51 @@ export async function htmlNodeProcessor<T extends ParentNode>(
     path.dirname(entryOutPath),
     bootstrapOutPath,
   );
+  let islandIndex = 0;
 
   const clientIslands = await Promise.all(
     getClientIslands(document).map(async (el) => {
-      const id = ctx.idProvider.generate();
-      const url = new URL(el.src, entryUrl);
-      const island = { id, url, props: el.props };
-
-      const { prerender } = await ctx.process["client-island"](island, ctx);
-      return { island, element: el.element, prerender };
+      const instance = await createIslandInstance(
+        el.src,
+        el.props,
+        "client",
+        islandIndex++,
+        entryUrl,
+        ctx,
+      );
+      const { prerender } = await ctx.process["client-island"](instance, ctx);
+      return { instance, element: el.element, prerender };
     }),
   );
 
   const serverIslands = await Promise.all(
     getServerIslands(document).map(async (el) => {
-      const id = ctx.idProvider.generate();
-      const url = new URL(el.src, entryUrl);
-      const island = { id, url, props: el.props };
-
-      const { prerender } = await ctx.process["server-island"](island, ctx);
-      ctx.registerServerIsland(island);
-      return { island, element: el.element, prerender };
+      const instance = await createIslandInstance(
+        el.src,
+        el.props,
+        "server",
+        islandIndex++,
+        entryUrl,
+        ctx,
+      );
+      const { prerender } = await ctx.process["server-island"](instance, ctx);
+      ctx.registerServerIsland(instance);
+      return { instance, element: el.element, prerender };
     }),
   );
 
   const staticIslands = await Promise.all(
     getStaticIslands(document).map(async (el) => {
-      const id = ctx.idProvider.generate();
-      const url = new URL(el.src, entryUrl);
-      const island = { id, url, props: el.props };
-
-      const { prerender } = await ctx.process["static-island"](island, ctx);
-      return { island, element: el.element, prerender };
+      const instance = await createIslandInstance(
+        el.src,
+        el.props,
+        "static",
+        islandIndex++,
+        entryUrl,
+        ctx,
+      );
+      const { prerender } = await ctx.process["static-island"](instance, ctx);
+      return { instance, element: el.element, prerender };
     }),
   );
 
@@ -117,8 +156,8 @@ export async function htmlNodeProcessor<T extends ParentNode>(
   }
 
   const bootstrapScript = await renderBootstrap(
-    clientIslands.map((i) => i.island),
-    serverIslands.map((i) => i.island),
+    clientIslands.map((i) => i.instance),
+    serverIslands.map((i) => i.instance),
   );
   ctx.registerVirtualFile(
     `${entryPath}.bootstrap.ts`,

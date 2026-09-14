@@ -1,17 +1,19 @@
 import * as path from "@std/path";
-import { Island } from "../../types.ts";
+import { IslandInstance } from "../../types.ts";
 
-function rendererTemplate(island: Island): string {
+function rendererTemplate(instance: IslandInstance): string {
   return `
-import("${island.url}").then(({ default: component }) => {
-  islands["${island.id}"] = React.createElement(component, ${
-    JSON.stringify(island.props)
+import("${instance.island.url}").then(({ default: component }) => {
+  islands["${instance.domId}"] = React.createElement(component, ${
+    JSON.stringify(instance.props)
   });
 });
   `;
 }
 
-export async function renderServerRenderer(islands: Island[]): Promise<string> {
+export async function renderServerRenderer(
+  islands: IslandInstance[],
+): Promise<string> {
   const templatePath = path.resolve(
     path.dirname(import.meta.filename ?? ""),
     "./serverRendererTemplate.ts",

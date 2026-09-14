@@ -4,28 +4,28 @@ import {
   prerenderStaticIsland,
 } from "./prerender.ts";
 import { Context as ProcessorContext } from "../../processor.ts";
-import { Island } from "../../types.ts";
+import { IslandInstance } from "../../types.ts";
 
 export async function clientIslandProcessor(
-  island: Island,
+  instance: IslandInstance,
   _: ProcessorContext,
 ): Promise<{ prerender: string }> {
-  const prerendered = await prerenderClientIsland(island);
+  const prerendered = await prerenderClientIsland(instance);
   return { prerender: prerendered };
 }
 
 export async function serverIslandProcessor(
-  island: Island,
+  instance: IslandInstance,
   _: ProcessorContext,
 ): Promise<{ prerender: string }> {
-  const prerendered = await prerenderServerIsland(island);
+  const prerendered = await prerenderServerIsland(instance);
   return { prerender: prerendered };
 }
 
 export async function staticIslandProcessor(
-  island: Island,
+  instance: IslandInstance,
   _: ProcessorContext,
 ): Promise<{ prerender: string }> {
-  const prerendered = await prerenderStaticIsland(island);
+  const prerendered = await prerenderStaticIsland(instance);
   return { prerender: prerendered };
 }

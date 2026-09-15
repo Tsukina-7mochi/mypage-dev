@@ -6,7 +6,7 @@
   },
   "exclude": ["dist/"],
   "fmt": {
-    "exclude": ["routes/**/*.md"]
+    "exclude": ["docs/**/*.md", "routes/**/*.md"]
   },
   "imports": {
     "@deno/esbuild-plugin": "jsr:@deno/esbuild-plugin@^1.2.1",

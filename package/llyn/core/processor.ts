@@ -1,4 +1,4 @@
-import { Island, IslandInstance } from "./types.ts";
+import { Island } from "./types.ts";
 import {
   htmlFileProcessor,
   htmlNodeProcessor,
@@ -32,7 +32,7 @@ export type Context = {
   registerSourceFile(input: string, output: string): void;
   registerVirtualFile(input: string, output: string, content: string): void;
   registerIsland(island: Island): void;
-  registerServerIsland(instance: IslandInstance): void;
+  registerServerIsland(island: Island): void;
 };
 
 export function createContext(

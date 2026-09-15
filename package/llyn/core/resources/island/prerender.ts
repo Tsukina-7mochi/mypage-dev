@@ -14,11 +14,14 @@ export function prerenderClientIsland(
 export async function prerenderServerIsland(
   instance: IslandInstance,
 ): Promise<string> {
-  const module = await import(`${instance.island.url}?prerender=true`);
+  const module = await import(instance.island.url.href);
   if (!("default" in module)) {
     throw Error(`No default export in ${instance.island.url.pathname}`);
   }
-  const element = React.createElement(module.default, instance.props);
+  const element = React.createElement(module.default, {
+    ...instance.props,
+    _prerender: true,
+  });
   const rendered = renderToStaticMarkup(element);
   return `<div id="${instance.domId}">${rendered}</div>`;
 }
@@ -26,11 +29,14 @@ export async function prerenderServerIsland(
 export async function prerenderStaticIsland(
   instance: IslandInstance,
 ): Promise<string> {
-  const module = await import(`${instance.island.url}?prerender=true`);
+  const module = await import(instance.island.url.href);
   if (!("default" in module)) {
     throw Error(`No default export in ${instance.island.url.pathname}`);
   }
-  const element = React.createElement(module.default, instance.props);
+  const element = React.createElement(module.default, {
+    ...instance.props,
+    _prerender: true,
+  });
   const stream = await renderToReadableStream(element);
   await stream.allReady;
 

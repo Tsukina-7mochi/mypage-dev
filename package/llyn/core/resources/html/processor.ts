@@ -91,7 +91,7 @@ export async function htmlNodeProcessor<T extends ParentNode>(
         ctx,
       );
       const { prerender } = await ctx.process["server-island"](instance, ctx);
-      ctx.registerServerIsland(instance);
+      ctx.registerServerIsland(instance.island);
       return { instance, element: el.element, prerender };
     }),
   );

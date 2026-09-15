@@ -3,13 +3,13 @@ import { Suspense } from "react";
 
 import { type ApiType } from "../src/api/index.ts";
 
-const isPrerender = !!new URL(import.meta.url).searchParams.get("prerender");
 const client = hc<ApiType>("http://localhost:8080/api");
 
 type ContributionHistory = InferResponseType<
   typeof client.contributionHistory.$get,
   200
 >;
+type Props = { _prerender: boolean };
 
 async function fetchContributionHistory(): Promise<ContributionHistory | null> {
   try {
@@ -54,8 +54,8 @@ function ErrorFallback() {
   return <p className="fallback">[Load Failed]</p>;
 }
 
-export default function () {
-  if (isPrerender) {
+export default function ({ _prerender }: Props) {
+  if (_prerender) {
     return <Fallback />;
   }
 

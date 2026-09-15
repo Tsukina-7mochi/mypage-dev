@@ -20,7 +20,10 @@ function getIslandFromElement(element: Element): IslandElement {
   const attrs = Object.fromEntries(
     element.attrs.map((attr) => [attr.name, attr.value]),
   );
-  const { src, type: __, ...props } = attrs;
+  const { src, type: __, ...remainingAttrs } = attrs;
+  const props = Object.fromEntries(
+    Object.entries(remainingAttrs).filter(([name]) => !name.startsWith("_")),
+  );
   return { src, props, element };
 }
 

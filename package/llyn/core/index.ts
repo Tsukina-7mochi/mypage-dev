@@ -8,7 +8,6 @@ import {
   BuildOptions,
   BuildOptionsSchema,
   Island,
-  IslandInstance,
   ParsedBuildOptions,
   ServerOptions,
   ServerOptionSchema,
@@ -40,7 +39,7 @@ async function runBuild(
   const sourceFiles: SourceFile[] = [];
   const virtualFiles: VirtualFile[] = [];
   const islands = new Map<string, Island>();
-  const serverIslands: IslandInstance[] = [];
+  const serverIslands = new Map<string, Island>();
 
   const ctx = createContext({
     dev: !!options.dev,
@@ -63,8 +62,8 @@ async function runBuild(
       }
       islands.set(island.id, island);
     },
-    registerServerIsland(instance) {
-      serverIslands.push(instance);
+    registerServerIsland(island) {
+      serverIslands.set(island.id, island);
     },
   });
 
@@ -113,7 +112,10 @@ async function runBuild(
     outdir: options.dist.pathname,
     format: "esm",
     bundle: true,
-    plugins: [llynRuntimePlugin({ islands: serverIslands }), denoPlugin()],
+    plugins: [
+      llynRuntimePlugin({ islands: [...serverIslands.values()] }),
+      denoPlugin(),
+    ],
     minify: !options.dev,
     sourcemap: options.dev ? "inline" : "linked",
   });

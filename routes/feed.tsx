@@ -4,10 +4,10 @@ import { Suspense } from "react";
 import { type ApiType } from "../src/api/index.ts";
 
 const NUM_FEED_ITEMS = 5;
-const isPrerender = !!new URL(import.meta.url).searchParams.get("prerender");
 const client = hc<ApiType>("http://localhost:8080/api");
 
 type Feed = InferResponseType<typeof client.feed.$get, 200>;
+type Props = { _prerender: boolean };
 
 async function fetchFeed(): Promise<Feed | null> {
   try {
@@ -44,7 +44,7 @@ function ErrorFallback() {
   return <p className="fallback">[Load Failed]</p>;
 }
 
-export default function () {
+export default function ({ _prerender }: Props) {
   return (
     <>
       <hgroup>
@@ -55,7 +55,7 @@ export default function () {
       </hgroup>
 
       <Suspense fallback={<Fallback />}>
-        {isPrerender ? <Fallback /> : <Feed />}
+        {_prerender ? <Fallback /> : <Feed />}
       </Suspense>
       <div className="cosmetic" />
     </>

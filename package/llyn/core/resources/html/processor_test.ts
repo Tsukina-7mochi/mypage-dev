@@ -52,6 +52,6 @@ Deno.test("assigns distinct DOM IDs and props to island instances", async () => 
   assertIncludes(html, `id="${id}-1"`);
   assertIncludes(bootstrap, `bootstrapClientIsland("${id}-0"`);
   assertIncludes(bootstrap, `bootstrapClientIsland("${id}-1"`);
-  assertIncludes(bootstrap, '{"label":"first"}');
-  assertIncludes(bootstrap, '{"label":"second"}');
+  assertIncludes(bootstrap, '{"label":"first","_prerender":false}');
+  assertIncludes(bootstrap, '{"label":"second","_prerender":false}');
 });

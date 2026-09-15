@@ -162,12 +162,12 @@ export default defineConfig({
 
 ### M2. `llyn/runtime` の再定義と worker API 刷新
 
-- [ ] `llyn/runtime` を `isDev`, `serveIsland`, `serveStaticForDev`（この時点では 未実装スタブ）の 3 本に整理し、`renderIsland` は内部化
-- [ ] アイランド描画時に `_prerender` prop を注入する（prerender では `true`、それ以外は `false`）。`_` 始まりの属性を props から除外する
-- [ ] `routes/feed.tsx` / `routes/contributionHistory.tsx` を `_prerender` prop 利用へ書き換え
-- [ ] esbuild plugin を「`llyn/runtime` をモジュールごと差し替える」形に更新
-- [ ] `src/island.ts` を廃止し、`src/main.ts` から `serveIsland` を直接マウント
-- [ ] 生成コードを `switch` + 静的 import 形式にし、server island 以外が worker に入らないことを確認
+- [x] `llyn/runtime` を `isDev`, `serveIsland`, `serveStaticForDev`（この時点では 未実装スタブ）の 3 本に整理し、`renderIsland` は内部化
+- [x] アイランド描画時に `_prerender` prop を注入する（prerender では `true`、それ以外は `false`）。`_` 始まりの属性を props から除外する
+- [x] `routes/feed.tsx` / `routes/contributionHistory.tsx` を `_prerender` prop 利用へ書き換え
+- [x] esbuild plugin を「`llyn/runtime` をモジュールごと差し替える」形に更新
+- [x] `src/island.ts` を廃止し、`src/main.ts` から `serveIsland` を直接マウント
+- [x] 生成コードを `switch` + 静的 import 形式にし、server island 以外が worker に入らないことを確認
 
 **完了条件**: `dist/worker.js` に client/static
 専用アイランドのコードが含まれない （`grep` またはバンドル解析で確認）。

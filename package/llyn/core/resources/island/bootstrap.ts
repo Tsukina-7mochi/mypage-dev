@@ -5,14 +5,16 @@ function clientIslandBootstrap(instance: IslandInstance): string {
   return `
 import("${instance.island.url}").then(({ default: component }) => {
   bootstrapClientIsland("${instance.domId}", component, ${
-    JSON.stringify(instance.props)
+    JSON.stringify({ ...instance.props, _prerender: false })
   })
 });
   `;
 }
 
 function serverIslandBootstrap(instance: IslandInstance): string {
-  return `bootstrapServerIsland("${instance.domId}");`;
+  return `bootstrapServerIsland("${instance.domId}", "${instance.island.id}", ${
+    JSON.stringify(instance.props)
+  });`;
 }
 
 export async function renderBootstrap(

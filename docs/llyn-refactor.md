@@ -174,11 +174,11 @@ export default defineConfig({
 
 ### M3. `llyn.config.ts` と `llyn/build` CLI
 
-- [ ] `core/config.ts`: スキーマ（valibot）、`defineConfig`、cwd からの探索ローダ
-- [ ] `core/collect.ts`: documents / islands の glob 収集（同期版・非同期版）
-- [ ] `llyn/build/main.ts` を CLI 化。収集 → ドキュメント処理 → 使用島の抽出 → 生成 → esbuild
-- [ ] `public` のコピーを build に内蔵
-- [ ] ルートに `llyn.config.ts` を追加し、`build.ts` を削除。`deno.json` の task を更新 （`build`: CLI 実行、`cp` の廃止）
+- [x] `core/config.ts`: スキーマ（valibot）、`defineConfig`、cwd 直下からの設定ローダ
+- [x] `core/collect.ts`: documents / islands の非同期 glob 収集
+- [x] `llyn/build/main.ts` を CLI 化。収集 → ドキュメント処理 → 使用島の抽出 → 生成 → esbuild
+- [x] `public` のコピーを build に内蔵
+- [x] ルートに `llyn.config.ts` を追加し、`build.ts` を削除。`deno.json` の task を更新 （`build`: CLI 実行、`cp` の廃止）
 
 **完了条件**: `deno task build` が `llyn.config.ts` だけを設定源として完結する。
 

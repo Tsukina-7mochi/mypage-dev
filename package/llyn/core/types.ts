@@ -45,6 +45,7 @@ export const DocumentEntrySchema = v.union([
     template: FileUrlSchema,
   }),
 ]);
+export type DocumentEntry = v.InferOutput<typeof DocumentEntrySchema>;
 
 export const BuildOptionsSchema = v.object({
   dev: v.optional(v.boolean(), false),

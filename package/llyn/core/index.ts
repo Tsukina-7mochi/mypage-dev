@@ -224,3 +224,5 @@ export async function startDevServer(
 }
 
 export type { BuildOptions };
+export * from "./collect.ts";
+export * from "./config.ts";

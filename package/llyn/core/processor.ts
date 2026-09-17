@@ -29,6 +29,7 @@ export type Context = {
   dist: URL;
   staticDist: URL;
   process: TProcessors;
+  resolveIsland(url: URL): Promise<Island>;
   registerSourceFile(input: string, output: string): void;
   registerVirtualFile(input: string, output: string, content: string): void;
   registerIsland(island: Island): void;

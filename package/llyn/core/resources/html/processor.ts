@@ -6,7 +6,6 @@ import * as htmlnano from "htmlnano";
 
 import { Context as ProcessorContext } from "../../processor.ts";
 import { IslandInstance, IslandKind } from "../../types.ts";
-import { generateIslandId } from "../../islandId.ts";
 import {
   getClientIslands,
   getScripts,
@@ -29,12 +28,7 @@ async function createIslandInstance(
   ctx: ProcessorContext,
 ): Promise<IslandInstance> {
   const url = new URL(src, entryUrl);
-  const specifier = path.relative(
-    path.fromFileUrl(ctx.root),
-    path.fromFileUrl(url),
-  ).replaceAll(path.SEPARATOR, "/");
-  const id = await generateIslandId(specifier);
-  const island = { id, specifier, url };
+  const island = await ctx.resolveIsland(url);
   ctx.registerIsland(island);
   return {
     island,

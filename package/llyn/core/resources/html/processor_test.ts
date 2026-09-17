@@ -1,6 +1,6 @@
 import * as parse5 from "parse5";
 
-import { generateIslandId } from "../../islandId.ts";
+import { createIsland, generateIslandId } from "../../island.ts";
 import { createContext } from "../../processor.ts";
 import { htmlNodeProcessor } from "./processor.ts";
 
@@ -32,6 +32,9 @@ Deno.test("assigns distinct DOM IDs and props to island instances", async () => 
     root: new URL("file:///site/routes/"),
     dist: new URL("file:///site/dist/"),
     staticDist: new URL("file:///site/dist/static/"),
+    resolveIsland(url) {
+      return createIsland(new URL("file:///site/routes/"), url);
+    },
     registerSourceFile() {},
     registerVirtualFile(_input, _output, content) {
       bootstrap = content;

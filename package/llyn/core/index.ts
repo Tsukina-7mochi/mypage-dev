@@ -14,6 +14,9 @@ import {
 } from "./types.ts";
 import { llynRuntimePlugin } from "../esbuildPlugin/llynRuntimePlugin.ts";
 import { createContext } from "./processor.ts";
+import { createIsland, createIslandResolver } from "./island.ts";
+import { collectDocuments, collectIslandUrls } from "./collect.ts";
+import { ResolvedLlynConfig } from "./config.ts";
 import { DebounceLatestStream, watchFs } from "./util/stream.ts";
 
 type SourceFile = {
@@ -26,13 +29,14 @@ type VirtualFile = {
   content: string;
 };
 
-type InternalOptions = {
+type InternalBuildOptions = {
   liveReload: boolean;
+  resolveIsland?: (url: URL) => Promise<Island>;
 };
 
-async function runBuild(
+async function runBuildWithOptions(
   options: ParsedBuildOptions,
-  internalOptions: InternalOptions,
+  internalOptions: InternalBuildOptions,
 ) {
   const staticDist = new URL("static/", options.dist);
 
@@ -47,6 +51,10 @@ async function runBuild(
     root: options.root,
     dist: options.dist,
     staticDist,
+    resolveIsland(url) {
+      return internalOptions.resolveIsland?.(url) ??
+        createIsland(options.root, url);
+    },
     registerSourceFile(input, output) {
       sourceFiles.push({ in: input, out: output });
     },
@@ -127,9 +135,35 @@ async function runBuild(
   await esbuild.stop();
 }
 
+export async function runBuild(
+  config: ResolvedLlynConfig,
+  options: { dev: boolean; liveReload: boolean },
+): Promise<void> {
+  const [documents, islandUrls] = await Promise.all([
+    collectDocuments(config),
+    collectIslandUrls(config),
+  ]);
+  const islands = await Promise.all(
+    islandUrls.map((url) => createIsland(config.root, url)),
+  );
+
+  await runBuildWithOptions({
+    dev: options.dev,
+    root: config.root,
+    dist: config.dist,
+    entries: {
+      documents,
+      worker: config.worker,
+    },
+  }, {
+    liveReload: options.liveReload,
+    resolveIsland: createIslandResolver(islands),
+  });
+}
+
 export async function build(options: BuildOptions) {
   const parsedOptions = v.parse(BuildOptionsSchema, options);
-  await runBuild(parsedOptions, {
+  await runBuildWithOptions(parsedOptions, {
     liveReload: false,
   });
   console.log("build finished");
@@ -140,6 +174,20 @@ export async function startDevServer(
   serverOptions?: ServerOptions,
 ) {
   const parsedOptions = v.parse(BuildOptionsSchema, options);
+  await startBuildServer(
+    parsedOptions.root,
+    parsedOptions.dist,
+    () => runBuildWithOptions(parsedOptions, { liveReload: true }),
+    serverOptions,
+  );
+}
+
+export async function startBuildServer(
+  root: URL,
+  dist: URL,
+  build: () => Promise<void>,
+  serverOptions?: ServerOptions,
+) {
   const { host: hostname, port } = v.parse(
     ServerOptionSchema,
     serverOptions ?? {},
@@ -150,7 +198,7 @@ export async function startDevServer(
   let ac = new AbortController();
 
   (async () => {
-    const fsStream = watchFs(parsedOptions.root.pathname, {
+    const fsStream = watchFs(root.pathname, {
       recursive: true,
     }).pipeThrough(new DebounceLatestStream(500));
 
@@ -165,7 +213,7 @@ export async function startDevServer(
     ac = new AbortController();
 
     try {
-      await runBuild(parsedOptions, { liveReload: true });
+      await build();
       console.log("build finished");
     } catch (err) {
       console.error("build ended wihth error\n", err);
@@ -190,7 +238,7 @@ export async function startDevServer(
     await server?.shutdown();
 
     const moduleName = path.join(
-      parsedOptions.dist.pathname,
+      dist.pathname,
       `worker.js?${Date.now()}`,
     );
     server = Deno.serve({ hostname, port }, async (req: Request) => {
@@ -226,3 +274,4 @@ export async function startDevServer(
 export type { BuildOptions };
 export * from "./collect.ts";
 export * from "./config.ts";
+export * from "./island.ts";

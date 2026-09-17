@@ -43,6 +43,17 @@ export async function markdownProcessor(
     path.relative(rootPath, filePath),
   ))[0] + ".html";
 
+  const content = await renderMarkdownDocument(file, templateFile, ctx);
+
+  await fs.ensureDir(path.dirname(outPath));
+  await Deno.writeTextFile(outPath, content);
+}
+
+export async function renderMarkdownDocument(
+  file: URL,
+  templateFile: URL,
+  ctx: ProcessorContext,
+): Promise<string> {
   const [rawMarkdownContent, templateContent] = await Promise.all([
     Deno.readTextFile(file),
     Deno.readTextFile(templateFile),
@@ -64,10 +75,7 @@ export async function markdownProcessor(
   if (!main) {
     throw Error("main not found");
   }
-  parse5Dom.appendNodesTo(
-    main,
-    ...markdownDoc.childNodes,
-  );
+  parse5Dom.appendNodesTo(main, ...markdownDoc.childNodes);
 
   const header = parse5Dom.selectOne(templateDoc, { tag: "head" });
   if (!header) {
@@ -87,6 +95,5 @@ export async function markdownProcessor(
     ...parse5.parseFragment(htmlNodes).childNodes,
   );
 
-  await fs.ensureDir(path.dirname(outPath));
-  await Deno.writeTextFile(outPath, parse5.serialize(templateDoc));
+  return parse5.serialize(templateDoc);
 }

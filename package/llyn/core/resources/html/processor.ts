@@ -171,6 +171,16 @@ export async function htmlFileProcessor(
   const staticDistPath = ctx.staticDist.pathname;
   const outPath = path.join(staticDistPath, path.relative(rootPath, filepath));
 
+  const content = await renderHtmlDocument(url, ctx);
+
+  await fs.ensureDir(path.dirname(outPath));
+  await Deno.writeTextFile(outPath, content);
+}
+
+export async function renderHtmlDocument(
+  url: URL,
+  ctx: ProcessorContext,
+): Promise<string> {
   const rawContent = await Deno.readTextFile(url);
   const document = parse5.parse(rawContent);
   await ctx.process["html-node"](url, document, ctx);
@@ -192,6 +202,5 @@ export async function htmlFileProcessor(
     ).html;
   }
 
-  await fs.ensureDir(path.dirname(outPath));
-  await Deno.writeTextFile(outPath, content);
+  return content;
 }

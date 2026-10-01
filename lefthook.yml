@@ -6,7 +6,7 @@ pre-commit:
       glob: "*.{ts,tsx,js,jsx}"
       run: deno check
     fmt:
-      run: deno fmt --check {staged_files}
+      run: deno fmt --check --permit-no-files {staged_files}
     lint:
       glob: "*.{ts,tsx,js,jsx}"
       run: deno lint {staged_files}

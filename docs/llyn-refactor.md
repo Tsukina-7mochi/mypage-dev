@@ -199,9 +199,9 @@ export default defineConfig({
 
 ### M4. アイランド収集の documents 起点化
 
-- [ ] config スキーマから `islands` / `islandsExclude` を削除し、`llyn.config.ts` を更新
-- [ ] documents の script タグからアイランドを収集する。specifier は root からの相対パスを `path.normalize` したもの（区切り文字は `/`）。root 外も制限しない
-- [ ] id の衝突検出を維持する
+- [x] config スキーマから `islands` / `islandsExclude` を削除し、`llyn.config.ts` を更新
+- [x] documents の script タグからアイランドを収集する。specifier は root からの相対パスを `path.normalize` したもの（区切り文字は `/`）。root 外も制限しない
+- [x] id の衝突検出を維持する
 
 **完了条件**: `deno task build` の出力が M3 時点と変わらない。
 

@@ -1,7 +1,7 @@
 import { assertEquals } from "@std/assert";
 import * as path from "@std/path";
 
-import { collectDocuments, collectIslandUrls } from "./collect.ts";
+import { collectDocuments } from "./collect.ts";
 import { ResolvedLlynConfig } from "./config.ts";
 
 let temporaryDirectory: string;
@@ -31,8 +31,6 @@ Deno.test("collects documents matching the configured globs", async () => {
     dist: path.toFileUrl(path.join(temporaryDirectory, "dist")),
     documents: ["**/*.html", "**/*.md", "blog/*.md"],
     documentsExclude: ["**/template.html"],
-    islands: ["**/*.tsx"],
-    islandsExclude: ["components/**/*.tsx"],
     public: path.toFileUrl(path.join(routes, "public")),
     worker: path.toFileUrl(path.join(temporaryDirectory, "src", "main.ts")),
   };
@@ -59,22 +57,5 @@ Deno.test("collects documents matching the configured globs", async () => {
       },
       { type: "html", path: "index.html", template: undefined },
     ],
-  );
-});
-
-Deno.test("collects islands matching the configured globs", async () => {
-  const config: ResolvedLlynConfig = {
-    root: path.toFileUrl(routes),
-    dist: path.toFileUrl(path.join(temporaryDirectory, "dist")),
-    documents: [],
-    documentsExclude: [],
-    islands: ["**/*.tsx"],
-    islandsExclude: ["components/**/*.tsx"],
-    worker: path.toFileUrl(path.join(temporaryDirectory, "src", "main.ts")),
-  };
-  const islandUrls = await collectIslandUrls(config);
-  assertEquals(
-    islandUrls.map((url) => path.relative(routes, path.fromFileUrl(url))),
-    ["feed.tsx"],
   );
 });

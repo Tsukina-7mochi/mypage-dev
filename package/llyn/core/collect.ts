@@ -37,18 +37,3 @@ export async function collectDocuments(
     toDocumentEntry(path.toFileUrl(entry.path))
   );
 }
-
-export async function collectIslandUrls(
-  config: ResolvedLlynConfig,
-): Promise<URL[]> {
-  const entries = await Promise.all(
-    config.islands.map((pattern) =>
-      Array.fromAsync(fs.expandGlob(pattern, {
-        root: path.fromFileUrl(config.root),
-        exclude: config.islandsExclude,
-        includeDirs: false,
-      }))
-    ),
-  );
-  return entries.flat().map((entry) => path.toFileUrl(entry.path));
-}

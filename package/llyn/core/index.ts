@@ -14,8 +14,8 @@ import {
 } from "./types.ts";
 import { llynRuntimePlugin } from "../esbuildPlugin/llynRuntimePlugin.ts";
 import { createContext } from "./processor.ts";
-import { createIsland, createIslandResolver } from "./island.ts";
-import { collectDocuments, collectIslandUrls } from "./collect.ts";
+import { createIsland } from "./island.ts";
+import { collectDocuments } from "./collect.ts";
 import { ResolvedLlynConfig } from "./config.ts";
 import { DebounceLatestStream, watchFs } from "./util/stream.ts";
 
@@ -31,7 +31,6 @@ type VirtualFile = {
 
 type InternalBuildOptions = {
   liveReload: boolean;
-  resolveIsland?: (url: URL) => Promise<Island>;
 };
 
 async function runBuildWithOptions(
@@ -52,8 +51,7 @@ async function runBuildWithOptions(
     dist: options.dist,
     staticDist,
     resolveIsland(url) {
-      return internalOptions.resolveIsland?.(url) ??
-        createIsland(options.root, url);
+      return createIsland(options.root, url);
     },
     registerSourceFile(input, output) {
       sourceFiles.push({ in: input, out: output });
@@ -139,13 +137,7 @@ export async function runBuild(
   config: ResolvedLlynConfig,
   options: { dev: boolean; liveReload: boolean },
 ): Promise<void> {
-  const [documents, islandUrls] = await Promise.all([
-    collectDocuments(config),
-    collectIslandUrls(config),
-  ]);
-  const islands = await Promise.all(
-    islandUrls.map((url) => createIsland(config.root, url)),
-  );
+  const documents = await collectDocuments(config);
 
   await runBuildWithOptions({
     dev: options.dev,
@@ -157,7 +149,6 @@ export async function runBuild(
     },
   }, {
     liveReload: options.liveReload,
-    resolveIsland: createIslandResolver(islands),
   });
 }
 

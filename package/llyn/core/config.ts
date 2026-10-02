@@ -22,8 +22,6 @@ export const LlynConfigSchema = v.object({
   dist: DirectoryUrlSchema,
   documents: v.array(v.string()),
   documentsExclude: v.optional(v.array(v.string()), []),
-  islands: v.array(v.string()),
-  islandsExclude: v.optional(v.array(v.string()), []),
   public: v.optional(DirectoryUrlSchema),
   worker: FileUrlSchema,
 });

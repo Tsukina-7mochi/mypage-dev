@@ -25,8 +25,6 @@ Deno.test("copyPublic copies the configured directory under static", async () =>
     ),
     documents: [],
     documentsExclude: [],
-    islands: [],
-    islandsExclude: [],
     public: path.toFileUrl(publicPath),
     worker: path.toFileUrl(path.join(temporaryDirectory, "src", "main.ts")),
   };

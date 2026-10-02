@@ -18,3 +18,16 @@ export async function createIsland(root: URL, url: URL): Promise<Island> {
     url,
   };
 }
+
+export function uniqueIslands(islands: Island[]): Island[] {
+  const islandsById = islands.reduce((acc, island) => {
+    const registered = acc.get(island.id);
+    if (registered && registered.specifier !== island.specifier) {
+      throw new Error(
+        `Island ID collision: ${registered.specifier} and ${island.specifier}`,
+      );
+    }
+    return registered ? acc : new Map([...acc, [island.id, island]]);
+  }, new Map<string, Island>());
+  return [...islandsById.values()];
+}

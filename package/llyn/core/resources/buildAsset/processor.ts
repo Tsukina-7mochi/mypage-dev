@@ -1,6 +1,6 @@
 import * as path from "@std/path";
 
-import { Context as ProcessorContext } from "../../processor.ts";
+import { Context, SourceFile } from "../../context.ts";
 import { decomposeExtension } from "../../util/path.ts";
 
 const extensionConversion = {
@@ -13,8 +13,8 @@ const extensionConversion = {
 
 export function buildAssetProcessor(
   url: URL,
-  ctx: ProcessorContext,
-): { outFile: URL } {
+  ctx: Context,
+): { outFile: URL; sourceFile: SourceFile } {
   const filepath = url.pathname;
   const rootPath = ctx.root.pathname;
   const staticDistPath = ctx.staticDist.pathname;
@@ -30,7 +30,8 @@ export function buildAssetProcessor(
       extensionConversion[outExt as keyof typeof extensionConversion];
   }
 
-  ctx.registerSourceFile(filepath, outName);
-
-  return { outFile: new URL(`file://${outPath}`) };
+  return {
+    outFile: new URL(`file://${outPath}`),
+    sourceFile: { in: filepath, out: outName },
+  };
 }

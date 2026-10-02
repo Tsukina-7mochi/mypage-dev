@@ -4,7 +4,8 @@ import * as path from "@std/path";
 import * as parse5Dom from "parse5-dom";
 import * as htmlnano from "htmlnano";
 
-import { Context as ProcessorContext } from "../../processor.ts";
+import { Context, DocumentOutput } from "../../context.ts";
+import { createIsland } from "../../island.ts";
 import { IslandInstance, IslandKind } from "../../types.ts";
 import {
   getClientIslands,
@@ -14,6 +15,12 @@ import {
   getStylesheets,
 } from "./helper.ts";
 import { renderBootstrap } from "../island/bootstrap.ts";
+import {
+  prerenderClientIsland,
+  prerenderServerIsland,
+  prerenderStaticIsland,
+} from "../island/prerender.ts";
+import { buildAssetProcessor } from "../buildAsset/processor.ts";
 import { decomposeExtension } from "../../util/path.ts";
 import { liveReloadScript } from "./liveReload.ts";
 
@@ -25,11 +32,9 @@ async function createIslandInstance(
   kind: IslandKind,
   index: number,
   entryUrl: URL,
-  ctx: ProcessorContext,
+  ctx: Context,
 ): Promise<IslandInstance> {
-  const url = new URL(src, entryUrl);
-  const island = await ctx.resolveIsland(url);
-  ctx.registerIsland(island);
+  const island = await createIsland(ctx.root, new URL(src, entryUrl));
   return {
     island,
     kind,
@@ -41,8 +46,8 @@ async function createIslandInstance(
 export async function htmlNodeProcessor<T extends ParentNode>(
   entryUrl: URL,
   document: T,
-  ctx: ProcessorContext,
-): Promise<T> {
+  ctx: Context,
+): Promise<DocumentOutput> {
   const entryPath = entryUrl.pathname;
   const rootPath = ctx.root.pathname;
   const staticDistPath = ctx.staticDist.pathname;
@@ -69,7 +74,7 @@ export async function htmlNodeProcessor<T extends ParentNode>(
         entryUrl,
         ctx,
       );
-      const { prerender } = await ctx.process["client-island"](instance, ctx);
+      const prerender = await prerenderClientIsland(instance);
       return { instance, element: el.element, prerender };
     }),
   );
@@ -84,8 +89,7 @@ export async function htmlNodeProcessor<T extends ParentNode>(
         entryUrl,
         ctx,
       );
-      const { prerender } = await ctx.process["server-island"](instance, ctx);
-      ctx.registerServerIsland(instance.island);
+      const prerender = await prerenderServerIsland(instance);
       return { instance, element: el.element, prerender };
     }),
   );
@@ -100,23 +104,23 @@ export async function htmlNodeProcessor<T extends ParentNode>(
         entryUrl,
         ctx,
       );
-      const { prerender } = await ctx.process["static-island"](instance, ctx);
+      const prerender = await prerenderStaticIsland(instance);
       return { instance, element: el.element, prerender };
     }),
   );
 
   const scripts = getScripts(document).map((el) => {
     const url = new URL(el.path, entryUrl);
-    const { outFile } = ctx.process["build-asset"](url, ctx);
+    const { outFile, sourceFile } = buildAssetProcessor(url, ctx);
     const newSrc = "/" + path.relative(staticDistPath, outFile.pathname);
-    return { element: el.element, newSrc };
+    return { element: el.element, newSrc, sourceFile };
   });
 
   const stylesheets = getStylesheets(document).map((el) => {
     const url = new URL(el.path, entryUrl);
-    const { outFile } = ctx.process["build-asset"](url, ctx);
+    const { outFile, sourceFile } = buildAssetProcessor(url, ctx);
     const newHref = "/" + path.relative(staticDistPath, outFile.pathname);
-    return { element: el.element, newHref };
+    return { element: el.element, newHref, sourceFile };
   });
 
   for (const island of clientIslands) {
@@ -155,25 +159,30 @@ export async function htmlNodeProcessor<T extends ParentNode>(
     );
   }
 
-  if (hasRuntimeIslands) {
-    const bootstrapScript = await renderBootstrap(
-      clientIslands.map((i) => i.instance),
-      serverIslands.map((i) => i.instance),
-    );
-    ctx.registerVirtualFile(
-      `${entryPath}.bootstrap.ts`,
-      bootstrapOutName,
-      bootstrapScript,
-    );
-  }
+  const virtualFiles = hasRuntimeIslands
+    ? [{
+      in: `${entryPath}.bootstrap.ts`,
+      out: bootstrapOutName,
+      content: await renderBootstrap(
+        clientIslands.map((i) => i.instance),
+        serverIslands.map((i) => i.instance),
+      ),
+    }]
+    : [];
 
-  return document;
+  return {
+    sourceFiles: [...scripts, ...stylesheets].map((asset) => asset.sourceFile),
+    virtualFiles,
+    islands: [...clientIslands, ...serverIslands, ...staticIslands].map(
+      (island) => island.instance,
+    ),
+  };
 }
 
 export async function htmlFileProcessor(
   url: URL,
-  ctx: ProcessorContext,
-): Promise<void> {
+  ctx: Context,
+): Promise<DocumentOutput> {
   const filepath = url.pathname;
   const rootPath = ctx.root.pathname;
   const staticDistPath = ctx.staticDist.pathname;
@@ -181,7 +190,7 @@ export async function htmlFileProcessor(
 
   const rawContent = await Deno.readTextFile(url);
   const document = parse5.parse(rawContent);
-  await ctx.process["html-node"](url, document, ctx);
+  const output = await htmlNodeProcessor(url, document, ctx);
   let content = parse5.serialize(document);
 
   if (!ctx.dev) {
@@ -202,4 +211,6 @@ export async function htmlFileProcessor(
 
   await fs.ensureDir(path.dirname(outPath));
   await Deno.writeTextFile(outPath, content);
+
+  return output;
 }

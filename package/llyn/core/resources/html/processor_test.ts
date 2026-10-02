@@ -1,7 +1,6 @@
 import * as parse5 from "parse5";
 
-import { createIsland, generateIslandId } from "../../island.ts";
-import { createContext } from "../../processor.ts";
+import { generateIslandId } from "../../island.ts";
 import { htmlNodeProcessor } from "./processor.ts";
 
 function assertIncludes(actual: string, expected: string): void {
@@ -25,29 +24,17 @@ Deno.test("assigns distinct DOM IDs and props to island instances", async () => 
       label="second"
     ></script>
   `);
-  let bootstrap = "";
-  const ctx = createContext({
-    dev: true,
-    liveReload: false,
-    root: new URL("file:///site/routes/"),
-    dist: new URL("file:///site/dist/"),
-    staticDist: new URL("file:///site/dist/static/"),
-    resolveIsland(url) {
-      return createIsland(new URL("file:///site/routes/"), url);
-    },
-    registerSourceFile() {},
-    registerVirtualFile(_input, _output, content) {
-      bootstrap = content;
-    },
-    registerIsland() {},
-    registerServerIsland() {},
-  });
-
-  await htmlNodeProcessor(
+  const { virtualFiles } = await htmlNodeProcessor(
     new URL("file:///site/routes/index.html"),
     document,
-    ctx,
+    {
+      dev: true,
+      liveReload: false,
+      root: new URL("file:///site/routes/"),
+      staticDist: new URL("file:///site/dist/static/"),
+    },
   );
+  const bootstrap = virtualFiles[0].content;
 
   const id = await generateIslandId("counter.tsx");
   const html = parse5.serialize(document);

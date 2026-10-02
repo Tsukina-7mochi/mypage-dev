@@ -113,9 +113,11 @@ the next change.
 ### Build flow
 
 1. `runBuild(config, options)` (`core/index.ts`) collects documents
-   (`core/collect.ts`) and creates a `Context` (`core/processor.ts`).
-2. Documents flow through the HTML / Markdown processors, which register source
-   files, virtual files (page bootstraps), islands, and server islands.
+   (`core/collect.ts`) and creates a `Context` (`core/context.ts`).
+2. Documents flow through the HTML / Markdown processors, which call the island
+   prerenderers and the build asset processor directly. Each processor returns a
+   `DocumentOutput` (source files, virtual files for page bootstraps, and island
+   instances), and `runBuild` merges them and checks island id collisions.
 3. esbuild bundles client code into `dist/static/` (ESM, code splitting into
    `chunks/`). When `worker` is enabled, it also bundles the worker entry into
    `dist/worker.js` with the generated runtime.
@@ -129,7 +131,7 @@ the next change.
   - `config.ts`: config schema, `defineConfig`, `loadConfig`
   - `collect.ts`: document collection
   - `island.ts`: island id and `createIsland`
-  - `processor.ts`: `Context` and processor dispatch map
+  - `context.ts`: `Context` and `DocumentOutput`
   - `types.ts`: `Island`, `IslandInstance`, frontmatter, document entries
   - `resources/html/processor.ts`: island prerender, DOM rewrite, bootstrap
   - `resources/html/helper.ts`: DOM queries for islands, scripts, styles

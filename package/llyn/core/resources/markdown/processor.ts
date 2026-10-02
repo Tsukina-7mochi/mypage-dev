@@ -6,7 +6,12 @@ import * as parse5 from "parse5";
 import * as path from "@std/path";
 import * as fs from "@std/fs";
 
-import { Context as ProcessorContext } from "../../processor.ts";
+import {
+  Context,
+  DocumentOutput,
+  mergeDocumentOutputs,
+} from "../../context.ts";
+import { htmlNodeProcessor } from "../html/processor.ts";
 import { Frontmatter, FrontmatterSchema } from "../../types.ts";
 import { decomposeExtension } from "../../util/path.ts";
 
@@ -33,8 +38,8 @@ async function parseDocument(content: string): Promise<MarkdownDocument> {
 export async function markdownProcessor(
   file: URL,
   templateFile: URL,
-  ctx: ProcessorContext,
-): Promise<void> {
+  ctx: Context,
+): Promise<DocumentOutput> {
   const filePath = file.pathname;
   const rootPath = ctx.root.pathname;
   const staticDistPath = ctx.staticDist.pathname;
@@ -57,8 +62,10 @@ export async function markdownProcessor(
   const markdownDoc = parse5.parse(markdownContent);
   const templateDoc = parse5.parse(templateContent);
 
-  await ctx.process["html-node"](file, markdownDoc, ctx);
-  await ctx.process["html-node"](templateFile, templateDoc, ctx);
+  const outputs = await Promise.all([
+    htmlNodeProcessor(file, markdownDoc, ctx),
+    htmlNodeProcessor(templateFile, templateDoc, ctx),
+  ]);
 
   const main = parse5Dom.selectOne(templateDoc, { tag: "main" });
   if (!main) {
@@ -89,4 +96,6 @@ export async function markdownProcessor(
 
   await fs.ensureDir(path.dirname(outPath));
   await Deno.writeTextFile(outPath, parse5.serialize(templateDoc));
+
+  return mergeDocumentOutputs(outputs);
 }

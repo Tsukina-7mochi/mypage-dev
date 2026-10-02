@@ -4,20 +4,12 @@ import { denoPlugin } from "@deno/esbuild-plugin";
 import { virtualFilePlugin } from "../esbuildPlugin/virtualFilePlugin.ts";
 import { DocumentEntry, Island } from "./types.ts";
 import { llynRuntimePlugin } from "../esbuildPlugin/llynRuntimePlugin.ts";
-import { createContext } from "./processor.ts";
-import { createIsland } from "./island.ts";
+import { Context, DocumentOutput, mergeDocumentOutputs } from "./context.ts";
+import { htmlFileProcessor } from "./resources/html/processor.ts";
+import { markdownProcessor } from "./resources/markdown/processor.ts";
+import { uniqueIslands } from "./island.ts";
 import { collectDocuments } from "./collect.ts";
 import { ResolvedLlynConfig } from "./config.ts";
-
-type SourceFile = {
-  in: string;
-  out: string;
-};
-type VirtualFile = {
-  in: string;
-  out: string;
-  content: string;
-};
 
 type BuildOptions = {
   dev: boolean;
@@ -29,55 +21,47 @@ type BuildOptions = {
   workerEntry: URL;
 };
 
+function processDocument(
+  entry: DocumentEntry,
+  ctx: Context,
+): Promise<DocumentOutput> {
+  switch (entry.type) {
+    case "html":
+      return htmlFileProcessor(entry.path, ctx);
+    case "markdown":
+      return markdownProcessor(entry.path, entry.template, ctx);
+    default:
+      throw Error(
+        `Unknown entry type: ${JSON.stringify(entry satisfies never)}`,
+      );
+  }
+}
+
 async function runBuildWithOptions(
   options: BuildOptions,
 ): Promise<Island[]> {
   const staticDist = new URL("static/", options.dist);
 
-  const sourceFiles: SourceFile[] = [];
-  const virtualFiles: VirtualFile[] = [];
-  const islands = new Map<string, Island>();
-  const serverIslands = new Map<string, Island>();
-
-  const ctx = createContext({
+  const ctx: Context = {
     dev: options.dev,
     liveReload: options.liveReload,
     root: options.root,
-    dist: options.dist,
     staticDist,
-    resolveIsland(url) {
-      return createIsland(options.root, url);
-    },
-    registerSourceFile(input, output) {
-      sourceFiles.push({ in: input, out: output });
-    },
-    registerVirtualFile(input, output, content) {
-      virtualFiles.push({ in: input, out: output, content });
-    },
-    registerIsland(island) {
-      const registered = islands.get(island.id);
-      if (registered && registered.specifier !== island.specifier) {
-        throw new Error(
-          `Island ID collision: ${registered.specifier} and ${island.specifier}`,
-        );
-      }
-      islands.set(island.id, island);
-    },
-    registerServerIsland(island) {
-      serverIslands.set(island.id, island);
-    },
-  });
+  };
 
-  await Promise.all(
-    options.documents.map(async (entry) => {
-      if (entry.type === "html") {
-        await ctx.process["html"](entry.path, ctx);
-      } else if (entry.type === "markdown") {
-        await ctx.process["markdown"](entry.path, entry.template, ctx);
-      } else {
-        throw Error(`Unknown entry type: ${JSON.stringify(entry)}`);
-      }
-    }),
+  const { sourceFiles, virtualFiles, islands } = mergeDocumentOutputs(
+    await Promise.all(
+      options.documents.map((entry) => processDocument(entry, ctx)),
+    ),
+  );
+  const allIslands = uniqueIslands(islands.map((instance) => instance.island));
+  const serverIslandIds = new Set(
+    islands
+      .filter((instance) => instance.kind === "server")
+      .map((instance) => instance.island.id),
+  );
+  const serverIslandList = allIslands.filter((island) =>
+    serverIslandIds.has(island.id)
   );
 
   const clientContext = await esbuild.context({
@@ -109,7 +93,6 @@ async function runBuildWithOptions(
     sourcemap: options.dev ? "inline" : "linked",
   });
 
-  const serverIslandList = [...serverIslands.values()];
   const serverContext = options.worker
     ? await esbuild.context({
       entryPoints: [{ in: options.workerEntry.pathname, out: "worker" }],

@@ -20,9 +20,10 @@ export const FrontmatterSchema = v.object({
   createdAt: v.date(),
   updatedAt: v.date(),
   og: v.optional(v.record(v.string(), v.string())),
+  template: v.optional(v.string(), "template.html"),
 });
 export type Frontmatter = v.InferOutput<typeof FrontmatterSchema>;
 
 export type DocumentEntry =
   | { type: "html"; path: URL }
-  | { type: "markdown"; path: URL; template: URL };
+  | { type: "markdown"; path: URL };

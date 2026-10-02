@@ -47,8 +47,9 @@ documents are included in the bundle.
 - css: `<link rel="stylesheet">`
 
 Markdown frontmatter is written in YAML and inserted into the HTML according to
-its keys. A Markdown document uses `template.html` in the same directory. See
-`core/types.ts` for the supported keys.
+its keys. A Markdown document uses the template given by the `template`
+frontmatter key (a path relative to the document), defaulting to
+`template.html`. See `core/types.ts` for the supported keys.
 
 ### Islands
 

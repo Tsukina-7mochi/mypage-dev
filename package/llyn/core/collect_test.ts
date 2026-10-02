@@ -40,22 +40,11 @@ Deno.test("collects documents matching the configured globs", async () => {
     documents.map((entry) => ({
       type: entry.type,
       path: path.relative(routes, path.fromFileUrl(entry.path)),
-      template: entry.type === "markdown"
-        ? path.relative(routes, path.fromFileUrl(entry.template))
-        : undefined,
     })).toSorted((a, b) => a.path.localeCompare(b.path)),
     [
-      {
-        type: "markdown",
-        path: "blog/post.md",
-        template: "blog/template.html",
-      },
-      {
-        type: "markdown",
-        path: "blog/post.md",
-        template: "blog/template.html",
-      },
-      { type: "html", path: "index.html", template: undefined },
+      { type: "markdown", path: "blog/post.md" },
+      { type: "markdown", path: "blog/post.md" },
+      { type: "html", path: "index.html" },
     ],
   );
 });

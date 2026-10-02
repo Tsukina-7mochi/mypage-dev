@@ -9,11 +9,7 @@ function toDocumentEntry(file: URL): DocumentEntry {
     case ".html":
       return { type: "html", path: file };
     case ".md":
-      return {
-        type: "markdown",
-        path: file,
-        template: new URL("template.html", file),
-      };
+      return { type: "markdown", path: file };
     default:
       throw new Error(`Unsupported document extension: ${file.pathname}`);
   }

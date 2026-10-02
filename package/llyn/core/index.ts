@@ -29,7 +29,7 @@ function processDocument(
     case "html":
       return htmlFileProcessor(entry.path, ctx);
     case "markdown":
-      return markdownProcessor(entry.path, entry.template, ctx);
+      return markdownProcessor(entry.path, ctx);
     default:
       throw Error(
         `Unknown entry type: ${JSON.stringify(entry satisfies never)}`,

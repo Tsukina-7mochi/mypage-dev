@@ -37,7 +37,6 @@ async function parseDocument(content: string): Promise<MarkdownDocument> {
 
 export async function markdownProcessor(
   file: URL,
-  templateFile: URL,
   ctx: Context,
 ): Promise<DocumentOutput> {
   const filePath = file.pathname;
@@ -48,16 +47,14 @@ export async function markdownProcessor(
     path.relative(rootPath, filePath),
   ))[0] + ".html";
 
-  const [rawMarkdownContent, templateContent] = await Promise.all([
-    Deno.readTextFile(file),
-    Deno.readTextFile(templateFile),
-  ]);
   const { body: markdownContent, frontmatter } = await parseDocument(
-    rawMarkdownContent,
+    await Deno.readTextFile(file),
   );
   if (!frontmatter) {
     throw Error("Frontmatter is required");
   }
+  const templateFile = new URL(frontmatter.template, file);
+  const templateContent = await Deno.readTextFile(templateFile);
 
   const markdownDoc = parse5.parse(markdownContent);
   const templateDoc = parse5.parse(templateContent);

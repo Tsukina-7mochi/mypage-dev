@@ -1,0 +1,59 @@
+import { assertStringIncludes } from "@std/assert";
+import * as path from "@std/path";
+
+import { markdownProcessor } from "./processor.ts";
+
+const template = (marker: string) =>
+  `<html><head></head><body><main data-template="${marker}"></main></body></html>`;
+
+async function buildPost(frontmatterTemplate?: string): Promise<string> {
+  const directory = await Deno.makeTempDir();
+  try {
+    const routes = path.join(directory, "routes");
+    await Deno.mkdir(path.join(routes, "layouts"), { recursive: true });
+    await Deno.writeTextFile(
+      path.join(routes, "template.html"),
+      template("default"),
+    );
+    await Deno.writeTextFile(
+      path.join(routes, "layouts", "custom.html"),
+      template("custom"),
+    );
+    await Deno.writeTextFile(
+      path.join(routes, "post.md"),
+      [
+        "---",
+        "title: Post",
+        "createdAt: 2026-01-01",
+        "updatedAt: 2026-01-01",
+        ...(frontmatterTemplate ? [`template: ${frontmatterTemplate}`] : []),
+        "---",
+        "body",
+      ].join("\n"),
+    );
+
+    const root = path.toFileUrl(routes + "/");
+    await markdownProcessor(new URL("post.md", root), {
+      dev: true,
+      liveReload: false,
+      root,
+      staticDist: path.toFileUrl(path.join(directory, "dist", "static") + "/"),
+    });
+    return await Deno.readTextFile(
+      path.join(directory, "dist", "static", "post.html"),
+    );
+  } finally {
+    await Deno.remove(directory, { recursive: true });
+  }
+}
+
+Deno.test("markdown uses template.html by default", async () => {
+  assertStringIncludes(await buildPost(), 'data-template="default"');
+});
+
+Deno.test("markdown uses the template given in frontmatter", async () => {
+  assertStringIncludes(
+    await buildPost("./layouts/custom.html"),
+    'data-template="custom"',
+  );
+});

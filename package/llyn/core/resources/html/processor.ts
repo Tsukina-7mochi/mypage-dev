@@ -133,15 +133,21 @@ export async function htmlNodeProcessor<T extends ParentNode>(
   }
   for (const script of scripts) {
     parse5Dom.setAttribute(script.element, "src", script.newSrc);
+    parse5Dom.setAttribute(script.element, "type", "module");
   }
   for (const stylesheet of stylesheets) {
     parse5Dom.setAttribute(stylesheet.element, "href", stylesheet.newHref);
   }
-  parse5Dom.appendNodesTo(
-    document,
-    ...parse5.parseFragment(`<script src="${bootstrapSrc}"></script>`)
-      .childNodes,
-  );
+  const hasRuntimeIslands = clientIslands.length > 0 ||
+    serverIslands.length > 0;
+  if (hasRuntimeIslands) {
+    parse5Dom.appendNodesTo(
+      document,
+      ...parse5.parseFragment(
+        `<script type="module" src="${bootstrapSrc}"></script>`,
+      ).childNodes,
+    );
+  }
   if (ctx.liveReload) {
     parse5Dom.appendNodesTo(
       document,
@@ -149,15 +155,17 @@ export async function htmlNodeProcessor<T extends ParentNode>(
     );
   }
 
-  const bootstrapScript = await renderBootstrap(
-    clientIslands.map((i) => i.instance),
-    serverIslands.map((i) => i.instance),
-  );
-  ctx.registerVirtualFile(
-    `${entryPath}.bootstrap.ts`,
-    bootstrapOutName,
-    bootstrapScript,
-  );
+  if (hasRuntimeIslands) {
+    const bootstrapScript = await renderBootstrap(
+      clientIslands.map((i) => i.instance),
+      serverIslands.map((i) => i.instance),
+    );
+    ctx.registerVirtualFile(
+      `${entryPath}.bootstrap.ts`,
+      bootstrapOutName,
+      bootstrapScript,
+    );
+  }
 
   return document;
 }

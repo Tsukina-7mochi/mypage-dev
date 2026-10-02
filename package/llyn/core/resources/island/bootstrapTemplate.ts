@@ -9,16 +9,15 @@ function bootstrapClientIsland(
   component: React.ComponentType<Props & { _prerender: false }>,
   props: Props & { _prerender: false },
 ) {
-  const element = document.getElementById(id);
-  if (!element) throw Error(`Element ${id} is not found`);
+  try {
+    const element = document.getElementById(id);
+    if (!element) throw Error(`Element ${id} is not found`);
 
-  const reactElement = React.createElement(component, props);
-  const root = createRoot(element);
-  root.render(reactElement);
-  (async () => {})().catch((err) => {
+    createRoot(element).render(React.createElement(component, props));
+  } catch (err) {
     const error = new Error(`Failed to bootstrap island ${id}`, { cause: err });
     console.error(error);
-  });
+  }
 }
 
 // deno-lint-ignore no-unused-vars -- Called by generated server-island bootstrap code.

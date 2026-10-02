@@ -4,9 +4,7 @@ import * as path from "@std/path";
 import { ResolvedLlynConfig } from "./config.ts";
 import { DocumentEntry } from "./types.ts";
 
-export type CollectedDocumentEntry = Exclude<DocumentEntry, URL>;
-
-function toDocumentEntry(file: URL): CollectedDocumentEntry {
+function toDocumentEntry(file: URL): DocumentEntry {
   switch (path.extname(file.pathname)) {
     case ".html":
       return { type: "html", path: file };
@@ -23,7 +21,7 @@ function toDocumentEntry(file: URL): CollectedDocumentEntry {
 
 export async function collectDocuments(
   config: ResolvedLlynConfig,
-): Promise<CollectedDocumentEntry[]> {
+): Promise<DocumentEntry[]> {
   const entries = await Promise.all(
     config.documents.map((pattern) =>
       Array.fromAsync(fs.expandGlob(pattern, {

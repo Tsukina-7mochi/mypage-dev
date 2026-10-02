@@ -22,7 +22,7 @@
     "hono": "jsr:@hono/hono@^4.12.24",
     "hono/": "jsr:/@hono/hono@^4.12.24/",
     "htmlnano": "npm:htmlnano@^3.3.0",
-    "llyn": "./package/llyn/index.ts",
+    "llyn/core": "./package/llyn/core/index.ts",
     "llyn/runtime": "./package/llyn/runtime/index.ts",
     "marked": "npm:marked@15.0.12",
     "parse5": "npm:parse5@^8.0.0",

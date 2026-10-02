@@ -220,10 +220,10 @@ export default defineConfig({
 
 ### M6. 仕上げ
 
-- [ ] ページ単位 bootstrap を静的 import + code splitting に切り替え
-- [ ] 旧 API（`build()` / `BuildOptions`）と旧ファイルを削除
-- [ ] `package/llyn/readme.md` を新設計で全面改訂、`AGENTS.md` / `readme.md` を更新
-- [ ] 本番バンドルに dev 依存（parse5 / marked / esbuild / 設定）が入っていないことを最終確認
+- [x] ページ単位 bootstrap を静的 import + code splitting に切り替え
+- [x] 旧 API（`build()` / `BuildOptions`）と旧ファイルを削除
+- [x] `package/llyn/readme.md` を新設計で全面改訂、`AGENTS.md` / `readme.md` を更新
+- [x] 本番バンドルに dev 依存（parse5 / marked / esbuild / 設定）が入っていないことを最終確認
 
 ---
 

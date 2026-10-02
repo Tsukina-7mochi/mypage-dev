@@ -1,14 +1,20 @@
 import * as path from "@std/path";
 import { IslandInstance } from "../../types.ts";
 
+function islandIdentifier(instance: IslandInstance): string {
+  return `Island_${instance.island.id}`;
+}
+
+function clientIslandImport(instance: IslandInstance): string {
+  return `import ${islandIdentifier(instance)} from ${
+    JSON.stringify(instance.island.url.href)
+  };`;
+}
+
 function clientIslandBootstrap(instance: IslandInstance): string {
-  return `
-import("${instance.island.url}").then(({ default: component }) => {
-  bootstrapClientIsland("${instance.domId}", component, ${
-    JSON.stringify({ ...instance.props, _prerender: false })
-  })
-});
-  `;
+  return `bootstrapClientIsland("${instance.domId}", ${
+    islandIdentifier(instance)
+  }, ${JSON.stringify({ ...instance.props, _prerender: false })});`;
 }
 
 function serverIslandBootstrap(instance: IslandInstance): string {
@@ -27,7 +33,12 @@ export async function renderBootstrap(
   );
   const template = await Deno.readTextFile(templatePath);
 
+  const imports = [
+    ...new Map(clientIslands.map((i) => [i.island.id, i])).values(),
+  ].map(clientIslandImport);
+
   return [
+    ...imports,
     template,
     ...clientIslands.map(clientIslandBootstrap),
     ...serverIslands.map(serverIslandBootstrap),

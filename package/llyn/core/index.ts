@@ -1,14 +1,8 @@
-import * as v from "valibot";
 import * as esbuild from "esbuild";
 import { denoPlugin } from "@deno/esbuild-plugin";
 
 import { virtualFilePlugin } from "../esbuildPlugin/virtualFilePlugin.ts";
-import {
-  BuildOptions,
-  BuildOptionsSchema,
-  Island,
-  ParsedBuildOptions,
-} from "./types.ts";
+import { DocumentEntry, Island } from "./types.ts";
 import { llynRuntimePlugin } from "../esbuildPlugin/llynRuntimePlugin.ts";
 import { createContext } from "./processor.ts";
 import { createIsland } from "./island.ts";
@@ -25,14 +19,18 @@ type VirtualFile = {
   content: string;
 };
 
-type InternalBuildOptions = {
+type BuildOptions = {
+  dev: boolean;
   liveReload: boolean;
   worker: boolean;
+  root: URL;
+  dist: URL;
+  documents: DocumentEntry[];
+  workerEntry: URL;
 };
 
 async function runBuildWithOptions(
-  options: ParsedBuildOptions,
-  internalOptions: InternalBuildOptions,
+  options: BuildOptions,
 ): Promise<Island[]> {
   const staticDist = new URL("static/", options.dist);
 
@@ -42,8 +40,8 @@ async function runBuildWithOptions(
   const serverIslands = new Map<string, Island>();
 
   const ctx = createContext({
-    dev: !!options.dev,
-    liveReload: internalOptions.liveReload,
+    dev: options.dev,
+    liveReload: options.liveReload,
     root: options.root,
     dist: options.dist,
     staticDist,
@@ -71,10 +69,8 @@ async function runBuildWithOptions(
   });
 
   await Promise.all(
-    options.entries.documents.map(async (entry) => {
-      if (entry instanceof URL) {
-        await ctx.process["html"](entry, ctx);
-      } else if (entry.type === "html") {
+    options.documents.map(async (entry) => {
+      if (entry.type === "html") {
         await ctx.process["html"](entry.path, ctx);
       } else if (entry.type === "markdown") {
         await ctx.process["markdown"](entry.path, entry.template, ctx);
@@ -91,7 +87,10 @@ async function runBuildWithOptions(
     ],
     outdir: staticDist.pathname,
     platform: "browser",
+    format: "esm",
     bundle: true,
+    splitting: true,
+    chunkNames: "chunks/[name]-[hash]",
     plugins: [
       virtualFilePlugin({
         files: Object.fromEntries(virtualFiles.map((f) => [f.in, f.content])),
@@ -111,9 +110,9 @@ async function runBuildWithOptions(
   });
 
   const serverIslandList = [...serverIslands.values()];
-  const serverContext = internalOptions.worker
+  const serverContext = options.worker
     ? await esbuild.context({
-      entryPoints: [{ in: options.entries.worker.pathname, out: "worker" }],
+      entryPoints: [{ in: options.workerEntry.pathname, out: "worker" }],
       outdir: options.dist.pathname,
       format: "esm",
       bundle: true,
@@ -142,29 +141,14 @@ export async function runBuild(
   const documents = await collectDocuments(config);
 
   return await runBuildWithOptions({
-    dev: options.dev,
+    ...options,
     root: config.root,
     dist: config.dist,
-    entries: {
-      documents,
-      worker: config.worker,
-    },
-  }, {
-    liveReload: options.liveReload,
-    worker: options.worker,
+    documents,
+    workerEntry: config.worker,
   });
 }
 
-export async function build(options: BuildOptions) {
-  const parsedOptions = v.parse(BuildOptionsSchema, options);
-  await runBuildWithOptions(parsedOptions, {
-    liveReload: false,
-    worker: true,
-  });
-  console.log("build finished");
-}
-
-export type { BuildOptions };
 export * from "./collect.ts";
 export * from "./config.ts";
 export * from "./island.ts";

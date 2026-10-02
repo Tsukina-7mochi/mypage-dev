@@ -1,4 +1,4 @@
-import { defineConfig } from "llyn";
+import { defineConfig } from "llyn/core";
 
 export default defineConfig({
   root: "./routes",

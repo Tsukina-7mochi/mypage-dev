@@ -1,162 +1,149 @@
 # Llyn
 
 Llyn is a website build framework based on island architecture. Llyn is designed
-to minimize client code and response time. Additionally, Llyn is built on Deno
-and configured to be deployed on Cloudflare Workers.
+to minimize client code and response time. Llyn is built on Deno and configured
+to be deployed on Cloudflare Workers.
 
 ## Usage
 
-Execute a build using `build(options)`. Start the development server using
-`startDevServer(options, serverOptions)`. The development server provides
-rebuilds upon change detection and live reloading. Please refer to `./types.ts`
-for options.
+### Configuration
+
+Llyn reads `llyn.config.ts` (or `.js` / `.mjs`) from the current directory.
+
+```ts
+import { defineConfig } from "llyn/core";
+
+export default defineConfig({
+  root: "./routes",
+  dist: "./dist",
+  documents: ["**/*.html", "**/*.md"],
+  documentsExclude: ["**/template.html"],
+  public: "./routes/public",
+  worker: "./src/main.ts",
+});
+```
+
+- `root`: base directory of documents and island specifiers
+- `dist`: output directory
+- `documents` / `documentsExclude`: globs relative to `root`
+- `public`: directory copied to `dist/static/<basename>/` (optional)
+- `worker`: server entry point
+
+### Build
+
+Run `package/llyn/build/main.ts` to build for production. It processes documents
+into `dist/static/`, bundles client code with code splitting, and bundles the
+worker entry into `dist/worker.js`.
 
 ### Documents
 
-Llyn's entry points are documents, namely HTML and Markdown. Resources
-referenced by documents are automatically included in the bundle. The list of
-resources is as follows:
+Documents (HTML and Markdown) are the entry points. Resources referenced by
+documents are included in the bundle.
 
-- client island: JavaScript/TypeScript/JSX/TSX files loaded via
-  `<script type="application/client-island">`
-- server island: JavaScript/TypeScript/JSX/TSX files loaded via
-  `<script type="application/server-island">`
-- static island: JavaScript/TypeScript/JSX/TSX files loaded via
-  `<script type="application/static-island">`
-- scripts: JavaScript/TypeScript/JSX/TSX files loaded via `<script>` elements
-  with a regular `type`
-- css: CSS files loaded via `<link rel="stylesheet">`
+- client island: `<script type="application/client-island" src>`
+- server island: `<script type="application/server-island" src>`
+- static island: `<script type="application/static-island" src>`
+- scripts: `<script src>` with a regular `type` (emitted as ES modules)
+- css: `<link rel="stylesheet">`
 
-Markdown frontmatter is written in YAML and is dynamically inserted into the
-HTML according to the keys, rather than using placeholders. Please refer to
-types.ts for the supported keys.
-
-### Worker
-
-Another entry point for Llyn is the Web Worker. When the `llyn/runtime` module
-is referenced from Worker code, dynamically generated code is embedded at build
-time. The `renderIsland` function receives the server island ID and returns the
-rendered HTML. The request path must be `/_island/${id}`.
+Markdown frontmatter is written in YAML and inserted into the HTML according to
+its keys. A Markdown document uses `template.html` in the same directory. See
+`core/types.ts` for the supported keys.
 
 ### Islands
 
-Llyn has multiple island types with different characteristics.
+Islands are collected from the script tags of documents; they are not listed in
+the configuration. The island id is the first 8 hex digits of the SHA-1 of its
+specifier (the normalized path relative to `root`, separated by `/`). Islands
+outside `root` are allowed. An id collision raises an error.
 
-- client island: It is prerendered at build time, and the prelude is embedded
-  instead of a `<script>` tag. At runtime, it is hydrated on the client using
-  `hydrateRoot`.
-- server island: It is rendered via `renderToStaticMarkup` at build time and
-  embedded instead of a `<script>` tag. In the server runtime, it is rendered
-  into an HTML string using `renderToReadableStream`. In the client runtime, it
-  is fetched lazily after the page loads and replaced with the returned content.
-  You can embed fallback content at build time by using `<Suspense>`.
-- static island: It is rendered via `renderToReadableStream` at build time
-  (waiting for `stream.allReady`, so async components are supported) and
-  embedded instead of a `<script>` tag. Unlike client and server islands, the
-  rendered markup is never hydrated or re-fetched at runtime; it ships as plain
-  HTML with no bootstrap code and no worker-side `renderIsland` entry.
+The remaining attributes of a script tag become string props. Attribute names
+starting with `_` are reserved and are not passed as props. Every island
+receives `_prerender: boolean`, which is `true` only during prerendering.
 
-> [!NOTE]
-> Llyn does not have server-side rendering in the sense of React. Llyn's server
-> islands are "lazy static islands." By combining Llyn's server islands, client
-> islands, and static content, you can clearly separate the roles assumed by
-> SSR.
+- client island: prerendered at build time and hydrated on the client. Props are
+  embedded in the page bootstrap.
+- server island: rendered at build time as a fallback, then fetched from
+  `/_islands/<id>?<props>` after the page loads.
+- static island: rendered at build time (async components are supported) and
+  never hydrated or fetched.
+
+### Runtime
+
+The server code imports `llyn/runtime`. The same code runs in dev and prod.
+
+```ts
+import { serveIsland, serveLiveReload, startDevBuild } from "llyn/runtime";
+
+const ctx = await startDevBuild();
+
+const app = new Hono()
+  .all("/_islands/*", (c) => serveIsland(c.req.raw, ctx))
+  .get("/__reload", (c) => serveLiveReload(c.req.raw, ctx));
+```
+
+- `startDevBuild()`: in dev, runs a full client build with live reload and
+  returns a `DevContext`. In prod, returns `undefined`.
+- `serveIsland(req, ctx)`: renders a server island.
+- `serveLiveReload(req, ctx)`: in dev, sends the boot id over SSE. In prod,
+  returns 404.
+
+`DevContext.staticDir` is the absolute path of `dist/static/` in dev. In prod,
+resolve static files from the bundled worker location instead.
+
+### Dev server
+
+Run the server entry with `deno serve --watch=<root>,llyn.config.ts`. Any change
+restarts the process, which rebuilds once at startup. The live reload client
+keeps the first boot id and reloads the page when a different one arrives after
+reconnecting. A failed build exits the process; `deno serve --watch` waits for
+the next change.
 
 ## For Developers
 
-This section is a minimal index for navigating the implementation when making
-changes. It is not exhaustive; read the referenced files for details.
+### Package boundaries
+
+- `runtime/`: `llyn/runtime`. The dev implementation lives here. In prod builds
+  `esbuildPlugin/llynRuntimePlugin.ts` replaces the whole module with generated
+  code, so no build dependency is bundled into the worker.
+- `build/`: production build CLI and `copyPublic`.
+- `core/`: config loading, document collection, document processing, island id,
+  prerender, and code generation.
 
 ### Build flow
 
-1. `build()` / `startDevServer()` (`index.ts`) parse options with valibot, then
-   call `runBuild()`.
-2. `runBuild()` creates a `Context` (`processor.ts`) holding shared state plus
-   three registration callbacks: `registerSourceFile`, `registerVirtualFile`,
-   and `registerServerIsland`. The `Context.process` map dispatches work to the
-   per-resource processors.
-3. Each document entry is processed: `html` and `markdown` documents flow
-   through their processors, which walk the parse5 DOM and, as a side effect,
-   register source files, virtual files, and server islands on the context.
-4. Two esbuild contexts then run in parallel:
-   - client: bundles registered source files and virtual files into
-     `dist/static/` (browser platform).
-   - server: bundles the worker entry into `dist/worker.js`, with
-     `llynRuntimePlugin` replacing the `llyn/runtime` import with generated
-     code.
-5. Dev mode adds an FS watcher (debounced) that re-runs the build and pushes a
-   reload event over SSE at `/__reload`; the worker is served via dynamic
-   import.
+1. `runBuild(config, options)` (`core/index.ts`) collects documents
+   (`core/collect.ts`) and creates a `Context` (`core/processor.ts`).
+2. Documents flow through the HTML / Markdown processors, which register source
+   files, virtual files (page bootstraps), islands, and server islands.
+3. esbuild bundles client code into `dist/static/` (ESM, code splitting into
+   `chunks/`). When `worker` is enabled, it also bundles the worker entry into
+   `dist/worker.js` with the generated runtime.
+4. `runBuild` returns the server islands, which `startDevBuild` turns into
+   `DevContext`.
 
-### Resource processing
+### Key files
 
-- HTML (`resources/html/processor.ts`): `htmlFileProcessor` reads, parses,
-  delegates to `htmlNodeProcessor`, serializes, minifies (prod only), writes.
-  `htmlNodeProcessor` is the core: it locates islands / scripts / stylesheets
-  (`resources/html/helper.ts`), prerenders islands, rewrites the DOM, appends
-  the bootstrap script, and registers a virtual bootstrap file.
-- Markdown (`resources/markdown/processor.ts`): parses YAML frontmatter, renders
-  the body with `marked`, runs both body and template through `html-node`, then
-  injects the body into `<main>` and the title into `<head>`.
-- Build assets (`resources/buildAsset/processor.ts`): maps script/CSS URLs to
-  output paths, normalizes source extensions to `.js`, and registers them as
-  esbuild source files.
-
-### Islands
-
-- `resources/island/prerender.ts`: imports the island module, builds a React
-  element. Client islands are wrapped in a `<div id>` for later hydration;
-  server islands use `renderToStaticMarkup`; static islands use
-  `renderToReadableStream` (awaiting `stream.allReady`) so async components are
-  supported, and are never hydrated or fetched at runtime.
-- `resources/island/bootstrap.ts` (+ `bootstrapTemplate.ts`): emits the
-  client-side script that hydrates client islands and lazily fetches server
-  islands from `/_islands/:id`.
-- `resources/island/serverRenderer.ts` (+ `serverRendererTemplate.ts`): emits
-  the worker-side `renderIsland` registry that `llynRuntimePlugin` injects in
-  place of `llyn/runtime`.
-
-### Directory layout
-
-- `index.ts`: build orchestration and dev server.
-- `processor.ts`: `Context` type and the resource-type to processor map.
-- `types.ts`: option schemas (valibot) and the `Island` type.
-- `idProvider.ts`: island id generation.
-- `resources/`: per-resource processors (the work units dispatched by Context).
-- `esbuildPlugin/`: esbuild plugins for virtual files and the worker runtime.
-- `runtime/`: the `llyn/runtime` module surface (build-time stub; real code is
-  injected at build time).
-- `util/`: path helpers and the FS-watch / debounce streams.
-
-### Tree (key files)
-
-```
-- llyn/
-  - index.ts                     build() / startDevServer() / runBuild()
-  - processor.ts                 Context type + processor dispatch map
-  - types.ts                     option schemas + Island type
-  - idProvider.ts
-  - esbuildPlugin/
-    - llynRuntimePlugin.ts       injects server renderer for llyn/runtime
-    - virtualFilePlugin.ts       serves in-memory virtual files
-  - resources/
-    - html/
-      - processor.ts             htmlFileProcessor / htmlNodeProcessor (core)
-      - helper.ts                DOM queries for islands/scripts/styles
-      - liveReload.ts
-    - markdown/
-      - processor.ts             frontmatter + marked + template merge
-    - island/
-      - processor.ts             thin prerender wrappers
-      - prerender.ts             React prerender: client / static markup (server) / stream (static)
-      - bootstrap.ts             client bootstrap script generation
-      - serverRenderer.ts        worker renderIsland registry generation
-    - buildAsset/
-      - processor.ts             script/css output mapping
-  - runtime/
-    - index.ts                   re-exports renderIsland
-    - renderIsland.ts            build-time stub
-  - util/
-    - path.ts                    extension / file-URL helpers
-    - stream.ts                  watchFs + DebounceLatestStream
-```
+- `core/`
+  - `index.ts`: `runBuild`
+  - `config.ts`: config schema, `defineConfig`, `loadConfig`
+  - `collect.ts`: document collection
+  - `island.ts`: island id and `createIsland`
+  - `processor.ts`: `Context` and processor dispatch map
+  - `types.ts`: `Island`, `IslandInstance`, frontmatter, document entries
+  - `resources/html/processor.ts`: island prerender, DOM rewrite, bootstrap
+  - `resources/html/helper.ts`: DOM queries for islands, scripts, styles
+  - `resources/html/liveReload.ts`: live reload client script
+  - `resources/markdown/processor.ts`: frontmatter, marked, template merge
+  - `resources/island/prerender.ts`: React prerender per island kind
+  - `resources/island/bootstrap.ts`: page bootstrap with static imports
+  - `resources/island/serverRenderer.ts`: prod `llyn/runtime` generation
+  - `resources/buildAsset/processor.ts`: script / css output mapping
+- `esbuildPlugin/`
+  - `llynRuntimePlugin.ts`: replaces `llyn/runtime` with generated code
+  - `virtualFilePlugin.ts`: serves in-memory virtual files
+- `runtime/`
+  - `index.ts`: dev `startDevBuild` / `serveIsland` / `serveLiveReload`
+  - `render.ts`: island response rendering
+  - `devContext.ts`: `DevContext`
+- `build/main.ts`: production build CLI

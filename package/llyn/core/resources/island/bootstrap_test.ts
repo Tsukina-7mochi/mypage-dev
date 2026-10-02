@@ -26,7 +26,8 @@ Deno.test("bootstrap passes runtime props and separates DOM and island IDs", asy
   );
 
   const expectations = [
-    'bootstrapClientIsland("1234abcd-0", component, {"label":"hello world","_prerender":false})',
+    'import Island_1234abcd from "file:///site/routes/counter.tsx";',
+    'bootstrapClientIsland("1234abcd-0", Island_1234abcd, {"label":"hello world","_prerender":false})',
     'bootstrapServerIsland("1234abcd-1", "1234abcd", {"label":"hello world"})',
     "new URLSearchParams(props).toString()",
     '`/_islands/${islandId}${search ? `?${search}` : ""}`',

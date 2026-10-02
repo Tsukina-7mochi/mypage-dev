@@ -5,29 +5,33 @@ framework written in Deno and targeting Cloudflare Workers.
 
 ## Commands
 
-- `deno task build`: build for production
-- `deno task dev`: start dev server
-- `deno task server`: serve the production dist
+- `deno task build`: build for production (`dist/worker.js` and `dist/static/`)
+- `deno task dev`: run `src/main.ts` on `deno serve --watch` with a dev build
+- `deno task serve`: serve the production dist
 - `deno task clean`: clean dist
 - `deno check`: run type checker
 - `deno fmt`: run formatter
 
 ## Architecture
 
-- `src/`: site source
+- `routes/`: site documents and islands (Llyn `root`)
   - `blog/`: blog contents (`*.md`) and templates (`.html`)
   - `index.html`: main page
-  - `common.css`: common css file
-  - `worker.ts`: worker entry point
+  - `*.tsx`: islands referenced from documents
+  - `public/`: files copied to `dist/static/public/`
+- `src/`: server code
+  - `main.ts`: worker entry point
+  - `api/`: API routes
+  - `static.ts`: static file route for Deno
 - `package/`: internal packages
   - `llyn`: island-architecture web framework
   - `parse5-dom`: dom manipulation tool for parse5
-- `build.ts`: build entry
+- `llyn.config.ts`: Llyn configuration
 - `deno.json`: deno manifest file
-- `dist/`: build output directory
+- `dist/`: build output directory (deployed)
   - `worker.js`: worker entry
   - `static/`: static assets
 
 ## Resources
 
-- See @./package/llyn/readme.md when editing files in `src/`.
+- See @./package/llyn/readme.md when editing files in `routes/` or `src/`.

@@ -1,5 +1,4 @@
 import * as v from "valibot";
-import * as pathUtil from "./util/path.ts";
 
 export type Island = {
   id: string;
@@ -24,38 +23,6 @@ export const FrontmatterSchema = v.object({
 });
 export type Frontmatter = v.InferOutput<typeof FrontmatterSchema>;
 
-const FileUrlSchema = v.pipe(
-  v.string(),
-  v.transform(pathUtil.toFileUrl),
-);
-const DirectoryFileUrlSchema = v.pipe(
-  v.string(),
-  v.transform(pathUtil.toDirectoryFileUrl),
-);
-
-export const DocumentEntrySchema = v.union([
-  FileUrlSchema,
-  v.object({
-    type: v.literal("html"),
-    path: FileUrlSchema,
-  }),
-  v.object({
-    type: v.literal("markdown"),
-    path: FileUrlSchema,
-    template: FileUrlSchema,
-  }),
-]);
-export type DocumentEntry = v.InferOutput<typeof DocumentEntrySchema>;
-
-export const BuildOptionsSchema = v.object({
-  dev: v.optional(v.boolean(), false),
-  entries: v.object({
-    documents: v.array(DocumentEntrySchema),
-    worker: FileUrlSchema,
-  }),
-  root: DirectoryFileUrlSchema,
-  dist: DirectoryFileUrlSchema,
-});
-
-export type BuildOptions = v.InferInput<typeof BuildOptionsSchema>;
-export type ParsedBuildOptions = v.InferOutput<typeof BuildOptionsSchema>;
+export type DocumentEntry =
+  | { type: "html"; path: URL }
+  | { type: "markdown"; path: URL; template: URL };

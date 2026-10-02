@@ -145,7 +145,9 @@ the next change.
   - `llynRuntimePlugin.ts`: replaces `llyn/runtime` with generated code
   - `virtualFilePlugin.ts`: serves in-memory virtual files
 - `runtime/`
-  - `index.ts`: dev `startDevBuild` / `serveIsland` / `serveLiveReload`
-  - `render.ts`: island response rendering
+  - `index.ts`: re-exports (one exported function per file)
+  - `startDevBuild.ts`: dev build and `DevContext` creation
+  - `serveIsland.ts`: dev server island rendering
+  - `serveLiveReload.ts`: boot id over SSE
   - `devContext.ts`: `DevContext`
 - `build/main.ts`: production build CLI

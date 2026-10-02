@@ -1,7 +1,9 @@
 import React from "react";
 import { renderToReadableStream } from "react-dom/server.edge";
 
-export function renderIslandResponse(
+import { DevContext } from "./devContext.ts";
+
+function renderIslandResponse(
   component: React.ElementType,
   props: Record<string, string | boolean>,
 ): Response {
@@ -22,7 +24,7 @@ export function renderIslandResponse(
   });
 }
 
-export function parseIslandRequest(
+function parseIslandRequest(
   req: Request,
 ): { id: string; props: Record<string, string | boolean> } {
   const url = new URL(req.url);
@@ -30,4 +32,20 @@ export function parseIslandRequest(
     id: url.pathname.slice(url.pathname.lastIndexOf("/") + 1),
     props: { ...Object.fromEntries(url.searchParams), _prerender: false },
   };
+}
+
+export async function serveIsland(
+  req: Request,
+  ctx?: DevContext,
+): Promise<Response> {
+  if (!ctx) {
+    throw new Error("serveIsland requires the context from startDevBuild");
+  }
+  const { id, props } = parseIslandRequest(req);
+  const url = ctx.islands.get(id);
+  if (!url) {
+    return new Response("Not Found", { status: 404 });
+  }
+  const module = await import(url.href);
+  return renderIslandResponse(module.default, props);
 }

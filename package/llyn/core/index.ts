@@ -11,14 +11,10 @@ import { uniqueIslands } from "./island.ts";
 import { collectDocuments } from "./collect.ts";
 import { ResolvedLlynConfig } from "./config.ts";
 
-type BuildOptions = {
+export type BuildOptions = {
   dev: boolean;
   liveReload: boolean;
   worker: boolean;
-  root: URL;
-  dist: URL;
-  documents: DocumentEntry[];
-  workerEntry: URL;
 };
 
 function processDocument(
@@ -37,21 +33,24 @@ function processDocument(
   }
 }
 
-async function runBuildWithOptions(
+export async function runBuild(
+  config: ResolvedLlynConfig,
   options: BuildOptions,
 ): Promise<Island[]> {
-  const staticDist = new URL("static/", options.dist);
+  const staticDist = new URL("static/", config.dist);
 
   const ctx: Context = {
     dev: options.dev,
     liveReload: options.liveReload,
-    root: options.root,
+    root: config.root,
     staticDist,
   };
 
   const { sourceFiles, virtualFiles, islands } = mergeDocumentOutputs(
     await Promise.all(
-      options.documents.map((entry) => processDocument(entry, ctx)),
+      (await collectDocuments(config)).map((entry) =>
+        processDocument(entry, ctx)
+      ),
     ),
   );
   const allIslands = uniqueIslands(islands.map((instance) => instance.island));
@@ -95,8 +94,8 @@ async function runBuildWithOptions(
 
   const serverContext = options.worker
     ? await esbuild.context({
-      entryPoints: [{ in: options.workerEntry.pathname, out: "worker" }],
-      outdir: options.dist.pathname,
+      entryPoints: [{ in: config.worker.pathname, out: "worker" }],
+      outdir: config.dist.pathname,
       format: "esm",
       bundle: true,
       plugins: [
@@ -115,21 +114,6 @@ async function runBuildWithOptions(
   await esbuild.stop();
 
   return serverIslandList;
-}
-
-export async function runBuild(
-  config: ResolvedLlynConfig,
-  options: { dev: boolean; liveReload: boolean; worker: boolean },
-): Promise<Island[]> {
-  const documents = await collectDocuments(config);
-
-  return await runBuildWithOptions({
-    ...options,
-    root: config.root,
-    dist: config.dist,
-    documents,
-    workerEntry: config.worker,
-  });
 }
 
 export * from "./collect.ts";

@@ -207,14 +207,14 @@ export default defineConfig({
 
 ### M5. dev ランタイム
 
-- [ ] `llyn/runtime` から `isDev` / `serveStaticForDev` を削除し、`startDevBuild` / `serveLiveReload` を追加。prod の置き換えはそれぞれ `async () => undefined` / 404 を返す関数
-- [ ] `startDevBuild`: `loadConfig()`、client のみの dev フルビルド（ライブリロードスクリプト注入）、`DevContext` を返す。失敗時は例外をそのまま投げる
-- [ ] `serveIsland(req, ctx)` の dev 実装: `ctx` からソースを引き、動的 import して描画
-- [ ] `serveLiveReload`: 起動 ID を SSE で送る。クライアントスクリプトを起動 ID 比較方式に更新
-- [ ] `src/main.ts` を `await startDevBuild()` 利用に更新し、`deno task dev` を `deno serve --watch=routes/ ... src/main.ts` に変更
-- [ ] 旧 dev 基盤を削除（`startBuildServer`、`llyn/build` CLI の `--dev`、`core/util/stream.ts`、core の `startDevServer`）
-- [ ] `--watch=<paths>` がモジュールグラフに加えて指定パスも監視することを確認
-- [ ] prod の worker に残る top-level の `await startDevBuild()` が Cloudflare Workers で問題ないことを確認
+- [x] `llyn/runtime` から `isDev` / `serveStaticForDev` を削除し、`startDevBuild` / `serveLiveReload` を追加。prod の置き換えはそれぞれ `async () => undefined` / 404 を返す関数
+- [x] `startDevBuild`: `loadConfig()`、client のみの dev フルビルド（ライブリロードスクリプト注入）、`DevContext` を返す。失敗時は例外をそのまま投げる
+- [x] `serveIsland(req, ctx)` の dev 実装: `ctx` からソースを引き、動的 import して描画
+- [x] `serveLiveReload`: 起動 ID を SSE で送る。クライアントスクリプトを起動 ID 比較方式に更新
+- [x] `src/main.ts` を `await startDevBuild()` 利用に更新し、`deno task dev` を `deno serve --watch=routes/ ... src/main.ts` に変更
+- [x] 旧 dev 基盤を削除（`startBuildServer`、`llyn/build` CLI の `--dev`、`core/util/stream.ts`、core の `startDevServer`）
+- [x] `--watch=<paths>` がモジュールグラフに加えて指定パスも監視することを確認
+- [x] prod の worker に残る top-level の `await startDevBuild()` が Cloudflare Workers で問題ないことを確認
 
 **完了条件**: `deno task dev` が `deno serve` で起動し、`routes/**` の編集がブラウザに自動反映される。ビルド失敗時も修正後に復帰する。
 

@@ -16,7 +16,7 @@ function importTemplate(island: Island): string {
 
 function switchCaseTemplate(island: Island): string {
   return `    case ${JSON.stringify(island.id)}:
-      return render(${islandIdentifier(island)}, props);`;
+      return Promise.resolve(render(${islandIdentifier(island)}, props));`;
 }
 
 export async function renderServerRenderer(

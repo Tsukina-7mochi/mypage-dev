@@ -32,11 +32,14 @@ Deno.test("generated serveIsland renders query props and handles unknown IDs", a
   }`;
   const runtime = await import(moduleUrl);
 
-  if (runtime.isDev !== false) {
-    throw new Error("Generated runtime must set isDev to false");
+  if (await runtime.startDevBuild() !== undefined) {
+    throw new Error("Generated startDevBuild must resolve to undefined");
+  }
+  if (runtime.serveLiveReload().status !== 404) {
+    throw new Error("Generated serveLiveReload must return Not Found");
   }
 
-  const response = runtime.serveIsland(
+  const response = await runtime.serveIsland(
     new Request(
       "https://example.test/_islands/1234abcd?label=runtime&_prerender=true",
     ),
@@ -49,7 +52,7 @@ Deno.test("generated serveIsland renders query props and handles unknown IDs", a
     throw new Error(`Unexpected render body: ${body}`);
   }
 
-  const notFound = runtime.serveIsland(
+  const notFound = await runtime.serveIsland(
     new Request("https://example.test/_islands/ffffffff"),
   );
   if (notFound.status !== 404 || await notFound.text() !== "Not Found") {

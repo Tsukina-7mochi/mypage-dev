@@ -2,7 +2,9 @@ import React from "react";
 import { renderToReadableStream } from "react-dom/server.edge";
 /*{ llyn-imports }*/
 
-export const isDev = false;
+export const startDevBuild = () => Promise.resolve(undefined);
+
+export const serveLiveReload = () => new Response("Not Found", { status: 404 });
 
 // deno-lint-ignore no-unused-vars -- Used by generated switch cases.
 function render(
@@ -25,7 +27,7 @@ function render(
   });
 }
 
-export function serveIsland(req: Request): Response {
+export function serveIsland(req: Request): Promise<Response> {
   const url = new URL(req.url);
   const id = url.pathname.slice(url.pathname.lastIndexOf("/") + 1);
   // deno-lint-ignore no-unused-vars -- Used by generated switch cases.
@@ -37,10 +39,6 @@ export function serveIsland(req: Request): Response {
   switch (id) {
     /*{ llyn-switch-cases }*/
     default:
-      return new Response("Not Found", { status: 404 });
+      return Promise.resolve(new Response("Not Found", { status: 404 }));
   }
-}
-
-export function serveStaticForDev(_req: Request): Response {
-  throw new Error("serveStaticForDev is not available in production");
 }

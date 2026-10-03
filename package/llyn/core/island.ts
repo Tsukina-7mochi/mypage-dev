@@ -1,6 +1,19 @@
 import * as path from "@std/path";
 
-import { Island } from "./types.ts";
+export type Island = {
+  id: string;
+  specifier: string;
+  url: URL;
+};
+
+export type IslandKind = "client" | "server" | "static";
+
+export type IslandInstance = {
+  island: Island;
+  kind: IslandKind;
+  domId: string;
+  props: Record<string, string>;
+};
 
 export async function generateIslandId(specifier: string): Promise<string> {
   const input = new TextEncoder().encode(specifier);

@@ -1,5 +1,5 @@
 import * as path from "@std/path";
-import { IslandInstance } from "../../types.ts";
+import { IslandInstance } from "../../island.ts";
 
 function islandIdentifier(instance: IslandInstance): string {
   return `Island_${instance.island.id}`;

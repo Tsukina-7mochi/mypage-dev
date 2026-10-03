@@ -1,5 +1,5 @@
 import * as path from "@std/path";
-import { Island } from "../types.ts";
+import { Island } from "../island.ts";
 
 const IMPORTS_MARKER = "/*{ llyn-imports }*/";
 const SWITCH_CASES_MARKER = "/*{ llyn-switch-cases }*/";

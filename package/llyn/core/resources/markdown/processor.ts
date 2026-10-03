@@ -9,7 +9,7 @@ import * as fs from "@std/fs";
 import { Context } from "../../context.ts";
 import { DocumentOutput, mergeDocumentOutputs } from "../../documentOutput.ts";
 import { htmlNodeProcessor } from "../html/processor.ts";
-import { Frontmatter, FrontmatterSchema } from "../../types.ts";
+import { Frontmatter, FrontmatterSchema } from "./frontmatter.ts";
 import { decomposeExtension } from "../../util/path.ts";
 
 marked.use({ async: true, gfm: true });

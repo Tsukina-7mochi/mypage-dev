@@ -2,15 +2,14 @@ import * as esbuild from "esbuild";
 import { denoPlugin } from "@deno/esbuild-plugin";
 
 import { virtualFilePlugin } from "./esbuildPlugin/virtualFilePlugin.ts";
-import { DocumentEntry, Island } from "./types.ts";
 import { llynRuntimePlugin } from "./esbuildPlugin/llynRuntimePlugin.ts";
 import { dataUrlPlugin } from "./esbuildPlugin/dataUrlPlugin.ts";
 import { Context } from "./context.ts";
 import { DocumentOutput, mergeDocumentOutputs } from "./documentOutput.ts";
 import { htmlFileProcessor } from "./resources/html/processor.ts";
 import { markdownProcessor } from "./resources/markdown/processor.ts";
-import { uniqueIslands } from "./island.ts";
-import { collectDocuments } from "./collect.ts";
+import { Island, uniqueIslands } from "./island.ts";
+import { collectDocuments, DocumentEntry } from "./collect.ts";
 import { ResolvedLlynConfig } from "./config.ts";
 import { copyPublic } from "./copyPublic.ts";
 

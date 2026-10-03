@@ -1,4 +1,4 @@
-import { IslandInstance } from "./types.ts";
+import { IslandInstance } from "./island.ts";
 
 export type SourceFile = {
   in: string;

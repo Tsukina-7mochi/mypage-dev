@@ -6,8 +6,7 @@ import * as htmlnano from "htmlnano";
 
 import { Context } from "../../context.ts";
 import { DocumentOutput } from "../../documentOutput.ts";
-import { createIsland } from "../../island.ts";
-import { IslandInstance, IslandKind } from "../../types.ts";
+import { createIsland, IslandInstance, IslandKind } from "../../island.ts";
 import {
   getClientIslands,
   getScripts,

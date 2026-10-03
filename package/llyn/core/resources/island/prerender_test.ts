@@ -1,4 +1,4 @@
-import { IslandInstance } from "../../types.ts";
+import { IslandInstance } from "../../island.ts";
 import { prerenderServerIsland, prerenderStaticIsland } from "./prerender.ts";
 
 const instance: IslandInstance = {

@@ -1,4 +1,4 @@
-import { Island } from "../types.ts";
+import { Island } from "../island.ts";
 import { renderServerRenderer } from "./serverRenderer.ts";
 
 const island: Island = {

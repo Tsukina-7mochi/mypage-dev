@@ -1,5 +1,5 @@
 import React from "react";
-import { IslandInstance } from "../../types.ts";
+import { IslandInstance } from "../../island.ts";
 import {
   renderToReadableStream,
   renderToStaticMarkup,

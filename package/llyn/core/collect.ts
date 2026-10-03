@@ -2,7 +2,10 @@ import * as fs from "@std/fs";
 import * as path from "@std/path";
 
 import { ResolvedLlynConfig } from "./config.ts";
-import { DocumentEntry } from "./types.ts";
+
+export type DocumentEntry =
+  | { type: "html"; path: URL }
+  | { type: "markdown"; path: URL };
 
 function toDocumentEntry(file: URL): DocumentEntry {
   switch (path.extname(file.pathname)) {

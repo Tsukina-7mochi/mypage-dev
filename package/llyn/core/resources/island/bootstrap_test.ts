@@ -1,4 +1,4 @@
-import { Island, IslandInstance } from "../../types.ts";
+import { Island, IslandInstance } from "../../island.ts";
 import { renderBootstrap } from "./bootstrap.ts";
 
 const island: Island = {

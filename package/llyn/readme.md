@@ -49,7 +49,8 @@ documents are included in the bundle.
 Markdown frontmatter is written in YAML and inserted into the HTML according to
 its keys. A Markdown document uses the template given by the `template`
 frontmatter key (a path relative to the document), defaulting to
-`template.html`. See `core/types.ts` for the supported keys.
+`template.html`. See `core/resources/markdown/frontmatter.ts` for the supported
+keys.
 
 ### Islands
 
@@ -131,16 +132,16 @@ the next change.
   - `index.ts`: `runBuild`
   - `main.ts`: production build CLI
   - `config.ts`: config schema, `defineConfig`, `loadConfig`
-  - `collect.ts`: document collection
+  - `collect.ts`: document collection and `DocumentEntry`
   - `copyPublic.ts`: copies `public` under `dist/static/`
-  - `island.ts`: island id and `createIsland`
+  - `island.ts`: `Island`, `IslandInstance`, island id and `createIsland`
   - `context.ts`: `Context`
   - `documentOutput.ts`: `DocumentOutput` and `mergeDocumentOutputs`
-  - `types.ts`: `Island`, `IslandInstance`, frontmatter, document entries
   - `resources/html/processor.ts`: island prerender, DOM rewrite, bootstrap
   - `resources/html/helper.ts`: DOM queries for islands, scripts, styles
   - `resources/html/liveReload.ts`: live reload client script
   - `resources/markdown/processor.ts`: frontmatter, marked, template merge
+  - `resources/markdown/frontmatter.ts`: frontmatter schema
   - `resources/island/prerender.ts`: React prerender per island kind
   - `resources/island/bootstrap.ts`: page bootstrap with static imports
   - `resources/buildAsset/processor.ts`: script / css output mapping

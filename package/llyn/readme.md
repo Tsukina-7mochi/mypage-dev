@@ -31,7 +31,7 @@ export default defineConfig({
 
 ### Build
 
-Run `package/llyn/build/main.ts` to build for production. It processes documents
+Run `package/llyn/core/main.ts` to build for production. It processes documents
 into `dist/static/`, bundles client code with code splitting, and bundles the
 worker entry into `dist/worker.js`.
 
@@ -107,9 +107,8 @@ the next change.
 - `runtime/`: `llyn/runtime`. The dev implementation lives here. In prod builds
   `core/esbuildPlugin/llynRuntimePlugin.ts` replaces the whole module with
   generated code, so no build dependency is bundled into the worker.
-- `build/`: production build CLI.
-- `core/`: config loading, document collection, document processing, island id,
-  prerender, and code generation.
+- `core/`: production build CLI, config loading, document collection, document
+  processing, island id, prerender, and code generation.
 
 ### Build flow
 
@@ -130,6 +129,7 @@ the next change.
 
 - `core/`
   - `index.ts`: `runBuild`
+  - `main.ts`: production build CLI
   - `config.ts`: config schema, `defineConfig`, `loadConfig`
   - `collect.ts`: document collection
   - `copyPublic.ts`: copies `public` under `dist/static/`
@@ -155,4 +155,3 @@ the next change.
   - `serveIsland.ts`: dev server island rendering
   - `serveLiveReload.ts`: boot id over SSE
   - `devContext.ts`: `DevContext`
-- `build/main.ts`: production build CLI

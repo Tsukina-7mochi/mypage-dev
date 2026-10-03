@@ -4,7 +4,8 @@ import * as path from "@std/path";
 import * as parse5Dom from "parse5-dom";
 import * as htmlnano from "htmlnano";
 
-import { Context, DocumentOutput } from "../../context.ts";
+import { Context } from "../../context.ts";
+import { DocumentOutput } from "../../documentOutput.ts";
 import { createIsland } from "../../island.ts";
 import { IslandInstance, IslandKind } from "../../types.ts";
 import {

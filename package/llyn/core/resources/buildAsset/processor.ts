@@ -1,6 +1,7 @@
 import * as path from "@std/path";
 
-import { Context, SourceFile } from "../../context.ts";
+import { Context } from "../../context.ts";
+import { SourceFile } from "../../documentOutput.ts";
 import { decomposeExtension } from "../../util/path.ts";
 
 const extensionConversion = {

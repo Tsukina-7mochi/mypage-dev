@@ -6,11 +6,8 @@ import * as parse5 from "parse5";
 import * as path from "@std/path";
 import * as fs from "@std/fs";
 
-import {
-  Context,
-  DocumentOutput,
-  mergeDocumentOutputs,
-} from "../../context.ts";
+import { Context } from "../../context.ts";
+import { DocumentOutput, mergeDocumentOutputs } from "../../documentOutput.ts";
 import { htmlNodeProcessor } from "../html/processor.ts";
 import { Frontmatter, FrontmatterSchema } from "../../types.ts";
 import { decomposeExtension } from "../../util/path.ts";

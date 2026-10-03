@@ -132,7 +132,8 @@ the next change.
   - `config.ts`: config schema, `defineConfig`, `loadConfig`
   - `collect.ts`: document collection
   - `island.ts`: island id and `createIsland`
-  - `context.ts`: `Context` and `DocumentOutput`
+  - `context.ts`: `Context`
+  - `documentOutput.ts`: `DocumentOutput` and `mergeDocumentOutputs`
   - `types.ts`: `Island`, `IslandInstance`, frontmatter, document entries
   - `resources/html/processor.ts`: island prerender, DOM rewrite, bootstrap
   - `resources/html/helper.ts`: DOM queries for islands, scripts, styles

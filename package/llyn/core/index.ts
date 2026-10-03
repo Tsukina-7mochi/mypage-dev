@@ -11,6 +11,7 @@ import { markdownProcessor } from "./resources/markdown/processor.ts";
 import { uniqueIslands } from "./island.ts";
 import { collectDocuments } from "./collect.ts";
 import { ResolvedLlynConfig } from "./config.ts";
+import { copyPublic } from "./copyPublic.ts";
 
 export type BuildOptions = {
   dev: boolean;
@@ -108,7 +109,11 @@ export async function runBuild(
     })
     : undefined;
 
-  await Promise.all([clientContext.rebuild(), serverContext?.rebuild()]);
+  await Promise.all([
+    clientContext.rebuild(),
+    serverContext?.rebuild(),
+    copyPublic(config),
+  ]);
 
   await clientContext.dispose();
   await serverContext?.dispose();

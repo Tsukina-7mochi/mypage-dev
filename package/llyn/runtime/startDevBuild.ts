@@ -1,7 +1,6 @@
 import * as path from "@std/path";
 
 import { loadConfig, runBuild } from "../core/index.ts";
-import { copyPublic } from "../build/main.ts";
 import { DevContext } from "./devContext.ts";
 
 export async function startDevBuild(): Promise<DevContext | undefined> {
@@ -11,7 +10,6 @@ export async function startDevBuild(): Promise<DevContext | undefined> {
     liveReload: true,
     worker: false,
   });
-  await copyPublic(config);
   console.log("dev build finished");
   return {
     islands: new Map(islands.map((island) => [island.id, island.url])),

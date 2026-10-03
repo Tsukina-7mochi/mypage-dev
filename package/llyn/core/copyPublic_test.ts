@@ -1,8 +1,8 @@
 import { assertEquals } from "@std/assert";
 import * as path from "@std/path";
 
-import { ResolvedLlynConfig } from "../core/config.ts";
-import { copyPublic } from "./main.ts";
+import { ResolvedLlynConfig } from "./config.ts";
+import { copyPublic } from "./copyPublic.ts";
 
 let temporaryDirectory: string;
 

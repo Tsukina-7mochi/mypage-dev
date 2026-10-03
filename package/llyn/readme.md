@@ -107,7 +107,7 @@ the next change.
 - `runtime/`: `llyn/runtime`. The dev implementation lives here. In prod builds
   `esbuildPlugin/llynRuntimePlugin.ts` replaces the whole module with generated
   code, so no build dependency is bundled into the worker.
-- `build/`: production build CLI and `copyPublic`.
+- `build/`: production build CLI.
 - `core/`: config loading, document collection, document processing, island id,
   prerender, and code generation.
 
@@ -121,7 +121,8 @@ the next change.
    instances), and `runBuild` merges them and checks island id collisions.
 3. esbuild bundles client code into `dist/static/` (ESM, code splitting into
    `chunks/`). When `worker` is enabled, it also bundles the worker entry into
-   `dist/worker.js` with the generated runtime.
+   `dist/worker.js` with the generated runtime. In parallel, `copyPublic`
+   (`core/copyPublic.ts`) copies `public` to `dist/static/<basename>/`.
 4. `runBuild` returns the server islands, which `startDevBuild` turns into
    `DevContext`.
 
@@ -131,6 +132,7 @@ the next change.
   - `index.ts`: `runBuild`
   - `config.ts`: config schema, `defineConfig`, `loadConfig`
   - `collect.ts`: document collection
+  - `copyPublic.ts`: copies `public` under `dist/static/`
   - `island.ts`: island id and `createIsland`
   - `context.ts`: `Context`
   - `documentOutput.ts`: `DocumentOutput` and `mergeDocumentOutputs`

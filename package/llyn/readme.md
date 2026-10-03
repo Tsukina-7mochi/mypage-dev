@@ -113,7 +113,7 @@ the next change.
 
 ### Build flow
 
-1. `runBuild(config, options)` (`core/index.ts`) collects documents
+1. `runBuild(config, options)` (`core/runBuild.ts`) collects documents
    (`core/collect.ts`) and creates a `Context` (`core/context.ts`).
 2. Documents flow through the HTML / Markdown processors, which call the island
    prerenderers and the build asset processor directly. Each processor returns a
@@ -129,14 +129,17 @@ the next change.
 ### Key files
 
 - `core/`
-  - `index.ts`: `runBuild`
+  - `index.ts`: re-exports
+  - `runBuild.ts`: `runBuild`
   - `main.ts`: production build CLI
   - `config.ts`: config schema, `defineConfig`, `loadConfig`
   - `collect.ts`: document collection and `DocumentEntry`
   - `copyPublic.ts`: copies `public` under `dist/static/`
-  - `island.ts`: `Island`, `IslandInstance`, island id and `createIsland`
+  - `island.ts`: `Island`, `IslandInstance`, island id, `createIsland`, and
+    server island extraction
   - `context.ts`: `Context`
   - `documentOutput.ts`: `DocumentOutput` and `mergeDocumentOutputs`
+  - `resources/processor.ts`: `processDocument` dispatch by document type
   - `resources/html/processor.ts`: island prerender, DOM rewrite, bootstrap
   - `resources/html/helper.ts`: DOM queries for islands, scripts, styles
   - `resources/html/liveReload.ts`: live reload client script

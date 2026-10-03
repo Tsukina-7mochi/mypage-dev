@@ -1,0 +1,91 @@
+import * as esbuild from "esbuild";
+import { denoPlugin } from "@deno/esbuild-plugin";
+
+import { virtualFilePlugin } from "./esbuildPlugin/virtualFilePlugin.ts";
+import { llynRuntimePlugin } from "./esbuildPlugin/llynRuntimePlugin.ts";
+import { dataUrlPlugin } from "./esbuildPlugin/dataUrlPlugin.ts";
+import { Context } from "./context.ts";
+import { mergeDocumentOutputs } from "./documentOutput.ts";
+import { processDocument } from "./resources/processor.ts";
+import { Island, uniqueServerIslands } from "./island.ts";
+import { collectDocuments } from "./collect.ts";
+import { ResolvedLlynConfig } from "./config.ts";
+import { copyPublic } from "./copyPublic.ts";
+
+export type BuildOptions = {
+  dev: boolean;
+  liveReload: boolean;
+  worker: boolean;
+};
+
+export async function runBuild(
+  config: ResolvedLlynConfig,
+  options: BuildOptions,
+): Promise<Island[]> {
+  const staticDist = new URL("static/", config.dist);
+
+  const ctx: Context = {
+    dev: options.dev,
+    liveReload: options.liveReload,
+    root: config.root,
+    staticDist,
+  };
+
+  const { sourceFiles, virtualFiles, islands } = mergeDocumentOutputs(
+    await Promise.all(
+      (await collectDocuments(config)).map((entry) =>
+        processDocument(entry, ctx)
+      ),
+    ),
+  );
+  const serverIslandList = uniqueServerIslands(islands);
+
+  const clientContext = await esbuild.context({
+    entryPoints: [
+      ...sourceFiles,
+      ...virtualFiles.map(({ content: _, ...entry }) => entry),
+    ],
+    outdir: staticDist.pathname,
+    platform: "browser",
+    format: "esm",
+    bundle: true,
+    splitting: true,
+    chunkNames: "chunks/[name]-[hash]",
+    plugins: [
+      virtualFilePlugin({
+        files: Object.fromEntries(virtualFiles.map((f) => [f.in, f.content])),
+      }),
+      dataUrlPlugin(),
+      denoPlugin(),
+    ],
+    minify: !options.dev,
+    sourcemap: options.dev ? "inline" : "linked",
+  });
+
+  const serverContext = options.worker
+    ? await esbuild.context({
+      entryPoints: [{ in: config.worker.pathname, out: "worker" }],
+      outdir: config.dist.pathname,
+      format: "esm",
+      bundle: true,
+      plugins: [
+        llynRuntimePlugin({ islands: serverIslandList }),
+        denoPlugin(),
+      ],
+      minify: !options.dev,
+      sourcemap: options.dev ? "inline" : "linked",
+    })
+    : undefined;
+
+  await Promise.all([
+    clientContext.rebuild(),
+    serverContext?.rebuild(),
+    copyPublic(config),
+  ]);
+
+  await clientContext.dispose();
+  await serverContext?.dispose();
+  await esbuild.stop();
+
+  return serverIslandList;
+}

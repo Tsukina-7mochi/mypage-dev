@@ -44,3 +44,14 @@ export function uniqueIslands(islands: Island[]): Island[] {
   }, new Map<string, Island>());
   return [...islandsById.values()];
 }
+
+export function uniqueServerIslands(instances: IslandInstance[]): Island[] {
+  const serverIslandIds = new Set(
+    instances
+      .filter((instance) => instance.kind === "server")
+      .map((instance) => instance.island.id),
+  );
+  return uniqueIslands(instances.map((instance) => instance.island)).filter(
+    (island) => serverIslandIds.has(island.id),
+  );
+}

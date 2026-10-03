@@ -1,5 +1,5 @@
-import { loadConfig, runBuild } from "./index.ts";
-import { ResolvedLlynConfig } from "./config.ts";
+import { runBuild } from "./runBuild.ts";
+import { loadConfig, ResolvedLlynConfig } from "./config.ts";
 
 export async function build(config?: ResolvedLlynConfig): Promise<void> {
   config ??= await loadConfig();

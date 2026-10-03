@@ -143,10 +143,10 @@ the next change.
   - `resources/markdown/processor.ts`: frontmatter, marked, template merge
   - `resources/island/prerender.ts`: React prerender per island kind
   - `resources/island/bootstrap.ts`: page bootstrap with static imports
-  - `resources/island/serverRenderer.ts`: prod `llyn/runtime` generation
   - `resources/buildAsset/processor.ts`: script / css output mapping
   - `esbuildPlugin/llynRuntimePlugin.ts`: replaces `llyn/runtime` with generated
     code
+  - `esbuildPlugin/serverRenderer.ts`: prod `llyn/runtime` generation
   - `esbuildPlugin/virtualFilePlugin.ts`: serves in-memory virtual files
   - `esbuildPlugin/dataUrlPlugin.ts`: keeps `data:` imports external
 - `runtime/`

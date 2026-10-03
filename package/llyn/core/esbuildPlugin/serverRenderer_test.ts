@@ -1,10 +1,10 @@
-import { Island } from "../../types.ts";
+import { Island } from "../types.ts";
 import { renderServerRenderer } from "./serverRenderer.ts";
 
 const island: Island = {
   id: "1234abcd",
   specifier: "testdata/island.tsx",
-  url: new URL("./testdata/island.tsx", import.meta.url),
+  url: new URL("../resources/island/testdata/island.tsx", import.meta.url),
 };
 
 function countOccurrences(value: string, search: string): number {

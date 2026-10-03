@@ -1,6 +1,6 @@
 import * as esbuild from "esbuild";
 import { Island } from "../types.ts";
-import { renderServerRenderer } from "../resources/island/serverRenderer.ts";
+import { renderServerRenderer } from "./serverRenderer.ts";
 
 const namespace = "worker-fetch-island-plugin";
 

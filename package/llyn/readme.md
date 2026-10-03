@@ -132,7 +132,7 @@ the next change.
   - `index.ts`: re-exports
   - `runBuild.ts`: `runBuild`
   - `main.ts`: production build CLI
-  - `config.ts`: config schema, `defineConfig`, `loadConfig`
+  - `config.ts`: config schema, `defineConfig`, `loadConfig`, `getStaticDist`
   - `collect.ts`: document collection and `DocumentEntry`
   - `copyPublic.ts`: copies `public` under `dist/static/`
   - `island.ts`: `Island`, `IslandInstance`, island id, `createIsland`, and

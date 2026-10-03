@@ -9,7 +9,7 @@ import { mergeDocumentOutputs } from "./documentOutput.ts";
 import { processDocument } from "./resources/processor.ts";
 import { Island, uniqueServerIslands } from "./island.ts";
 import { collectDocuments } from "./collect.ts";
-import { ResolvedLlynConfig } from "./config.ts";
+import { getStaticDist, ResolvedLlynConfig } from "./config.ts";
 import { copyPublic } from "./copyPublic.ts";
 
 export type BuildOptions = {
@@ -22,7 +22,7 @@ export async function runBuild(
   config: ResolvedLlynConfig,
   options: BuildOptions,
 ): Promise<Island[]> {
-  const staticDist = new URL("static/", config.dist);
+  const staticDist = getStaticDist(config);
 
   const ctx: Context = {
     dev: options.dev,

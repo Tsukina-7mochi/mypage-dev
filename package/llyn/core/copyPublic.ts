@@ -1,12 +1,12 @@
 import * as fs from "@std/fs";
 import * as path from "@std/path";
 
-import { ResolvedLlynConfig } from "./config.ts";
+import { getStaticDist, ResolvedLlynConfig } from "./config.ts";
 
 export async function copyPublic(config: ResolvedLlynConfig): Promise<void> {
   if (!config.public) return;
 
-  const staticDist = new URL("static/", config.dist);
+  const staticDist = getStaticDist(config);
   const publicPath = path.fromFileUrl(config.public);
   const destination = path.join(
     path.fromFileUrl(staticDist),

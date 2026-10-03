@@ -1,6 +1,6 @@
 import * as path from "@std/path";
 
-import { loadConfig, runBuild } from "../core/index.ts";
+import { getStaticDist, loadConfig, runBuild } from "../core/index.ts";
 import { DevContext } from "./devContext.ts";
 
 export async function startDevBuild(): Promise<DevContext | undefined> {
@@ -13,6 +13,6 @@ export async function startDevBuild(): Promise<DevContext | undefined> {
   console.log("dev build finished");
   return {
     islands: new Map(islands.map((island) => [island.id, island.url])),
-    staticDir: path.fromFileUrl(new URL("static/", config.dist)),
+    staticDir: path.fromFileUrl(getStaticDist(config)),
   };
 }

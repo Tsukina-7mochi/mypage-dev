@@ -29,6 +29,10 @@ export const LlynConfigSchema = v.object({
 export type LlynConfig = v.InferInput<typeof LlynConfigSchema>;
 export type ResolvedLlynConfig = v.InferOutput<typeof LlynConfigSchema>;
 
+export function getStaticDist(config: ResolvedLlynConfig): URL {
+  return new URL("static/", config.dist);
+}
+
 export function defineConfig<const T extends LlynConfig>(config: T): T {
   return config;
 }

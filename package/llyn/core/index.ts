@@ -1,9 +1,10 @@
 import * as esbuild from "esbuild";
 import { denoPlugin } from "@deno/esbuild-plugin";
 
-import { virtualFilePlugin } from "../esbuildPlugin/virtualFilePlugin.ts";
+import { virtualFilePlugin } from "./esbuildPlugin/virtualFilePlugin.ts";
 import { DocumentEntry, Island } from "./types.ts";
-import { llynRuntimePlugin } from "../esbuildPlugin/llynRuntimePlugin.ts";
+import { llynRuntimePlugin } from "./esbuildPlugin/llynRuntimePlugin.ts";
+import { dataUrlPlugin } from "./esbuildPlugin/dataUrlPlugin.ts";
 import { Context } from "./context.ts";
 import { DocumentOutput, mergeDocumentOutputs } from "./documentOutput.ts";
 import { htmlFileProcessor } from "./resources/html/processor.ts";
@@ -80,14 +81,7 @@ export async function runBuild(
       virtualFilePlugin({
         files: Object.fromEntries(virtualFiles.map((f) => [f.in, f.content])),
       }),
-      {
-        name: "data-url",
-        setup(build) {
-          build.onResolve({ filter: /^data:/ }, (args) => {
-            return { path: args.path, external: true };
-          });
-        },
-      },
+      dataUrlPlugin(),
       denoPlugin(),
     ],
     minify: !options.dev,

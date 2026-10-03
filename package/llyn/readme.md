@@ -105,8 +105,8 @@ the next change.
 ### Package boundaries
 
 - `runtime/`: `llyn/runtime`. The dev implementation lives here. In prod builds
-  `esbuildPlugin/llynRuntimePlugin.ts` replaces the whole module with generated
-  code, so no build dependency is bundled into the worker.
+  `core/esbuildPlugin/llynRuntimePlugin.ts` replaces the whole module with
+  generated code, so no build dependency is bundled into the worker.
 - `build/`: production build CLI.
 - `core/`: config loading, document collection, document processing, island id,
   prerender, and code generation.
@@ -145,9 +145,10 @@ the next change.
   - `resources/island/bootstrap.ts`: page bootstrap with static imports
   - `resources/island/serverRenderer.ts`: prod `llyn/runtime` generation
   - `resources/buildAsset/processor.ts`: script / css output mapping
-- `esbuildPlugin/`
-  - `llynRuntimePlugin.ts`: replaces `llyn/runtime` with generated code
-  - `virtualFilePlugin.ts`: serves in-memory virtual files
+  - `esbuildPlugin/llynRuntimePlugin.ts`: replaces `llyn/runtime` with generated
+    code
+  - `esbuildPlugin/virtualFilePlugin.ts`: serves in-memory virtual files
+  - `esbuildPlugin/dataUrlPlugin.ts`: keeps `data:` imports external
 - `runtime/`
   - `index.ts`: re-exports (one exported function per file)
   - `startDevBuild.ts`: dev build and `DevContext` creation

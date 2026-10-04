@@ -1,11 +1,39 @@
+import * as path from "@std/path";
+
 import { Island } from "../island.ts";
 import { renderServerRenderer } from "./serverRenderer.ts";
 
-const island: Island = {
-  id: "1234abcd",
-  specifier: "testdata/island.tsx",
-  url: new URL("../resources/island/testdata/island.tsx", import.meta.url),
+const islandSource = `type Props = {
+  _prerender: boolean;
+  label?: string;
 };
+
+export default function TestIsland({ _prerender, label }: Props) {
+  return (
+    <p data-prerender={String(_prerender)}>
+      {label}
+    </p>
+  );
+}
+`;
+
+let temporaryDirectory: string;
+let island: Island;
+
+Deno.test.beforeEach(async () => {
+  temporaryDirectory = await Deno.makeTempDir();
+  const islandPath = path.join(temporaryDirectory, "island.tsx");
+  await Deno.writeTextFile(islandPath, islandSource);
+  island = {
+    id: "1234abcd",
+    specifier: "island.tsx",
+    url: path.toFileUrl(islandPath),
+  };
+});
+
+Deno.test.afterEach(async () => {
+  await Deno.remove(temporaryDirectory, { recursive: true });
+});
 
 function countOccurrences(value: string, search: string): number {
   return value.split(search).length - 1;

@@ -7,7 +7,7 @@ import { dataUrlPlugin } from "./esbuildPlugin/dataUrlPlugin.ts";
 import { Context } from "./context.ts";
 import { mergeDocumentOutputs } from "./documentOutput.ts";
 import { processDocument } from "./resources/processor.ts";
-import { Island, uniqueServerIslands } from "./island.ts";
+import { uniqueServerIslands } from "./island.ts";
 import { collectDocuments } from "./collect.ts";
 import { getStaticDist, ResolvedLlynConfig } from "./config.ts";
 import { copyPublic } from "./copyPublic.ts";
@@ -20,7 +20,7 @@ export type BuildOptions = {
 export async function runBuild(
   config: ResolvedLlynConfig,
   options: BuildOptions,
-): Promise<Island[]> {
+): Promise<void> {
   const staticDist = getStaticDist(config);
 
   const ctx: Context = {
@@ -79,6 +79,4 @@ export async function runBuild(
 
   await Promise.all([clientBuild, serverBuild, copyPublic(config)]);
   await esbuild.stop();
-
-  return serverIslandList;
 }

@@ -3,9 +3,9 @@
 ## ゴール
 
 1. ランタイム実行
-   - dev では生成ファイル（`dist/worker.js`）ではなく、ユーザーのサーバーコードと llyn 自体を `deno serve --watch` で直接実行する。
-   - アセット（ドキュメント・クライアント資産）は起動時にフルビルドして `dist` に出力し、それを参照して配信する。インクリメンタルビルドは行わない。
-   - prod では静的コンパイルする
+   - dev でも prod と同じく、フルビルドで生成した `dist/worker.js` を `deno serve` で実行する。インクリメンタルビルドは行わない。
+   - dev と prod の違いはビルドのオプション（最適化の有無、ライブリロードの有無）だけにする。
+   - ファイルの監視は llyn の関心外とし、`deno run --watch` / `deno serve --watch` に任せる。
 2. アイランドの単体ビルド
    - アイランドは呼び出し側（HTML）の情報なしで解決・ビルド・描画できる。
    - 呼び出し側が持つ情報（props、配置）はランタイムで与える
@@ -19,10 +19,9 @@
 
 - `llyn/runtime`（公開）
   - ランタイムで用いる関数を提供する
-    - `serveIsland`: `(req: Request, ctx?: DevContext): Promise<Response>`
-    - `startDevBuild`: `(): Promise<DevContext | undefined>`
-    - `serveLiveReload`: `(req: Request, ctx?: DevContext): Response`
-  - esbuild によってモジュール全体が生成コードに置き換わる。dev と prod の分岐はこの置き換えのみで行い、ユーザーコードに分岐を持たせない
+    - `serveIsland`: `(req: Request): Promise<Response>`
+    - `serveLiveReload`: `(req: Request): Response`
+  - ソースのモジュールは宣言だけで、呼ぶと例外を投げる。esbuild によってモジュール全体が生成コードに置き換わる。ユーザーコードに dev と prod の分岐を持たせない
 - `llyn/build`（公開）
   - prod build で使うスクリプト
 - `llyn/core`（内部）
@@ -74,43 +73,33 @@ export default function Feed({ _prerender }: Props) {
 
 ### ユーザーのサーバーコード
 
-`startDevBuild` は fetch の前に一度だけフルビルドを行い、`DevContext` を返す。
-prod では `undefined` を返すため、ユーザーコードは dev と prod で同一になる。
+ユーザーコードは dev と prod で同一で、常にバンドルされた `dist/worker.js` として実行される。
 
 ```ts
 // src/main.ts
-import { serveIsland, serveLiveReload, startDevBuild } from "llyn/runtime";
-
-const llyn = await startDevBuild();
+import { serveIsland, serveLiveReload } from "llyn/runtime";
 
 const app = new Hono<Bindings>()
   .use(logger())
-  .all("/_islands/*", (c) => serveIsland(c.req.raw, llyn))
-  .get("/__reload", (c) => serveLiveReload(c.req.raw, llyn))
+  .all("/_islands/*", (c) => serveIsland(c.req.raw))
+  .get("/__reload", (c) => serveLiveReload(c.req.raw))
   .route("/api", apiRoute);
 ```
 
-静的ファイルは dev / prod ともに `dist/static/` を既存の `src/static.ts`（`hono/deno` の `serveStatic`）で配信する。
+静的ファイルは worker の位置から `static/` を既存の `src/static.ts`（`hono/deno` の `serveStatic`）で配信する。
 
-### dev ランタイム
+### dev ビルド
 
-- `startDevBuild`
-  - `loadConfig()` で cwd の `llyn.config.ts` を読む
-  - client 側のみフルビルドする（`dist/worker.js` は生成しない）。HTML にはライブリロードスクリプトを注入する
-  - 古い成果物は削除しない
-  - ビルドに失敗した場合は例外をそのまま投げ、プロセスを落とす。`deno serve --watch` が次の変更を待って再起動する
-  - `DevContext` はアイランド id からソース URL への対応表を持つ
-- `serveIsland(req, ctx)`
-  - `ctx` からアイランドのソースを引き、動的 import して描画する
-  - プロセスは変更のたびに再起動されるため、モジュールキャッシュの回避は行わない
-  - `ctx` がなければ例外を投げる
-- ビルド中のリクエストは待たせない
+- `llyn/core/main.ts --dev --live-reload` でビルドする
+  - `--dev`: minify せず、source map を inline にする
+  - `--live-reload`: HTML にライブリロードスクリプトを注入し、生成コードの `serveLiveReload` にビルド ID を埋め込む
+- 古い成果物は削除しない
+- `deno task dev` は `deno run --watch=routes/,src/,llyn.config.ts` でビルドし、並行して `deno serve --watch=dist/` で `dist/worker.js` を配信する
 
 ### dev のライブリロード
 
-- `root` 配下の変更は `deno serve --watch=<root>` がプロセスを再起動することで反映する。プロセス内での watch は行わない
-- `serveLiveReload` は接続時に SSE で起動 ID（プロセス起動時に生成する乱数）を一度だけ送る
-- クライアントは最初に受け取った起動 ID を保持し、再接続後に異なる ID を受け取ったら reload する
+- `serveLiveReload` は接続時に SSE でビルド ID（ビルドごとに生成する乱数）を一度だけ送る。`--live-reload` なしのビルドでは 404 を返す
+- クライアントは最初に受け取ったビルド ID を保持し、再接続後に異なる ID を受け取ったら reload する
 
 ### 生成コード (サーバー)
 
@@ -123,9 +112,11 @@ import { renderToReadableStream } from "react-dom/server.edge";
 import Island_a1b2c3d4 from "/abs/routes/feed.tsx";
 import Island_deadbeef from "/abs/routes/contributionHistory.tsx";
 
-export const startDevBuild = async () => undefined;
+const bootId: string | undefined = "<build id>"; // --live-reload なしでは undefined
 
-export const serveLiveReload = () => new Response("Not Found", { status: 404 });
+export function serveLiveReload(): Response {
+  // bootId がなければ 404、あれば SSE で bootId を送る
+}
 
 export function serveIsland(req: Request): Promise<Response> {
   const url = new URL(req.url);
@@ -224,6 +215,16 @@ export default defineConfig({
 - [x] 旧 API（`build()` / `BuildOptions`）と旧ファイルを削除
 - [x] `package/llyn/readme.md` を新設計で全面改訂、`AGENTS.md` / `readme.md` を更新
 - [x] 本番バンドルに dev 依存（parse5 / marked / esbuild / 設定）が入っていないことを最終確認
+
+### M7. dev を生成した worker で実行する
+
+- [x] `runBuild` を `esbuild.build` の 1 回呼び出しに整理
+- [x] `BuildOptions` を `{ dev, liveReload }` にし、worker を常にバンドルする。CLI に `--dev` / `--live-reload` を追加
+- [x] 生成コードの `serveLiveReload` がビルド ID を SSE で送る
+- [x] dev 実装（`startDevBuild`、`DevContext`、動的 import の `serveIsland`）を削除し、`llyn/runtime` を宣言だけにする
+- [x] `src/main.ts` と `deno task dev` を更新
+
+**完了条件**: `deno task dev` で `routes/**` の編集がブラウザに自動反映される。
 
 ---
 

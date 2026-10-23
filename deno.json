@@ -36,7 +36,7 @@
   "tasks": {
     "build": "deno -RWE --allow-run --allow-sys=homedir ./package/llyn/core/main.ts",
     "clean": "rm -rf ./dist",
-    "dev": "deno serve --watch=routes/,llyn.config.ts --port=8080 -RWEN --allow-run --allow-sys=homedir --env-file=.dev.vars ./src/main.ts",
+    "dev": "mkdir -p dist && deno run --watch=routes/,src/,llyn.config.ts -RWE --allow-run --allow-sys=homedir ./package/llyn/core/main.ts --dev --live-reload & deno serve --watch=dist/ --port=8080 -RN --env-file=.dev.vars ./dist/worker.js",
     "test": "deno test -RWE --allow-sys=homedir",
     "serve": "deno serve --port=8080 --allow-read --env-file=.dev.vars ./dist/worker.js"
   }

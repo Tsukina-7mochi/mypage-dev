@@ -60,9 +60,6 @@ Deno.test("generated serveIsland renders query props and handles unknown IDs", a
   }`;
   const runtime = await import(moduleUrl);
 
-  if (await runtime.startDevBuild() !== undefined) {
-    throw new Error("Generated startDevBuild must resolve to undefined");
-  }
   if (runtime.serveLiveReload().status !== 404) {
     throw new Error("Generated serveLiveReload must return Not Found");
   }

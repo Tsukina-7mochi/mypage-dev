@@ -6,7 +6,8 @@ framework written in Deno and targeting Cloudflare Workers.
 ## Commands
 
 - `deno task build`: build for production (`dist/worker.js` and `dist/static/`)
-- `deno task dev`: run `src/main.ts` on `deno serve --watch` with a dev build
+- `deno task dev`: rebuild with live reload on changes and serve
+  `dist/worker.js`
 - `deno task serve`: serve the production dist
 - `deno task clean`: clean dist
 - `deno task test`: run tests with the required permissions

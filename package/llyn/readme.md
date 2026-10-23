@@ -76,44 +76,41 @@ receives `_prerender: boolean`, which is `true` only during prerendering.
 
 ### Runtime
 
-The server code imports `llyn/runtime`. The same code runs in dev and prod.
+The server code imports `llyn/runtime`. The source module only declares the API;
+the build replaces it with generated code, so the server code runs only from the
+bundled `dist/worker.js`, in dev and prod alike.
 
 ```ts
-import { serveIsland, serveLiveReload, startDevBuild } from "llyn/runtime";
-
-const ctx = await startDevBuild();
+import { serveIsland, serveLiveReload } from "llyn/runtime";
 
 const app = new Hono()
-  .all("/_islands/*", (c) => serveIsland(c.req.raw, ctx))
-  .get("/__reload", (c) => serveLiveReload(c.req.raw, ctx));
+  .all("/_islands/*", (c) => serveIsland(c.req.raw))
+  .get("/__reload", (c) => serveLiveReload(c.req.raw));
 ```
 
-- `startDevBuild()`: in dev, runs a full client build with live reload and
-  returns a `DevContext`. In prod, returns `undefined`.
-- `serveIsland(req, ctx)`: renders a server island.
-- `serveLiveReload(req, ctx)`: in dev, sends the boot id over SSE. In prod,
-  returns 404.
+- `serveIsland(req)`: renders a server island.
+- `serveLiveReload(req)`: with `--live-reload`, sends the boot id of the build
+  over SSE. Otherwise, returns 404.
 
-`DevContext.staticDir` is the absolute path of `dist/static/` in dev. In prod,
-resolve static files from the bundled worker location instead.
+Resolve static files from the bundled worker location (`dist/static/`).
 
 ### Dev server
 
-Run the server entry with `deno serve --watch=<root>,llyn.config.ts`. Any change
-restarts the process, which rebuilds once at startup. The live reload client
-keeps the first boot id and reloads the page when a different one arrives after
-reconnecting. A failed build exits the process; `deno serve --watch` waits for
-the next change.
+Llyn does not watch files. Run the build with `--dev --live-reload` under
+`deno run --watch=<root>,<server code>,llyn.config.ts`, and serve
+`dist/worker.js` with `deno serve --watch=<dist>` in parallel. The live reload
+client keeps the first boot id and reloads the page when a different one arrives
+after reconnecting.
 
 ## For Developers
 
 ### Package boundaries
 
-- `runtime/`: `llyn/runtime`. The dev implementation lives here. In prod builds
+- `runtime/`: `llyn/runtime`. Declarations only; calling them throws.
   `core/esbuildPlugin/llynRuntimePlugin.ts` replaces the whole module with
   generated code, so no build dependency is bundled into the worker.
-- `core/`: production build CLI, config loading, document collection, document
-  processing, island id, prerender, and code generation.
+- `core/`: build CLI, config loading, document collection, document processing,
+  island id, prerender, and code generation.
 
 ### Build flow
 
@@ -127,15 +124,13 @@ the next change.
    `chunks/`), and bundles the worker entry into `dist/worker.js` with the
    generated runtime. In parallel, `copyPublic` (`core/copyPublic.ts`) copies
    `public` to `dist/static/<basename>/`.
-4. `runBuild` returns the server islands, which `startDevBuild` turns into
-   `DevContext`.
 
 ### Key files
 
 - `core/`
   - `index.ts`: re-exports
   - `runBuild.ts`: `runBuild`
-  - `main.ts`: production build CLI
+  - `main.ts`: build CLI
   - `config.ts`: config schema, `defineConfig`, `loadConfig`, `getStaticDist`
   - `collect.ts`: document collection and `DocumentEntry`
   - `copyPublic.ts`: copies `public` under `dist/static/`
@@ -159,7 +154,5 @@ the next change.
   - `esbuildPlugin/dataUrlPlugin.ts`: keeps `data:` imports external
 - `runtime/`
   - `index.ts`: re-exports (one exported function per file)
-  - `startDevBuild.ts`: dev build and `DevContext` creation
-  - `serveIsland.ts`: dev server island rendering
-  - `serveLiveReload.ts`: boot id over SSE
-  - `devContext.ts`: `DevContext`
+  - `serveIsland.ts`, `serveLiveReload.ts`: declarations
+  - `notBundled.ts`: the error thrown outside a bundled worker

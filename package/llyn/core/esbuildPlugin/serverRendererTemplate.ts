@@ -2,8 +2,6 @@ import React from "react";
 import { renderToReadableStream } from "react-dom/server.edge";
 /*{ llyn-imports }*/
 
-export const startDevBuild = () => Promise.resolve(undefined);
-
 const bootId: string | undefined = /*{ llyn-boot-id }*/ undefined;
 
 export function serveLiveReload(): Response {

@@ -6,6 +6,8 @@ const namespace = "worker-fetch-island-plugin";
 
 export type PluginOptions = {
   islands: Island[];
+  // Live reload is served only when a boot id is given.
+  bootId?: string;
 };
 
 export function llynRuntimePlugin(options: PluginOptions): esbuild.Plugin {
@@ -14,7 +16,10 @@ export function llynRuntimePlugin(options: PluginOptions): esbuild.Plugin {
     setup: (build) => {
       let serverRenderer = "";
       build.onStart(async () => {
-        serverRenderer = await renderServerRenderer(options.islands);
+        serverRenderer = await renderServerRenderer(
+          options.islands,
+          options.bootId,
+        );
       });
 
       build.onResolve({ filter: /^llyn\/runtime$/ }, (args) => {

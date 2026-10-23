@@ -8,7 +8,6 @@ export async function startDevBuild(): Promise<DevContext | undefined> {
   const islands = await runBuild(config, {
     dev: true,
     liveReload: true,
-    worker: false,
   });
   console.log("dev build finished");
   return {

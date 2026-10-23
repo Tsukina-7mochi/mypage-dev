@@ -31,9 +31,13 @@ export default defineConfig({
 
 ### Build
 
-Run `package/llyn/core/main.ts` to build for production. It processes documents
-into `dist/static/`, bundles client code with code splitting, and bundles the
-worker entry into `dist/worker.js`.
+Run `package/llyn/core/main.ts` to build. It processes documents into
+`dist/static/`, bundles client code with code splitting, and bundles the worker
+entry into `dist/worker.js`. Every run is a full build.
+
+- `--dev`: skip minification and emit inline source maps
+- `--live-reload`: insert the live reload client into documents and serve the
+  boot id of the build from `serveLiveReload`
 
 ### Documents
 
@@ -120,9 +124,9 @@ the next change.
    `DocumentOutput` (source files, virtual files for page bootstraps, and island
    instances), and `runBuild` merges them and checks island id collisions.
 3. esbuild bundles client code into `dist/static/` (ESM, code splitting into
-   `chunks/`). When `worker` is enabled, it also bundles the worker entry into
-   `dist/worker.js` with the generated runtime. In parallel, `copyPublic`
-   (`core/copyPublic.ts`) copies `public` to `dist/static/<basename>/`.
+   `chunks/`), and bundles the worker entry into `dist/worker.js` with the
+   generated runtime. In parallel, `copyPublic` (`core/copyPublic.ts`) copies
+   `public` to `dist/static/<basename>/`.
 4. `runBuild` returns the server islands, which `startDevBuild` turns into
    `DevContext`.
 

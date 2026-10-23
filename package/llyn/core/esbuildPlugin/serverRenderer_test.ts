@@ -87,3 +87,23 @@ Deno.test("generated serveIsland renders query props and handles unknown IDs", a
     throw new Error("Unknown island did not return Not Found");
   }
 });
+
+Deno.test("generated serveLiveReload sends the embedded boot id", async () => {
+  const source = await renderServerRenderer([island], "boot-1234");
+  const moduleUrl = `data:application/typescript;charset=utf-8,${
+    encodeURIComponent(source)
+  }`;
+  const runtime = await import(moduleUrl);
+
+  const response = runtime.serveLiveReload();
+  if (response.headers.get("Content-Type") !== "text/event-stream") {
+    throw new Error("Live reload must respond with an event stream");
+  }
+  const reader = response.body.getReader();
+  const { value } = await reader.read();
+  await reader.cancel();
+  const event = new TextDecoder().decode(value);
+  if (event !== "event: boot\ndata: boot-1234\n\n") {
+    throw new Error(`Unexpected live reload event: ${event}`);
+  }
+});

@@ -3,6 +3,7 @@ import { Island } from "../island.ts";
 
 const IMPORTS_MARKER = "/*{ llyn-imports }*/";
 const SWITCH_CASES_MARKER = "/*{ llyn-switch-cases }*/";
+const BOOT_ID_MARKER = "/*{ llyn-boot-id }*/ undefined";
 
 function islandIdentifier(island: Island): string {
   return `Island_${island.id}`;
@@ -21,6 +22,7 @@ function switchCaseTemplate(island: Island): string {
 
 export async function renderServerRenderer(
   islands: Island[],
+  bootId?: string,
 ): Promise<string> {
   const templatePath = path.resolve(
     path.dirname(import.meta.filename ?? ""),
@@ -35,5 +37,6 @@ export async function renderServerRenderer(
 
   return template
     .replace(IMPORTS_MARKER, imports)
-    .replace(SWITCH_CASES_MARKER, switchCases);
+    .replace(SWITCH_CASES_MARKER, switchCases)
+    .replace(BOOT_ID_MARKER, bootId ? JSON.stringify(bootId) : "undefined");
 }

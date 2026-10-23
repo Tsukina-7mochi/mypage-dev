@@ -15,7 +15,6 @@ import { copyPublic } from "./copyPublic.ts";
 export type BuildOptions = {
   dev: boolean;
   liveReload: boolean;
-  worker: boolean;
 };
 
 export async function runBuild(
@@ -62,20 +61,21 @@ export async function runBuild(
     sourcemap: options.dev ? "inline" : "linked",
   });
 
-  const serverBuild = options.worker
-    ? esbuild.build({
-      entryPoints: [{ in: config.worker.pathname, out: "worker" }],
-      outdir: config.dist.pathname,
-      format: "esm",
-      bundle: true,
-      plugins: [
-        llynRuntimePlugin({ islands: serverIslandList }),
-        denoPlugin(),
-      ],
-      minify: !options.dev,
-      sourcemap: options.dev ? "inline" : "linked",
-    })
-    : undefined;
+  const serverBuild = esbuild.build({
+    entryPoints: [{ in: config.worker.pathname, out: "worker" }],
+    outdir: config.dist.pathname,
+    format: "esm",
+    bundle: true,
+    plugins: [
+      llynRuntimePlugin({
+        islands: serverIslandList,
+        bootId: options.liveReload ? crypto.randomUUID() : undefined,
+      }),
+      denoPlugin(),
+    ],
+    minify: !options.dev,
+    sourcemap: options.dev ? "inline" : "linked",
+  });
 
   await Promise.all([clientBuild, serverBuild, copyPublic(config)]);
   await esbuild.stop();

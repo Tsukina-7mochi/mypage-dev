@@ -2,6 +2,7 @@ import { assertEquals, assertRejects, assertStringIncludes } from "@std/assert";
 import * as path from "@std/path";
 
 import { markdownProcessor } from "./processor.ts";
+import { endPoint } from "../html/liveReload.ts";
 
 const template = (marker: string) =>
   `<html><head></head><body><main data-template="${marker}"></main></body></html>`;
@@ -9,6 +10,7 @@ const template = (marker: string) =>
 async function buildPost(
   frontmatterTemplate?: string,
   dev = true,
+  liveReload = false,
 ): Promise<string> {
   const directory = await Deno.makeTempDir();
   try {
@@ -38,7 +40,7 @@ async function buildPost(
     const root = path.toFileUrl(routes + "/");
     await markdownProcessor(new URL("post.md", root), {
       dev,
-      liveReload: false,
+      liveReload,
       root,
       staticDist: path.toFileUrl(path.join(directory, "dist", "static") + "/"),
     });
@@ -92,4 +94,9 @@ Deno.test("markdown without frontmatter is rejected", async () => {
   } finally {
     await Deno.remove(directory, { recursive: true });
   }
+});
+
+Deno.test("markdown output has a single live reload script", async () => {
+  const html = await buildPost(undefined, true, true);
+  assertEquals(html.split(endPoint).length - 1, 1);
 });

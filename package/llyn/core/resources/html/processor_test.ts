@@ -1,6 +1,7 @@
 import * as parse5 from "parse5";
 
 import { generateIslandId } from "../../island.ts";
+import { endPoint } from "./liveReload.ts";
 import { htmlNodeProcessor } from "./processor.ts";
 
 function assertIncludes(actual: string, expected: string): void {
@@ -66,4 +67,22 @@ Deno.test("places the bootstrap script inside the html element", async () => {
     html,
     '<script type="module" src="index-bootstrap.js"></script></html>',
   );
+});
+
+Deno.test("places the live reload script inside the html element", async () => {
+  const document = parse5.parse("");
+  await htmlNodeProcessor(
+    new URL("file:///site/routes/index.html"),
+    document,
+    {
+      dev: true,
+      liveReload: true,
+      root: new URL("file:///site/routes/"),
+      staticDist: new URL("file:///site/dist/static/"),
+    },
+  );
+
+  const html = parse5.serialize(document);
+  assertIncludes(html, endPoint);
+  assertIncludes(html, "</script></html>");
 });

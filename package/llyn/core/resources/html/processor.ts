@@ -152,9 +152,11 @@ export async function htmlNodeProcessor<T extends ParentNode>(
       ).childNodes,
     );
   }
-  if (ctx.liveReload) {
+  // Fragments have no html element and rely on their enclosing document.
+  const htmlElement = parse5Dom.selectOne(document, { tag: "html" });
+  if (ctx.liveReload && htmlElement) {
     parse5Dom.appendNodesTo(
-      document,
+      htmlElement,
       ...parse5.parseFragment(liveReloadScript()).childNodes,
     );
   }

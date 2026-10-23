@@ -9,6 +9,7 @@ framework written in Deno and targeting Cloudflare Workers.
 - `deno task dev`: run `src/main.ts` on `deno serve --watch` with a dev build
 - `deno task serve`: serve the production dist
 - `deno task clean`: clean dist
+- `deno task test`: run tests with the required permissions
 - `deno check`: run type checker
 - `deno fmt`: run formatter
 

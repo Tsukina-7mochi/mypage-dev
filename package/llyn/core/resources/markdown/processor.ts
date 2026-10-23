@@ -9,10 +9,17 @@ import * as fs from "@std/fs";
 import { Context } from "../../context.ts";
 import { DocumentOutput } from "../../documentOutput.ts";
 import { htmlNodeProcessor, minifyHtml } from "../html/processor.ts";
+import {
+  getClientIslands,
+  getScripts,
+  getServerIslands,
+  getStaticIslands,
+  getStylesheets,
+} from "../html/helper.ts";
 import { Frontmatter, FrontmatterSchema } from "./frontmatter.ts";
 import { decomposeExtension } from "../../util/path.ts";
 
-type Element = parse5.DefaultTreeAdapterTypes.Element;
+type Document = parse5.DefaultTreeAdapterTypes.Document;
 
 marked.use({ async: true, gfm: true });
 
@@ -32,6 +39,33 @@ async function parseDocument(content: string): Promise<MarkdownDocument> {
   const htmlBody = content.slice(match[0].length).trim();
   const body = await marked.parse(htmlBody);
   return { body, frontmatter };
+}
+
+// Rewrites references in a document read from `from` so they resolve from `to`.
+function rebaseReferences(document: Document, from: URL, to: URL) {
+  const rebase = (reference: string) => {
+    const relative = path.relative(
+      path.dirname(to.pathname),
+      new URL(reference, from).pathname,
+    );
+    return relative.startsWith("../") ? relative : `./${relative}`;
+  };
+
+  for (
+    const island of [
+      ...getClientIslands(document),
+      ...getServerIslands(document),
+      ...getStaticIslands(document),
+    ]
+  ) {
+    parse5Dom.setAttribute(island.element, "src", rebase(island.src));
+  }
+  for (const script of getScripts(document)) {
+    parse5Dom.setAttribute(script.element, "src", rebase(script.path));
+  }
+  for (const stylesheet of getStylesheets(document)) {
+    parse5Dom.setAttribute(stylesheet.element, "href", rebase(stylesheet.path));
+  }
 }
 
 export async function markdownProcessor(
@@ -54,23 +88,18 @@ export async function markdownProcessor(
 
   const markdownDoc = parse5.parseFragment(markdownContent);
   const templateDoc = parse5.parse(templateContent);
+  rebaseReferences(templateDoc, templateFile, file);
 
   const main = parse5Dom.selectOne(templateDoc, { tag: "main" });
   if (!main) {
     throw Error("main not found");
   }
-  const bodyElements = new Set<Element>(parse5Dom.selectAll(markdownDoc, {}));
   parse5Dom.appendNodesTo(
     main,
     ...markdownDoc.childNodes,
   );
 
-  const output = await htmlNodeProcessor(
-    file,
-    templateDoc,
-    ctx,
-    (element) => bodyElements.has(element) ? file : templateFile,
-  );
+  const output = await htmlNodeProcessor(file, templateDoc, ctx);
 
   const header = parse5Dom.selectOne(templateDoc, { tag: "head" });
   if (!header) {

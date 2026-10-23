@@ -1,4 +1,3 @@
-import { assertEquals } from "@std/assert";
 import * as parse5 from "parse5";
 
 import { generateIslandId } from "../../island.ts";
@@ -86,23 +85,4 @@ Deno.test("places the live reload script inside the html element", async () => {
   const html = parse5.serialize(document);
   assertIncludes(html, endPoint);
   assertIncludes(html, "</script></html>");
-});
-
-Deno.test("resolves references against the base URL of each element", async () => {
-  const document = parse5.parse(`
-    <script type="application/client-island" src="../counter.tsx"></script>
-  `);
-  const { islands } = await htmlNodeProcessor(
-    new URL("file:///site/routes/blog/post.md"),
-    document,
-    {
-      dev: true,
-      liveReload: false,
-      root: new URL("file:///site/routes/"),
-      staticDist: new URL("file:///site/dist/static/"),
-    },
-    () => new URL("file:///site/routes/layouts/template.html"),
-  );
-
-  assertEquals(islands[0].island.specifier, "counter.tsx");
 });

@@ -113,7 +113,7 @@ Deno.test("markdown page with islands in body and template is processed once", a
     );
     await Deno.writeTextFile(
       path.join(routes, "layouts", "template.html"),
-      '<html><head></head><body><script type="application/client-island" src="../counter.tsx"></script><main></main></body></html>',
+      '<html><head><link rel="stylesheet" href="./layout.css"></head><body><script type="application/client-island" src="../counter.tsx"></script><main></main></body></html>',
     );
     await Deno.writeTextFile(
       path.join(routes, "blog", "post.md"),
@@ -146,6 +146,11 @@ Deno.test("markdown page with islands in body and template is processed once", a
     );
     const domIds = output.islands.map((instance) => instance.domId);
     assertEquals(new Set(domIds).size, 2);
+    assertEquals(
+      output.islands.map((instance) => instance.island.specifier),
+      ["counter.tsx", "counter.tsx"],
+    );
+    assertStringIncludes(html, 'href="/layouts/layout.css"');
   } finally {
     await Deno.remove(directory, { recursive: true });
   }

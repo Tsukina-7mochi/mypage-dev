@@ -34,9 +34,9 @@
     "valibot": "jsr:@valibot/valibot@^1.4.0"
   },
   "tasks": {
-    "build": "deno -RWE --allow-run --allow-sys=homedir ./package/llyn/core/main.ts",
+    "build": "deno run -RWE --allow-run --allow-sys=homedir ./build.ts",
     "clean": "rm -rf ./dist",
-    "dev": "mkdir -p dist && deno run --watch=routes/,src/,llyn.config.ts -RWE --allow-run --allow-sys=homedir ./package/llyn/core/main.ts --dev --live-reload & deno serve --watch=dist/ --port=8080 -RN --env-file=.dev.vars ./dist/worker.js",
+    "dev": "deno run -RWE --allow-run --allow-sys=homedir ./build.ts --dev",
     "test": "deno test -RWE --allow-sys=homedir",
     "serve": "deno serve --port=8080 --allow-read --env-file=.dev.vars ./dist/worker.js"
   }

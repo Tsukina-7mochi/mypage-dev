@@ -7,7 +7,7 @@ framework written in Deno and targeting Cloudflare Workers.
 
 - `deno task build`: build for production (`dist/worker.js` and `dist/static/`)
 - `deno task dev`: rebuild with live reload on changes and serve
-  `dist/worker.js`
+  `dist/worker.js` (`build.ts --dev`)
 - `deno task serve`: serve the production dist
 - `deno task clean`: clean dist
 - `deno task test`: run tests with the required permissions
@@ -25,6 +25,7 @@ framework written in Deno and targeting Cloudflare Workers.
   - `main.ts`: worker entry point
   - `api/`: API routes
   - `static.ts`: static file route for Deno
+- `build.ts`: build script (dev mode watches files and runs the server)
 - `package/`: internal packages
   - `llyn`: island-architecture web framework
   - `parse5-dom`: dom manipulation tool for parse5

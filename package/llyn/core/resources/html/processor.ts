@@ -24,7 +24,7 @@ import { buildAssetProcessor } from "../buildAsset/processor.ts";
 import { decomposeExtension } from "../../util/path.ts";
 import { liveReloadScript } from "./liveReload.ts";
 
-type ParentNode = parse5.DefaultTreeAdapterTypes.ParentNode;
+type Document = parse5.DefaultTreeAdapterTypes.Document;
 type Element = parse5.DefaultTreeAdapterTypes.Element;
 
 async function createIslandInstance(
@@ -44,9 +44,9 @@ async function createIslandInstance(
   };
 }
 
-export async function htmlNodeProcessor<T extends ParentNode>(
+export async function htmlNodeProcessor(
   entryUrl: URL,
-  document: T,
+  document: Document,
   ctx: Context,
   baseUrlOf: (element: Element) => URL = () => entryUrl,
 ): Promise<DocumentOutput> {
@@ -144,19 +144,21 @@ export async function htmlNodeProcessor<T extends ParentNode>(
   for (const stylesheet of stylesheets) {
     parse5Dom.setAttribute(stylesheet.element, "href", stylesheet.newHref);
   }
+  const htmlElement = parse5Dom.selectOne(document, { tag: "html" });
+  if (!htmlElement) {
+    throw Error("html not found");
+  }
   const hasRuntimeIslands = clientIslands.length > 0 ||
     serverIslands.length > 0;
   if (hasRuntimeIslands) {
     parse5Dom.appendNodesTo(
-      parse5Dom.selectOne(document, { tag: "html" }) ?? document,
+      htmlElement,
       ...parse5.parseFragment(
         `<script type="module" src="${bootstrapSrc}"></script>`,
       ).childNodes,
     );
   }
-  // Fragments have no html element and rely on their enclosing document.
-  const htmlElement = parse5Dom.selectOne(document, { tag: "html" });
-  if (ctx.liveReload && htmlElement) {
+  if (ctx.liveReload) {
     parse5Dom.appendNodesTo(
       htmlElement,
       ...parse5.parseFragment(liveReloadScript()).childNodes,

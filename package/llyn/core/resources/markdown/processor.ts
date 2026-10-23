@@ -7,10 +7,12 @@ import * as path from "@std/path";
 import * as fs from "@std/fs";
 
 import { Context } from "../../context.ts";
-import { DocumentOutput, mergeDocumentOutputs } from "../../documentOutput.ts";
+import { DocumentOutput } from "../../documentOutput.ts";
 import { htmlNodeProcessor, minifyHtml } from "../html/processor.ts";
 import { Frontmatter, FrontmatterSchema } from "./frontmatter.ts";
 import { decomposeExtension } from "../../util/path.ts";
+
+type Element = parse5.DefaultTreeAdapterTypes.Element;
 
 marked.use({ async: true, gfm: true });
 
@@ -53,18 +55,21 @@ export async function markdownProcessor(
   const markdownDoc = parse5.parseFragment(markdownContent);
   const templateDoc = parse5.parse(templateContent);
 
-  const outputs = await Promise.all([
-    htmlNodeProcessor(file, markdownDoc, ctx),
-    htmlNodeProcessor(templateFile, templateDoc, ctx),
-  ]);
-
   const main = parse5Dom.selectOne(templateDoc, { tag: "main" });
   if (!main) {
     throw Error("main not found");
   }
+  const bodyElements = new Set<Element>(parse5Dom.selectAll(markdownDoc, {}));
   parse5Dom.appendNodesTo(
     main,
     ...markdownDoc.childNodes,
+  );
+
+  const output = await htmlNodeProcessor(
+    file,
+    templateDoc,
+    ctx,
+    (element) => bodyElements.has(element) ? file : templateFile,
   );
 
   const header = parse5Dom.selectOne(templateDoc, { tag: "head" });
@@ -93,5 +98,5 @@ export async function markdownProcessor(
   await fs.ensureDir(path.dirname(outPath));
   await Deno.writeTextFile(outPath, content);
 
-  return mergeDocumentOutputs(outputs);
+  return output;
 }

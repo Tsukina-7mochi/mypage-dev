@@ -100,3 +100,53 @@ Deno.test("markdown output has a single live reload script", async () => {
   const html = await buildPost(undefined, true, true);
   assertEquals(html.split(endPoint).length - 1, 1);
 });
+
+Deno.test("markdown page with islands in body and template is processed once", async () => {
+  const directory = await Deno.makeTempDir();
+  try {
+    const routes = path.join(directory, "routes");
+    await Deno.mkdir(path.join(routes, "layouts"), { recursive: true });
+    await Deno.mkdir(path.join(routes, "blog"), { recursive: true });
+    await Deno.writeTextFile(
+      path.join(routes, "counter.tsx"),
+      "export default function Counter() { return <span />; }",
+    );
+    await Deno.writeTextFile(
+      path.join(routes, "layouts", "template.html"),
+      '<html><head></head><body><script type="application/client-island" src="../counter.tsx"></script><main></main></body></html>',
+    );
+    await Deno.writeTextFile(
+      path.join(routes, "blog", "post.md"),
+      [
+        "---",
+        "title: Post",
+        "createdAt: 2026-01-01",
+        "updatedAt: 2026-01-01",
+        "template: ../layouts/template.html",
+        "---",
+        '<script type="application/client-island" src="../counter.tsx"></script>',
+      ].join("\n"),
+    );
+
+    const root = path.toFileUrl(routes + "/");
+    const output = await markdownProcessor(new URL("blog/post.md", root), {
+      dev: true,
+      liveReload: false,
+      root,
+      staticDist: path.toFileUrl(path.join(directory, "dist", "static") + "/"),
+    });
+    const html = await Deno.readTextFile(
+      path.join(directory, "dist", "static", "blog", "post.html"),
+    );
+
+    assertEquals(output.virtualFiles.length, 1);
+    assertEquals(
+      html.match(/<script type="module" src="[^"]*"/g),
+      ['<script type="module" src="post-bootstrap.js"'],
+    );
+    const domIds = output.islands.map((instance) => instance.domId);
+    assertEquals(new Set(domIds).size, 2);
+  } finally {
+    await Deno.remove(directory, { recursive: true });
+  }
+});

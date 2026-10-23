@@ -53,7 +53,7 @@ export async function markdownProcessor(
   const templateFile = new URL(frontmatter.template, file);
   const templateContent = await Deno.readTextFile(templateFile);
 
-  const markdownDoc = parse5.parse(markdownContent);
+  const markdownDoc = parse5.parseFragment(markdownContent);
   const templateDoc = parse5.parse(templateContent);
 
   const outputs = await Promise.all([

@@ -1,4 +1,4 @@
-import { assertStringIncludes } from "@std/assert";
+import { assertEquals, assertStringIncludes } from "@std/assert";
 import * as path from "@std/path";
 
 import { markdownProcessor } from "./processor.ts";
@@ -56,4 +56,10 @@ Deno.test("markdown uses the template given in frontmatter", async () => {
     await buildPost("./layouts/custom.html"),
     'data-template="custom"',
   );
+});
+
+Deno.test("markdown body is inserted without a nested document", async () => {
+  const html = await buildPost();
+  assertEquals(html.match(/<html/g)?.length, 1);
+  assertStringIncludes(html, '<main data-template="default"><p>body</p>');
 });

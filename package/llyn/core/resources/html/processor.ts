@@ -25,16 +25,17 @@ import { decomposeExtension } from "../../util/path.ts";
 import { liveReloadScript } from "./liveReload.ts";
 
 type ParentNode = parse5.DefaultTreeAdapterTypes.ParentNode;
+type Element = parse5.DefaultTreeAdapterTypes.Element;
 
 async function createIslandInstance(
   src: string,
   props: Record<string, string>,
   kind: IslandKind,
   index: number,
-  entryUrl: URL,
+  baseUrl: URL,
   ctx: Context,
 ): Promise<IslandInstance> {
-  const island = await createIsland(ctx.root, new URL(src, entryUrl));
+  const island = await createIsland(ctx.root, new URL(src, baseUrl));
   return {
     island,
     kind,
@@ -47,6 +48,7 @@ export async function htmlNodeProcessor<T extends ParentNode>(
   entryUrl: URL,
   document: T,
   ctx: Context,
+  baseUrlOf: (element: Element) => URL = () => entryUrl,
 ): Promise<DocumentOutput> {
   const entryPath = entryUrl.pathname;
   const rootPath = ctx.root.pathname;
@@ -71,7 +73,7 @@ export async function htmlNodeProcessor<T extends ParentNode>(
         el.props,
         "client",
         islandIndex++,
-        entryUrl,
+        baseUrlOf(el.element),
         ctx,
       );
       const prerender = await prerenderClientIsland(instance);
@@ -86,7 +88,7 @@ export async function htmlNodeProcessor<T extends ParentNode>(
         el.props,
         "server",
         islandIndex++,
-        entryUrl,
+        baseUrlOf(el.element),
         ctx,
       );
       const prerender = await prerenderServerIsland(instance);
@@ -101,7 +103,7 @@ export async function htmlNodeProcessor<T extends ParentNode>(
         el.props,
         "static",
         islandIndex++,
-        entryUrl,
+        baseUrlOf(el.element),
         ctx,
       );
       const prerender = await prerenderStaticIsland(instance);
@@ -110,14 +112,14 @@ export async function htmlNodeProcessor<T extends ParentNode>(
   );
 
   const scripts = getScripts(document).map((el) => {
-    const url = new URL(el.path, entryUrl);
+    const url = new URL(el.path, baseUrlOf(el.element));
     const { outFile, sourceFile } = buildAssetProcessor(url, ctx);
     const newSrc = "/" + path.relative(staticDistPath, outFile.pathname);
     return { element: el.element, newSrc, sourceFile };
   });
 
   const stylesheets = getStylesheets(document).map((el) => {
-    const url = new URL(el.path, entryUrl);
+    const url = new URL(el.path, baseUrlOf(el.element));
     const { outFile, sourceFile } = buildAssetProcessor(url, ctx);
     const newHref = "/" + path.relative(staticDistPath, outFile.pathname);
     return { element: el.element, newHref, sourceFile };

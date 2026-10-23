@@ -1,4 +1,4 @@
-import { assertEquals, assertStringIncludes } from "@std/assert";
+import { assertEquals, assertRejects, assertStringIncludes } from "@std/assert";
 import * as path from "@std/path";
 
 import { markdownProcessor } from "./processor.ts";
@@ -70,4 +70,26 @@ Deno.test("markdown body is inserted without a nested document", async () => {
 Deno.test("markdown output is minified in production", async () => {
   const html = await buildPost(undefined, false);
   assertEquals(html.includes("\n"), false);
+});
+
+Deno.test("markdown without frontmatter is rejected", async () => {
+  const directory = await Deno.makeTempDir();
+  try {
+    const file = path.join(directory, "post.md");
+    await Deno.writeTextFile(file, "body");
+
+    await assertRejects(
+      () =>
+        markdownProcessor(path.toFileUrl(file), {
+          dev: true,
+          liveReload: false,
+          root: path.toFileUrl(directory + "/"),
+          staticDist: path.toFileUrl(path.join(directory, "dist") + "/"),
+        }),
+      Error,
+      "Frontmatter is required",
+    );
+  } finally {
+    await Deno.remove(directory, { recursive: true });
+  }
 });

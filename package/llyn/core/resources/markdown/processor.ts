@@ -16,13 +16,13 @@ marked.use({ async: true, gfm: true });
 
 type MarkdownDocument = {
   body: string;
-  frontmatter: Frontmatter | null;
+  frontmatter: Frontmatter;
 };
 
 async function parseDocument(content: string): Promise<MarkdownDocument> {
   const match = content.match(/^-{3,}\n([\s\S]*?)\n-{3,}/);
   if (match === null) {
-    return { body: content.trim(), frontmatter: null };
+    throw Error("Frontmatter is required");
   }
 
   const frontmatterString = match[1].trim();
@@ -47,9 +47,6 @@ export async function markdownProcessor(
   const { body: markdownContent, frontmatter } = await parseDocument(
     await Deno.readTextFile(file),
   );
-  if (!frontmatter) {
-    throw Error("Frontmatter is required");
-  }
   const templateFile = new URL(frontmatter.template, file);
   const templateContent = await Deno.readTextFile(templateFile);
 

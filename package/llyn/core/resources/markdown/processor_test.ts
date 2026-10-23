@@ -6,7 +6,10 @@ import { markdownProcessor } from "./processor.ts";
 const template = (marker: string) =>
   `<html><head></head><body><main data-template="${marker}"></main></body></html>`;
 
-async function buildPost(frontmatterTemplate?: string): Promise<string> {
+async function buildPost(
+  frontmatterTemplate?: string,
+  dev = true,
+): Promise<string> {
   const directory = await Deno.makeTempDir();
   try {
     const routes = path.join(directory, "routes");
@@ -34,7 +37,7 @@ async function buildPost(frontmatterTemplate?: string): Promise<string> {
 
     const root = path.toFileUrl(routes + "/");
     await markdownProcessor(new URL("post.md", root), {
-      dev: true,
+      dev,
       liveReload: false,
       root,
       staticDist: path.toFileUrl(path.join(directory, "dist", "static") + "/"),
@@ -62,4 +65,9 @@ Deno.test("markdown body is inserted without a nested document", async () => {
   const html = await buildPost();
   assertEquals(html.match(/<html/g)?.length, 1);
   assertStringIncludes(html, '<main data-template="default"><p>body</p>');
+});
+
+Deno.test("markdown output is minified in production", async () => {
+  const html = await buildPost(undefined, false);
+  assertEquals(html.includes("\n"), false);
 });

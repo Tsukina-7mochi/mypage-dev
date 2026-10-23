@@ -8,7 +8,7 @@ import * as fs from "@std/fs";
 
 import { Context } from "../../context.ts";
 import { DocumentOutput, mergeDocumentOutputs } from "../../documentOutput.ts";
-import { htmlNodeProcessor } from "../html/processor.ts";
+import { htmlNodeProcessor, minifyHtml } from "../html/processor.ts";
 import { Frontmatter, FrontmatterSchema } from "./frontmatter.ts";
 import { decomposeExtension } from "../../util/path.ts";
 
@@ -88,8 +88,13 @@ export async function markdownProcessor(
     ...parse5.parseFragment(htmlNodes).childNodes,
   );
 
+  let content = parse5.serialize(templateDoc);
+  if (!ctx.dev) {
+    content = await minifyHtml(content);
+  }
+
   await fs.ensureDir(path.dirname(outPath));
-  await Deno.writeTextFile(outPath, parse5.serialize(templateDoc));
+  await Deno.writeTextFile(outPath, content);
 
   return mergeDocumentOutputs(outputs);
 }

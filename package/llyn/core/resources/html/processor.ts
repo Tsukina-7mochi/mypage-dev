@@ -179,6 +179,21 @@ export async function htmlNodeProcessor<T extends ParentNode>(
   };
 }
 
+export async function minifyHtml(html: string): Promise<string> {
+  const result = await htmlnano.process(
+    html,
+    {
+      minifyCss: false,
+      minifyJs: false,
+      minifySvg: false,
+      skipConfigLoading: true,
+      skipInternalWarnings: true,
+    },
+    htmlnano.presets.safe,
+  );
+  return result.html;
+}
+
 export async function htmlFileProcessor(
   url: URL,
   ctx: Context,
@@ -194,19 +209,7 @@ export async function htmlFileProcessor(
   let content = parse5.serialize(document);
 
   if (!ctx.dev) {
-    content = (
-      await htmlnano.process(
-        content,
-        {
-          minifyCss: false,
-          minifyJs: false,
-          minifySvg: false,
-          skipConfigLoading: true,
-          skipInternalWarnings: true,
-        },
-        htmlnano.presets.safe,
-      )
-    ).html;
+    content = await minifyHtml(content);
   }
 
   await fs.ensureDir(path.dirname(outPath));

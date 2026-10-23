@@ -146,7 +146,7 @@ export async function htmlNodeProcessor<T extends ParentNode>(
     serverIslands.length > 0;
   if (hasRuntimeIslands) {
     parse5Dom.appendNodesTo(
-      document,
+      parse5Dom.selectOne(document, { tag: "html" }) ?? document,
       ...parse5.parseFragment(
         `<script type="module" src="${bootstrapSrc}"></script>`,
       ).childNodes,

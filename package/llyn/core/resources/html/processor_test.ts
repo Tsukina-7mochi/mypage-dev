@@ -45,3 +45,25 @@ Deno.test("assigns distinct DOM IDs and props to island instances", async () => 
   assertIncludes(bootstrap, '{"label":"first","_prerender":false}');
   assertIncludes(bootstrap, '{"label":"second","_prerender":false}');
 });
+
+Deno.test("places the bootstrap script inside the html element", async () => {
+  const document = parse5.parse(`
+    <script type="application/client-island" src="./counter.tsx"></script>
+  `);
+  await htmlNodeProcessor(
+    new URL("file:///site/routes/index.html"),
+    document,
+    {
+      dev: true,
+      liveReload: false,
+      root: new URL("file:///site/routes/"),
+      staticDist: new URL("file:///site/dist/static/"),
+    },
+  );
+
+  const html = parse5.serialize(document);
+  assertIncludes(
+    html,
+    '<script type="module" src="index-bootstrap.js"></script></html>',
+  );
+});

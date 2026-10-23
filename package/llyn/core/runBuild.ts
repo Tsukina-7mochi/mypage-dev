@@ -40,7 +40,7 @@ export async function runBuild(
   );
   const serverIslandList = uniqueServerIslands(islands);
 
-  const clientContext = await esbuild.context({
+  const clientBuild = esbuild.build({
     entryPoints: [
       ...sourceFiles,
       ...virtualFiles.map(({ content: _, ...entry }) => entry),
@@ -62,8 +62,8 @@ export async function runBuild(
     sourcemap: options.dev ? "inline" : "linked",
   });
 
-  const serverContext = options.worker
-    ? await esbuild.context({
+  const serverBuild = options.worker
+    ? esbuild.build({
       entryPoints: [{ in: config.worker.pathname, out: "worker" }],
       outdir: config.dist.pathname,
       format: "esm",
@@ -77,14 +77,7 @@ export async function runBuild(
     })
     : undefined;
 
-  await Promise.all([
-    clientContext.rebuild(),
-    serverContext?.rebuild(),
-    copyPublic(config),
-  ]);
-
-  await clientContext.dispose();
-  await serverContext?.dispose();
+  await Promise.all([clientBuild, serverBuild, copyPublic(config)]);
   await esbuild.stop();
 
   return serverIslandList;

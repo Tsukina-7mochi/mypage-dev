@@ -1,5 +1,5 @@
 import * as path from "@std/path";
-import { Island } from "../island.ts";
+import { Island } from "./island.ts";
 
 const IMPORTS_MARKER = "/*{ llyn-imports }*/";
 const SWITCH_CASES_MARKER = "/*{ llyn-switch-cases }*/";
@@ -22,6 +22,7 @@ function switchCaseTemplate(island: Island): string {
 
 export async function renderServerRenderer(
   islands: Island[],
+  // Live reload is served only when a boot id is given.
   bootId?: string,
 ): Promise<string> {
   const templatePath = path.resolve(

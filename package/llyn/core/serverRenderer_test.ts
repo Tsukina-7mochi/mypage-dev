@@ -1,6 +1,6 @@
 import * as path from "@std/path";
 
-import { Island } from "../island.ts";
+import { Island } from "./island.ts";
 import { renderServerRenderer } from "./serverRenderer.ts";
 
 const islandSource = `type Props = {

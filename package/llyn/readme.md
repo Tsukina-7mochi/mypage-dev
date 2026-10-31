@@ -120,7 +120,9 @@ after reconnecting.
    prerenderers and the build asset processor directly. Each processor returns a
    `DocumentOutput` (source files, virtual files for page bootstraps, and island
    instances), and `runBuild` merges them and checks island id collisions.
-3. esbuild bundles client code into `dist/static/` (ESM, code splitting into
+3. `renderServerRenderer` (`core/serverRenderer.ts`) generates the runtime from
+   the server islands.
+4. esbuild bundles client code into `dist/static/` (ESM, code splitting into
    `chunks/`), and bundles the worker entry into `dist/worker.js` with the
    generated runtime. In parallel, `copyPublic` (`core/copyPublic.ts`) copies
    `public` to `dist/static/<basename>/`.
@@ -147,9 +149,9 @@ after reconnecting.
   - `resources/island/prerender.ts`: React prerender per island kind
   - `resources/island/bootstrap.ts`: page bootstrap with static imports
   - `resources/buildAsset/processor.ts`: script / css output mapping
+  - `serverRenderer.ts`: prod `llyn/runtime` generation
   - `esbuildPlugin/llynRuntimePlugin.ts`: replaces `llyn/runtime` with generated
     code
-  - `esbuildPlugin/serverRenderer.ts`: prod `llyn/runtime` generation
   - `esbuildPlugin/virtualFilePlugin.ts`: serves in-memory virtual files
   - `esbuildPlugin/dataUrlPlugin.ts`: keeps `data:` imports external
 - `runtime/`

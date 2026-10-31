@@ -11,6 +11,7 @@ import { uniqueServerIslands } from "./island.ts";
 import { collectDocuments } from "./collect.ts";
 import { getStaticDist, ResolvedLlynConfig } from "./config.ts";
 import { copyPublic } from "./copyPublic.ts";
+import { renderServerRenderer } from "./serverRenderer.ts";
 
 export type BuildOptions = {
   dev: boolean;
@@ -61,16 +62,18 @@ export async function runBuild(
     sourcemap: options.dev ? "inline" : "linked",
   });
 
+  const serverRenderer = await renderServerRenderer(
+    serverIslandList,
+    options.liveReload ? crypto.randomUUID() : undefined,
+  );
+
   const serverBuild = esbuild.build({
     entryPoints: [{ in: config.worker.pathname, out: "worker" }],
     outdir: config.dist.pathname,
     format: "esm",
     bundle: true,
     plugins: [
-      llynRuntimePlugin({
-        islands: serverIslandList,
-        bootId: options.liveReload ? crypto.randomUUID() : undefined,
-      }),
+      llynRuntimePlugin({ contents: serverRenderer }),
       denoPlugin(),
     ],
     minify: !options.dev,

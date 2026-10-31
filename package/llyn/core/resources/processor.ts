@@ -1,21 +1,14 @@
 import { Context } from "../context.ts";
-import { DocumentEntry } from "../collect.ts";
 import { DocumentOutput } from "../documentOutput.ts";
-import { htmlFileProcessor } from "./html/processor.ts";
-import { markdownProcessor } from "./markdown/processor.ts";
+import { LoadedDocument } from "../load.ts";
+import { writeDocument } from "../render.ts";
+import { htmlNodeProcessor } from "./html/processor.ts";
 
-export function processDocument(
-  entry: DocumentEntry,
+export async function processDocument(
+  doc: LoadedDocument,
   ctx: Context,
 ): Promise<DocumentOutput> {
-  switch (entry.type) {
-    case "html":
-      return htmlFileProcessor(entry.path, ctx);
-    case "markdown":
-      return markdownProcessor(entry.path, ctx);
-    default:
-      throw Error(
-        `Unknown entry type: ${JSON.stringify(entry satisfies never)}`,
-      );
-  }
+  const output = await htmlNodeProcessor(doc.url, doc.document, ctx);
+  await writeDocument(doc, ctx);
+  return output;
 }

@@ -116,13 +116,17 @@ after reconnecting.
 
 1. `runBuild(config, options)` (`core/runBuild.ts`) collects documents
    (`core/collect.ts`) and creates a `Context` (`core/context.ts`).
-2. Documents flow through the HTML / Markdown processors, which call the island
-   prerenderers and the build asset processor directly. Each processor returns a
-   `DocumentOutput` (source files, virtual files for page bootstraps, and island
-   instances), and `runBuild` merges them and checks island id collisions.
-3. `renderServerRenderer` (`core/serverRenderer.ts`) generates the runtime from
+2. `loadDocuments` (`core/load.ts`) loads each document into a `LoadedDocument`
+   (the source URL, the output path, and the DOM). Markdown is converted and
+   merged into its template here.
+3. `processDocument` runs the HTML processor, which calls the island
+   prerenderers and the build asset processor directly, and writes the document
+   with `writeDocument` (`core/render.ts`). It returns a `DocumentOutput`
+   (source files, virtual files for page bootstraps, and island instances), and
+   `runBuild` merges them and checks island id collisions.
+4. `renderServerRenderer` (`core/serverRenderer.ts`) generates the runtime from
    the server islands.
-4. esbuild bundles client code into `dist/static/` (ESM, code splitting into
+5. esbuild bundles client code into `dist/static/` (ESM, code splitting into
    `chunks/`), and bundles the worker entry into `dist/worker.js` with the
    generated runtime. In parallel, `copyPublic` (`core/copyPublic.ts`) copies
    `public` to `dist/static/<basename>/`.
@@ -135,16 +139,20 @@ after reconnecting.
   - `main.ts`: build CLI
   - `config.ts`: config schema, `defineConfig`, `loadConfig`, `getStaticDist`
   - `collect.ts`: document collection and `DocumentEntry`
+  - `load.ts`: `loadDocuments` and `LoadedDocument`
+  - `render.ts`: `writeDocument` (serialize, minify, write)
   - `copyPublic.ts`: copies `public` under `dist/static/`
   - `island.ts`: `Island`, `IslandInstance`, island id, `createIsland`, and
     server island extraction
   - `context.ts`: `Context`
   - `documentOutput.ts`: `DocumentOutput` and `mergeDocumentOutputs`
-  - `resources/processor.ts`: `processDocument` dispatch by document type
+  - `resources/processor.ts`: `processDocument`
+  - `resources/html/load.ts`: `loadHtml`
   - `resources/html/processor.ts`: island prerender, DOM rewrite, bootstrap
   - `resources/html/helper.ts`: DOM queries for islands, scripts, styles
   - `resources/html/liveReload.ts`: live reload client script
-  - `resources/markdown/processor.ts`: frontmatter, marked, template merge
+  - `resources/markdown/load.ts`: `loadMarkdown` (frontmatter, marked, template
+    merge)
   - `resources/markdown/frontmatter.ts`: frontmatter schema
   - `resources/island/prerender.ts`: React prerender per island kind
   - `resources/island/bootstrap.ts`: page bootstrap with static imports

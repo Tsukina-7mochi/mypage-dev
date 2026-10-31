@@ -4,11 +4,9 @@ import * as v from "valibot";
 import * as parse5Dom from "parse5-dom";
 import * as parse5 from "parse5";
 import * as path from "@std/path";
-import * as fs from "@std/fs";
 
 import { Context } from "../../context.ts";
-import { DocumentOutput } from "../../documentOutput.ts";
-import { htmlNodeProcessor, minifyHtml } from "../html/processor.ts";
+import { LoadedDocument } from "../../load.ts";
 import {
   getClientIslands,
   getScripts,
@@ -68,10 +66,10 @@ function rebaseReferences(document: Document, from: URL, to: URL) {
   }
 }
 
-export async function markdownProcessor(
+export async function loadMarkdown(
   file: URL,
   ctx: Context,
-): Promise<DocumentOutput> {
+): Promise<LoadedDocument> {
   const filePath = file.pathname;
   const rootPath = ctx.root.pathname;
   const staticDistPath = ctx.staticDist.pathname;
@@ -99,8 +97,6 @@ export async function markdownProcessor(
     ...markdownDoc.childNodes,
   );
 
-  const output = await htmlNodeProcessor(file, templateDoc, ctx);
-
   const header = parse5Dom.selectOne(templateDoc, { tag: "head" });
   if (!header) {
     throw Error("head not found");
@@ -119,13 +115,5 @@ export async function markdownProcessor(
     ...parse5.parseFragment(htmlNodes).childNodes,
   );
 
-  let content = parse5.serialize(templateDoc);
-  if (!ctx.dev) {
-    content = await minifyHtml(content);
-  }
-
-  await fs.ensureDir(path.dirname(outPath));
-  await Deno.writeTextFile(outPath, content);
-
-  return output;
+  return { url: file, outPath, document: templateDoc };
 }

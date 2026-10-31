@@ -1,8 +1,6 @@
-import * as fs from "@std/fs";
 import * as parse5 from "parse5";
 import * as path from "@std/path";
 import * as parse5Dom from "parse5-dom";
-import * as htmlnano from "htmlnano";
 
 import { Context } from "../../context.ts";
 import { DocumentOutput } from "../../documentOutput.ts";
@@ -181,43 +179,4 @@ export async function htmlNodeProcessor(
       (island) => island.instance,
     ),
   };
-}
-
-export async function minifyHtml(html: string): Promise<string> {
-  const result = await htmlnano.process(
-    html,
-    {
-      minifyCss: false,
-      minifyJs: false,
-      minifySvg: false,
-      skipConfigLoading: true,
-      skipInternalWarnings: true,
-    },
-    htmlnano.presets.safe,
-  );
-  return result.html;
-}
-
-export async function htmlFileProcessor(
-  url: URL,
-  ctx: Context,
-): Promise<DocumentOutput> {
-  const filepath = url.pathname;
-  const rootPath = ctx.root.pathname;
-  const staticDistPath = ctx.staticDist.pathname;
-  const outPath = path.join(staticDistPath, path.relative(rootPath, filepath));
-
-  const rawContent = await Deno.readTextFile(url);
-  const document = parse5.parse(rawContent);
-  const output = await htmlNodeProcessor(url, document, ctx);
-  let content = parse5.serialize(document);
-
-  if (!ctx.dev) {
-    content = await minifyHtml(content);
-  }
-
-  await fs.ensureDir(path.dirname(outPath));
-  await Deno.writeTextFile(outPath, content);
-
-  return output;
 }

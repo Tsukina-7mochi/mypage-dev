@@ -9,6 +9,7 @@ import { mergeDocumentOutputs } from "./documentOutput.ts";
 import { processDocument } from "./resources/processor.ts";
 import { uniqueServerIslands } from "./island.ts";
 import { collectDocuments } from "./collect.ts";
+import { loadDocuments } from "./load.ts";
 import { getStaticDist, ResolvedLlynConfig } from "./config.ts";
 import { copyPublic } from "./copyPublic.ts";
 import { renderServerRenderer } from "./serverRenderer.ts";
@@ -31,12 +32,9 @@ export async function runBuild(
     staticDist,
   };
 
+  const documents = await loadDocuments(await collectDocuments(config), ctx);
   const { sourceFiles, virtualFiles, islands } = mergeDocumentOutputs(
-    await Promise.all(
-      (await collectDocuments(config)).map((entry) =>
-        processDocument(entry, ctx)
-      ),
-    ),
+    await Promise.all(documents.map((doc) => processDocument(doc, ctx))),
   );
   const serverIslandList = uniqueServerIslands(islands);
 

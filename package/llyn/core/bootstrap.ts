@@ -1,9 +1,9 @@
 import * as path from "@std/path";
 
-import { VirtualFile } from "../../entryPoint.ts";
-import { IslandInstance } from "../../island.ts";
-import { CollectedDocument, LoadedDocument } from "../../document.ts";
-import { decomposeExtension } from "../../util/path.ts";
+import { VirtualFile } from "./entryPoint.ts";
+import { IslandInstance } from "./island.ts";
+import { CollectedDocument, LoadedDocument } from "./document.ts";
+import { decomposeExtension } from "./util/path.ts";
 
 export type BootstrapPaths = {
   // Virtual module name of the bootstrap.

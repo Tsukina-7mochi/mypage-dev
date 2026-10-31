@@ -53,8 +53,7 @@ documents are included in the bundle.
 Markdown frontmatter is written in YAML and inserted into the HTML according to
 its keys. A Markdown document uses the template given by the `template`
 frontmatter key (a path relative to the document), defaulting to
-`template.html`. See `core/resources/markdown/frontmatter.ts` for the supported
-keys.
+`template.html`. See `core/load/frontmatter.ts` for the supported keys.
 
 ### Islands
 
@@ -127,9 +126,9 @@ after reconnecting.
    - `renderDocument` (`core/render.ts`) runs on each document:
      `prerenderIslands`, `rewriteAssetReferences`, `embedPrerenders`,
      `injectScripts` (bootstrap and live reload), and `writeDocument`.
-   - `renderBootstraps` (`core/resources/island/bootstrap.ts`) renders the
-     virtual file for each page bootstrap, and esbuild bundles them with the
-     source files into `dist/static/` (ESM, code splitting into `chunks/`).
+   - `renderBootstraps` (`core/bootstrap.ts`) renders the virtual file for each
+     page bootstrap, and esbuild bundles them with the source files into
+     `dist/static/` (ESM, code splitting into `chunks/`).
    - `renderServerRenderer` (`core/serverRenderer.ts`) generates the runtime
      from the server islands, and esbuild bundles the worker entry into
      `dist/worker.js` with it.
@@ -147,23 +146,22 @@ after reconnecting.
   - `document.ts`: `LoadedDocument` and `CollectedDocument` passed between
     stages
   - `load.ts`: `loadDocuments`
+  - `load/html.ts`: `loadHtml`
+  - `load/markdown.ts`: `loadMarkdown` (frontmatter, marked, template merge)
+  - `load/frontmatter.ts`: frontmatter schema
   - `scan.ts`: `scanDocuments`
   - `render.ts`: `renderDocument` and its stages, from island prerender to
     `writeDocument` (serialize, minify, write)
+  - `prerender.ts`: React prerender per island kind
+  - `liveReload.ts`: live reload client script
+  - `bootstrap.ts`: `renderBootstraps` (page bootstrap with static imports) and
+    `bootstrapPaths`
+  - `dom.ts`: DOM queries for islands, scripts, styles
   - `entryPoint.ts`: `SourceFile` and `VirtualFile` for esbuild entry points
   - `copyPublic.ts`: copies `public` under `dist/static/`
   - `island.ts`: `Island`, `IslandInstance`, island id, `createIsland`, and
     server island extraction
   - `context.ts`: `Context`
-  - `resources/html/load.ts`: `loadHtml`
-  - `resources/html/helper.ts`: DOM queries for islands, scripts, styles
-  - `resources/html/liveReload.ts`: live reload client script
-  - `resources/markdown/load.ts`: `loadMarkdown` (frontmatter, marked, template
-    merge)
-  - `resources/markdown/frontmatter.ts`: frontmatter schema
-  - `resources/island/prerender.ts`: React prerender per island kind
-  - `resources/island/bootstrap.ts`: `renderBootstraps` (page bootstrap with
-    static imports) and `bootstrapPaths`
   - `resources/buildAsset/processor.ts`: script / css output mapping
   - `serverRenderer.ts`: prod `llyn/runtime` generation
   - `esbuildPlugin/llynRuntimePlugin.ts`: replaces `llyn/runtime` with generated

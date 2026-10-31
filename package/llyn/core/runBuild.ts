@@ -11,7 +11,7 @@ import { loadDocuments } from "./load.ts";
 import { scanDocuments } from "./scan.ts";
 import { renderDocument } from "./render.ts";
 import { SourceFile, VirtualFile } from "./entryPoint.ts";
-import { renderBootstraps } from "./resources/island/bootstrap.ts";
+import { renderBootstraps } from "./bootstrap.ts";
 import { getStaticDist, ResolvedLlynConfig } from "./config.ts";
 import { copyPublic } from "./copyPublic.ts";
 import { renderServerRenderer } from "./serverRenderer.ts";

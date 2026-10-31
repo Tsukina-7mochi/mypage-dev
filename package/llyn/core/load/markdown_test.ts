@@ -2,9 +2,9 @@ import { assertEquals, assertRejects, assertStringIncludes } from "@std/assert";
 import * as parse5 from "parse5";
 import * as path from "@std/path";
 
-import { Context } from "../../context.ts";
-import { getClientIslands } from "../html/helper.ts";
-import { loadMarkdown } from "./load.ts";
+import { Context } from "../context.ts";
+import { getClientIslands } from "../dom.ts";
+import { loadMarkdown } from "./markdown.ts";
 
 const template = (marker: string) =>
   `<html><head></head><body><main data-template="${marker}"></main></body></html>`;

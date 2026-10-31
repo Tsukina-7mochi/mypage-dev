@@ -5,17 +5,17 @@ import * as parse5Dom from "parse5-dom";
 import * as parse5 from "parse5";
 import * as path from "@std/path";
 
-import { Context } from "../../context.ts";
-import { LoadedDocument } from "../../document.ts";
+import { Context } from "../context.ts";
+import { LoadedDocument } from "../document.ts";
 import {
   getClientIslands,
   getScripts,
   getServerIslands,
   getStaticIslands,
   getStylesheets,
-} from "../html/helper.ts";
+} from "../dom.ts";
 import { Frontmatter, FrontmatterSchema } from "./frontmatter.ts";
-import { decomposeExtension } from "../../util/path.ts";
+import { decomposeExtension } from "../util/path.ts";
 
 type Document = parse5.DefaultTreeAdapterTypes.Document;
 

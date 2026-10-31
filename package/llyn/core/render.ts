@@ -7,16 +7,13 @@ import * as htmlnano from "htmlnano";
 import { Context } from "./context.ts";
 import { IslandInstance } from "./island.ts";
 import { CollectedDocument, LoadedDocument } from "./document.ts";
-import {
-  bootstrapPaths,
-  hasRuntimeIslands,
-} from "./resources/island/bootstrap.ts";
+import { bootstrapPaths, hasRuntimeIslands } from "./bootstrap.ts";
 import {
   prerenderClientIsland,
   prerenderServerIsland,
   prerenderStaticIsland,
-} from "./resources/island/prerender.ts";
-import { liveReloadScript } from "./resources/html/liveReload.ts";
+} from "./prerender.ts";
+import { liveReloadScript } from "./liveReload.ts";
 
 type Element = parse5.DefaultTreeAdapterTypes.Element;
 

@@ -2,8 +2,8 @@ import { assertEquals, assertStringIncludes } from "@std/assert";
 import * as parse5 from "parse5";
 import * as parse5Dom from "parse5-dom";
 
-import { Island, IslandInstance, IslandKind } from "../../island.ts";
-import { CollectedDocument } from "../../document.ts";
+import { Island, IslandInstance, IslandKind } from "./island.ts";
+import { CollectedDocument } from "./document.ts";
 import {
   bootstrapPaths,
   renderBootstrap,

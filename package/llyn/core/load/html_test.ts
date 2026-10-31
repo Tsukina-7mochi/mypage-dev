@@ -2,7 +2,7 @@ import { assertEquals, assertStringIncludes } from "@std/assert";
 import * as parse5 from "parse5";
 import * as path from "@std/path";
 
-import { loadHtml } from "./load.ts";
+import { loadHtml } from "./html.ts";
 
 let temporaryDirectory: string;
 let routes: string;

@@ -1,6 +1,6 @@
 import * as path from "@std/path";
 
-import { Island, IslandInstance } from "../../island.ts";
+import { Island, IslandInstance } from "./island.ts";
 import { prerenderServerIsland, prerenderStaticIsland } from "./prerender.ts";
 
 const islandSource = `type Props = {

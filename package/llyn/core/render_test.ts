@@ -13,7 +13,7 @@ import {
   rewriteAssetReferences,
   writeDocument,
 } from "./render.ts";
-import { endPoint } from "./resources/html/liveReload.ts";
+import { endPoint } from "./liveReload.ts";
 
 let temporaryDirectory: string;
 let routes: string;

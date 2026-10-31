@@ -1,6 +1,6 @@
 import * as parse5 from "parse5";
 
-import { getClientIslands } from "./helper.ts";
+import { getClientIslands } from "./dom.ts";
 
 Deno.test("island props exclude framework-reserved attributes", () => {
   const document = parse5.parse(`

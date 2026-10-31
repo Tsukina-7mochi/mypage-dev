@@ -1,8 +1,8 @@
 import { Context } from "./context.ts";
 import { DocumentEntry } from "./collect.ts";
 import { LoadedDocument } from "./document.ts";
-import { loadHtml } from "./resources/html/load.ts";
-import { loadMarkdown } from "./resources/markdown/load.ts";
+import { loadHtml } from "./load/html.ts";
+import { loadMarkdown } from "./load/markdown.ts";
 
 function loadDocument(
   entry: DocumentEntry,

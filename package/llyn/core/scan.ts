@@ -10,7 +10,7 @@ import {
   getServerIslands,
   getStaticIslands,
   getStylesheets,
-} from "./resources/html/helper.ts";
+} from "./dom.ts";
 import { buildAssetProcessor } from "./resources/buildAsset/processor.ts";
 
 type Element = parse5.DefaultTreeAdapterTypes.Element;

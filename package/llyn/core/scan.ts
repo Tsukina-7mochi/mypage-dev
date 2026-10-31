@@ -11,7 +11,8 @@ import {
   getStaticIslands,
   getStylesheets,
 } from "./dom.ts";
-import { buildAssetProcessor } from "./resources/buildAsset/processor.ts";
+import { SourceFile } from "./entryPoint.ts";
+import { decomposeExtension } from "./util/path.ts";
 
 type Element = parse5.DefaultTreeAdapterTypes.Element;
 
@@ -32,6 +33,39 @@ async function createIslandInstance(
   };
 }
 
+const extensionConversion = {
+  ".ts": ".js",
+  ".jsx": ".js",
+  ".tsx": ".js",
+  ".mjs": ".js",
+  ".cjs": ".js",
+};
+
+function resolveAssetOutput(
+  url: URL,
+  ctx: Context,
+): { outFile: URL; sourceFile: SourceFile } {
+  const filepath = url.pathname;
+  const rootPath = ctx.root.pathname;
+  const staticDistPath = ctx.staticDist.pathname;
+  const outPathPreExt = path.join(
+    staticDistPath,
+    path.relative(rootPath, filepath),
+  );
+
+  let outPath = outPathPreExt;
+  const [outName, outExt] = decomposeExtension(outPathPreExt);
+  if (outExt in extensionConversion) {
+    outPath = outName +
+      extensionConversion[outExt as keyof typeof extensionConversion];
+  }
+
+  return {
+    outFile: new URL(`file://${outPath}`),
+    sourceFile: { in: filepath, out: outName },
+  };
+}
+
 function scanAsset(
   element: Element,
   reference: string,
@@ -39,7 +73,7 @@ function scanAsset(
   ctx: Context,
 ): ScannedAsset {
   const url = new URL(reference, entryUrl);
-  const { outFile, sourceFile } = buildAssetProcessor(url, ctx);
+  const { outFile, sourceFile } = resolveAssetOutput(url, ctx);
   return {
     element,
     reference: "/" + path.relative(ctx.staticDist.pathname, outFile.pathname),

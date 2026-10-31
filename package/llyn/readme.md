@@ -149,7 +149,8 @@ after reconnecting.
   - `load/html.ts`: `loadHtml`
   - `load/markdown.ts`: `loadMarkdown` (frontmatter, marked, template merge)
   - `load/frontmatter.ts`: frontmatter schema
-  - `scan.ts`: `scanDocuments`
+  - `scan.ts`: `scanDocuments` (island instances, and script / css output
+    mapping)
   - `render.ts`: `renderDocument` and its stages, from island prerender to
     `writeDocument` (serialize, minify, write)
   - `prerender.ts`: React prerender per island kind
@@ -162,7 +163,6 @@ after reconnecting.
   - `island.ts`: `Island`, `IslandInstance`, island id, `createIsland`, and
     server island extraction
   - `context.ts`: `Context`
-  - `resources/buildAsset/processor.ts`: script / css output mapping
   - `serverRenderer.ts`: prod `llyn/runtime` generation
   - `esbuildPlugin/llynRuntimePlugin.ts`: replaces `llyn/runtime` with generated
     code

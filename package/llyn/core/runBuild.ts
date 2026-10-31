@@ -5,11 +5,11 @@ import { virtualFilePlugin } from "./esbuildPlugin/virtualFilePlugin.ts";
 import { llynRuntimePlugin } from "./esbuildPlugin/llynRuntimePlugin.ts";
 import { dataUrlPlugin } from "./esbuildPlugin/dataUrlPlugin.ts";
 import { Context } from "./context.ts";
-import { mergeDocumentOutputs } from "./documentOutput.ts";
-import { processDocument } from "./resources/processor.ts";
 import { uniqueServerIslands } from "./island.ts";
 import { collectDocuments } from "./collect.ts";
 import { loadDocuments } from "./load.ts";
+import { scanDocuments } from "./scan.ts";
+import { renderDocument } from "./render.ts";
 import { getStaticDist, ResolvedLlynConfig } from "./config.ts";
 import { copyPublic } from "./copyPublic.ts";
 import { renderServerRenderer } from "./serverRenderer.ts";
@@ -32,11 +32,19 @@ export async function runBuild(
     staticDist,
   };
 
-  const documents = await loadDocuments(await collectDocuments(config), ctx);
-  const { sourceFiles, virtualFiles, islands } = mergeDocumentOutputs(
-    await Promise.all(documents.map((doc) => processDocument(doc, ctx))),
+  const documents = await scanDocuments(
+    await loadDocuments(await collectDocuments(config), ctx),
+    ctx,
   );
-  const serverIslandList = uniqueServerIslands(islands);
+  const serverIslandList = uniqueServerIslands(
+    documents.flatMap((doc) => doc.islands.map((island) => island.instance)),
+  );
+  const virtualFiles = (await Promise.all(
+    documents.map((doc) => renderDocument(doc, ctx)),
+  )).flat();
+  const sourceFiles = documents.flatMap((doc) =>
+    [...doc.scripts, ...doc.stylesheets].map((asset) => asset.sourceFile)
+  );
 
   const clientBuild = esbuild.build({
     entryPoints: [

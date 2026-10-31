@@ -119,14 +119,16 @@ after reconnecting.
 2. `loadDocuments` (`core/load.ts`) loads each document into a `LoadedDocument`
    (the source URL, the output path, and the DOM). Markdown is converted and
    merged into its template here.
-3. `processDocument` runs the HTML processor, which calls the island
-   prerenderers and the build asset processor directly, and writes the document
-   with `writeDocument` (`core/render.ts`). It returns a `DocumentOutput`
-   (source files, virtual files for page bootstraps, and island instances), and
-   `runBuild` merges them and checks island id collisions.
-4. `renderServerRenderer` (`core/serverRenderer.ts`) generates the runtime from
+3. `scanDocuments` (`core/scan.ts`) collects the island instances, scripts, and
+   stylesheets of each document into a `CollectedDocument`. `runBuild` derives
+   the esbuild source files and the server islands from them, checking island id
+   collisions.
+4. `renderDocument` (`core/render.ts`) prerenders the islands of each document,
+   rewrites the DOM, writes it with `writeDocument`, and returns the virtual
+   file for the page bootstrap.
+5. `renderServerRenderer` (`core/serverRenderer.ts`) generates the runtime from
    the server islands.
-5. esbuild bundles client code into `dist/static/` (ESM, code splitting into
+6. esbuild bundles client code into `dist/static/` (ESM, code splitting into
    `chunks/`), and bundles the worker entry into `dist/worker.js` with the
    generated runtime. In parallel, `copyPublic` (`core/copyPublic.ts`) copies
    `public` to `dist/static/<basename>/`.
@@ -140,15 +142,15 @@ after reconnecting.
   - `config.ts`: config schema, `defineConfig`, `loadConfig`, `getStaticDist`
   - `collect.ts`: document collection and `DocumentEntry`
   - `load.ts`: `loadDocuments` and `LoadedDocument`
-  - `render.ts`: `writeDocument` (serialize, minify, write)
+  - `scan.ts`: `scanDocuments` and `CollectedDocument`
+  - `render.ts`: `renderDocument` (island prerender, DOM rewrite, bootstrap) and
+    `writeDocument` (serialize, minify, write)
+  - `entryPoint.ts`: `SourceFile` and `VirtualFile` for esbuild entry points
   - `copyPublic.ts`: copies `public` under `dist/static/`
   - `island.ts`: `Island`, `IslandInstance`, island id, `createIsland`, and
     server island extraction
   - `context.ts`: `Context`
-  - `documentOutput.ts`: `DocumentOutput` and `mergeDocumentOutputs`
-  - `resources/processor.ts`: `processDocument`
   - `resources/html/load.ts`: `loadHtml`
-  - `resources/html/processor.ts`: island prerender, DOM rewrite, bootstrap
   - `resources/html/helper.ts`: DOM queries for islands, scripts, styles
   - `resources/html/liveReload.ts`: live reload client script
   - `resources/markdown/load.ts`: `loadMarkdown` (frontmatter, marked, template

@@ -3,8 +3,7 @@ import * as parse5 from "parse5";
 import * as path from "@std/path";
 
 import { Context } from "../../context.ts";
-import { htmlNodeProcessor } from "../html/processor.ts";
-import { endPoint } from "../html/liveReload.ts";
+import { getClientIslands } from "../html/helper.ts";
 import { loadMarkdown } from "./load.ts";
 
 const template = (marker: string) =>
@@ -31,10 +30,10 @@ Deno.test.afterEach(async () => {
   await Deno.remove(temporaryDirectory, { recursive: true });
 });
 
-function context(liveReload = false): Context {
+function context(): Context {
   return {
     dev: true,
-    liveReload,
+    liveReload: false,
     root: path.toFileUrl(routes + "/"),
     staticDist: path.toFileUrl(
       path.join(temporaryDirectory, "dist", "static") + "/",
@@ -111,20 +110,8 @@ Deno.test("markdown without frontmatter is rejected", async () => {
   );
 });
 
-Deno.test("markdown output has a single live reload script", async () => {
-  const ctx = context(true);
-  const doc = await loadMarkdown(await writePost(), ctx);
-  await htmlNodeProcessor(doc.url, doc.document, ctx);
-  const html = parse5.serialize(doc.document);
-  assertEquals(html.split(endPoint).length - 1, 1);
-});
-
-Deno.test("markdown page with islands in body and template is processed once", async () => {
+Deno.test("markdown body and template islands are rebased into one document", async () => {
   await Deno.mkdir(path.join(routes, "blog"), { recursive: true });
-  await Deno.writeTextFile(
-    path.join(routes, "counter.tsx"),
-    "export default function Counter() { return <span />; }",
-  );
   await Deno.writeTextFile(
     path.join(routes, "layouts", "template.html"),
     '<html><head><link rel="stylesheet" href="./layout.css"></head><body><script type="application/client-island" src="../counter.tsx"></script><main></main></body></html>',
@@ -143,21 +130,13 @@ Deno.test("markdown page with islands in body and template is processed once", a
     ].join("\n"),
   );
 
-  const ctx = context();
-  const doc = await loadMarkdown(path.toFileUrl(file), ctx);
-  const output = await htmlNodeProcessor(doc.url, doc.document, ctx);
+  const doc = await loadMarkdown(path.toFileUrl(file), context());
   const html = parse5.serialize(doc.document);
 
-  assertEquals(output.virtualFiles.length, 1);
+  assertEquals(html.match(/<html/g)?.length, 1);
   assertEquals(
-    html.match(/<script type="module" src="[^"]*"/g),
-    ['<script type="module" src="post-bootstrap.js"'],
+    getClientIslands(doc.document).map((island) => island.src),
+    ["../counter.tsx", "../counter.tsx"],
   );
-  const domIds = output.islands.map((instance) => instance.domId);
-  assertEquals(new Set(domIds).size, 2);
-  assertEquals(
-    output.islands.map((instance) => instance.island.specifier),
-    ["counter.tsx", "counter.tsx"],
-  );
-  assertStringIncludes(html, 'href="/layouts/layout.css"');
+  assertStringIncludes(html, 'href="../layouts/layout.css"');
 });

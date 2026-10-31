@@ -7,7 +7,13 @@ import { Context } from "./context.ts";
 import { Island, IslandKind } from "./island.ts";
 import { LoadedDocument } from "./load.ts";
 import { CollectedDocument } from "./scan.ts";
-import { renderDocument, writeDocument } from "./render.ts";
+import {
+  embedPrerenders,
+  injectScripts,
+  prerenderIslands,
+  rewriteAssetReferences,
+  writeDocument,
+} from "./render.ts";
 import { endPoint } from "./resources/html/liveReload.ts";
 
 let temporaryDirectory: string;
@@ -95,38 +101,57 @@ Deno.test("document output is minified in production", async () => {
   assertEquals((await Deno.readTextFile(doc.outPath)).includes("\n"), false);
 });
 
-Deno.test("islands are replaced with their prerendered html", async () => {
+Deno.test("islands are prerendered by kind", async () => {
   const doc = collected(twoIslands, ["client", "static"]);
-  await renderDocument(doc, context());
+  const prerenders = await prerenderIslands(doc);
 
-  const html = parse5.serialize(doc.document);
-  assertStringIncludes(html, '<div id="1234abcd-0"></div>');
-  assertStringIncludes(html, '<div id="1234abcd-1"><section>card</section>');
-  assertEquals(html.includes("-island"), false);
+  assertEquals(
+    prerenders.map(({ element, html }) => ({ element, html })),
+    [
+      { element: doc.islands[0].element, html: '<div id="1234abcd-0"></div>' },
+      {
+        element: doc.islands[1].element,
+        html: '<div id="1234abcd-1"><section>card</section></div>',
+      },
+    ],
+  );
 });
 
-Deno.test("asset references are rewritten to the built outputs", async () => {
+Deno.test("asset references are rewritten to the built outputs", () => {
   const doc = loaded(
     '<link rel="stylesheet" href="./index.css"><script src="./main.ts"></script>',
   );
   const [stylesheet] = parse5Dom.selectAll(doc.document, { tag: "link" });
   const [script] = parse5Dom.selectAll(doc.document, { tag: "script" });
   const sourceFile = { in: "", out: "" };
-  await renderDocument({
+  rewriteAssetReferences({
     ...doc,
     islands: [],
     scripts: [{ element: script, reference: "/main.js", sourceFile }],
     stylesheets: [{ element: stylesheet, reference: "/index.css", sourceFile }],
-  }, context());
+  });
 
   const html = parse5.serialize(doc.document);
   assertStringIncludes(html, '<link rel="stylesheet" href="/index.css">');
   assertStringIncludes(html, '<script src="/main.js" type="module"></script>');
 });
 
-Deno.test("bootstrap script is placed inside the html element", async () => {
+Deno.test("prerenders replace the island elements", () => {
   const doc = collected(twoIslands, ["client", "static"]);
-  await renderDocument(doc, context());
+  embedPrerenders([
+    { element: doc.islands[0].element, html: '<div id="a"></div>' },
+    { element: doc.islands[1].element, html: "<p>b</p><p>c</p>" },
+  ]);
+
+  const html = parse5.serialize(doc.document);
+  assertStringIncludes(html, '<div id="a"></div>');
+  assertStringIncludes(html, "<p>b</p><p>c</p>");
+  assertEquals(html.includes("-island"), false);
+});
+
+Deno.test("bootstrap script is placed inside the html element", () => {
+  const doc = collected(twoIslands, ["client", "static"]);
+  injectScripts(doc, context());
 
   assertStringIncludes(
     parse5.serialize(doc.document),
@@ -134,19 +159,19 @@ Deno.test("bootstrap script is placed inside the html element", async () => {
   );
 });
 
-Deno.test("bootstrap script is omitted without client or server islands", async () => {
+Deno.test("bootstrap script is omitted without client or server islands", () => {
   const doc = collected(
     '<script type="application/static-island" src="./card.tsx"></script>',
     ["static"],
   );
-  await renderDocument(doc, context());
+  injectScripts(doc, context());
 
   assertEquals(parse5.serialize(doc.document).includes("bootstrap"), false);
 });
 
-Deno.test("live reload script is placed once inside the html element", async () => {
+Deno.test("live reload script is placed once inside the html element", () => {
   const doc = collected("", []);
-  await renderDocument(doc, context({ liveReload: true }));
+  injectScripts(doc, context({ liveReload: true }));
 
   const html = parse5.serialize(doc.document);
   assertEquals(html.split(endPoint).length - 1, 1);

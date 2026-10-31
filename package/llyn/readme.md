@@ -124,8 +124,9 @@ after reconnecting.
    the esbuild source files and the server islands from them, checking island id
    collisions.
 4. In parallel:
-   - `renderDocument` (`core/render.ts`) prerenders the islands of each
-     document, rewrites the DOM, and writes it with `writeDocument`.
+   - `renderDocument` (`core/render.ts`) runs on each document:
+     `prerenderIslands`, `rewriteAssetReferences`, `embedPrerenders`,
+     `injectScripts` (bootstrap and live reload), and `writeDocument`.
    - `renderBootstraps` (`core/resources/island/bootstrap.ts`) renders the
      virtual file for each page bootstrap, and esbuild bundles them with the
      source files into `dist/static/` (ESM, code splitting into `chunks/`).
@@ -145,7 +146,7 @@ after reconnecting.
   - `collect.ts`: document collection and `DocumentEntry`
   - `load.ts`: `loadDocuments` and `LoadedDocument`
   - `scan.ts`: `scanDocuments` and `CollectedDocument`
-  - `render.ts`: `renderDocument` (island prerender, DOM rewrite) and
+  - `render.ts`: `renderDocument` and its stages, from island prerender to
     `writeDocument` (serialize, minify, write)
   - `entryPoint.ts`: `SourceFile` and `VirtualFile` for esbuild entry points
   - `copyPublic.ts`: copies `public` under `dist/static/`

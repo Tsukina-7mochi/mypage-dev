@@ -1,17 +1,8 @@
-import * as parse5 from "parse5";
-
 import { Context } from "./context.ts";
 import { DocumentEntry } from "./collect.ts";
+import { LoadedDocument } from "./document.ts";
 import { loadHtml } from "./resources/html/load.ts";
 import { loadMarkdown } from "./resources/markdown/load.ts";
-
-type Document = parse5.DefaultTreeAdapterTypes.Document;
-
-export type LoadedDocument = {
-  url: URL;
-  outPath: string;
-  document: Document;
-};
 
 function loadDocument(
   entry: DocumentEntry,

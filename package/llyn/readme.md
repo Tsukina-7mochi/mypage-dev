@@ -144,8 +144,10 @@ after reconnecting.
   - `main.ts`: build CLI
   - `config.ts`: config schema, `defineConfig`, `loadConfig`, `getStaticDist`
   - `collect.ts`: document collection and `DocumentEntry`
-  - `load.ts`: `loadDocuments` and `LoadedDocument`
-  - `scan.ts`: `scanDocuments` and `CollectedDocument`
+  - `document.ts`: `LoadedDocument` and `CollectedDocument` passed between
+    stages
+  - `load.ts`: `loadDocuments`
+  - `scan.ts`: `scanDocuments`
   - `render.ts`: `renderDocument` and its stages, from island prerender to
     `writeDocument` (serialize, minify, write)
   - `entryPoint.ts`: `SourceFile` and `VirtualFile` for esbuild entry points

@@ -2,8 +2,7 @@ import * as path from "@std/path";
 
 import { VirtualFile } from "../../entryPoint.ts";
 import { IslandInstance } from "../../island.ts";
-import { LoadedDocument } from "../../load.ts";
-import { CollectedDocument } from "../../scan.ts";
+import { CollectedDocument, LoadedDocument } from "../../document.ts";
 import { decomposeExtension } from "../../util/path.ts";
 
 export type BootstrapPaths = {

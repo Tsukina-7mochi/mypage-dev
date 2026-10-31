@@ -5,8 +5,7 @@ import * as path from "@std/path";
 
 import { Context } from "./context.ts";
 import { Island, IslandKind } from "./island.ts";
-import { LoadedDocument } from "./load.ts";
-import { CollectedDocument } from "./scan.ts";
+import { CollectedDocument, LoadedDocument } from "./document.ts";
 import {
   embedPrerenders,
   injectScripts,

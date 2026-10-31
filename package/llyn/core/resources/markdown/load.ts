@@ -6,7 +6,7 @@ import * as parse5 from "parse5";
 import * as path from "@std/path";
 
 import { Context } from "../../context.ts";
-import { LoadedDocument } from "../../load.ts";
+import { LoadedDocument } from "../../document.ts";
 import {
   getClientIslands,
   getScripts,

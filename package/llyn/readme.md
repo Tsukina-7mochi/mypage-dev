@@ -123,15 +123,17 @@ after reconnecting.
    stylesheets of each document into a `CollectedDocument`. `runBuild` derives
    the esbuild source files and the server islands from them, checking island id
    collisions.
-4. `renderDocument` (`core/render.ts`) prerenders the islands of each document,
-   rewrites the DOM, writes it with `writeDocument`, and returns the virtual
-   file for the page bootstrap.
-5. `renderServerRenderer` (`core/serverRenderer.ts`) generates the runtime from
-   the server islands.
-6. esbuild bundles client code into `dist/static/` (ESM, code splitting into
-   `chunks/`), and bundles the worker entry into `dist/worker.js` with the
-   generated runtime. In parallel, `copyPublic` (`core/copyPublic.ts`) copies
-   `public` to `dist/static/<basename>/`.
+4. In parallel:
+   - `renderDocument` (`core/render.ts`) prerenders the islands of each
+     document, rewrites the DOM, and writes it with `writeDocument`.
+   - `renderBootstraps` (`core/resources/island/bootstrap.ts`) renders the
+     virtual file for each page bootstrap, and esbuild bundles them with the
+     source files into `dist/static/` (ESM, code splitting into `chunks/`).
+   - `renderServerRenderer` (`core/serverRenderer.ts`) generates the runtime
+     from the server islands, and esbuild bundles the worker entry into
+     `dist/worker.js` with it.
+   - `copyPublic` (`core/copyPublic.ts`) copies `public` to
+     `dist/static/<basename>/`.
 
 ### Key files
 
@@ -143,7 +145,7 @@ after reconnecting.
   - `collect.ts`: document collection and `DocumentEntry`
   - `load.ts`: `loadDocuments` and `LoadedDocument`
   - `scan.ts`: `scanDocuments` and `CollectedDocument`
-  - `render.ts`: `renderDocument` (island prerender, DOM rewrite, bootstrap) and
+  - `render.ts`: `renderDocument` (island prerender, DOM rewrite) and
     `writeDocument` (serialize, minify, write)
   - `entryPoint.ts`: `SourceFile` and `VirtualFile` for esbuild entry points
   - `copyPublic.ts`: copies `public` under `dist/static/`
@@ -157,7 +159,8 @@ after reconnecting.
     merge)
   - `resources/markdown/frontmatter.ts`: frontmatter schema
   - `resources/island/prerender.ts`: React prerender per island kind
-  - `resources/island/bootstrap.ts`: page bootstrap with static imports
+  - `resources/island/bootstrap.ts`: `renderBootstraps` (page bootstrap with
+    static imports) and `bootstrapPaths`
   - `resources/buildAsset/processor.ts`: script / css output mapping
   - `serverRenderer.ts`: prod `llyn/runtime` generation
   - `esbuildPlugin/llynRuntimePlugin.ts`: replaces `llyn/runtime` with generated

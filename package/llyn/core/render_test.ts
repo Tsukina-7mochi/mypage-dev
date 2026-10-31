@@ -124,36 +124,23 @@ Deno.test("asset references are rewritten to the built outputs", async () => {
   assertStringIncludes(html, '<script src="/main.js" type="module"></script>');
 });
 
-Deno.test("bootstrap is rendered and placed inside the html element", async () => {
+Deno.test("bootstrap script is placed inside the html element", async () => {
   const doc = collected(twoIslands, ["client", "static"]);
-  const virtualFiles = await renderDocument(doc, context());
+  await renderDocument(doc, context());
 
-  assertEquals(
-    virtualFiles.map(({ in: input, out }) => ({ in: input, out })),
-    [{
-      in: path.join(routes, "index.html.bootstrap.ts"),
-      out: path.join(staticDist, "index-bootstrap"),
-    }],
-  );
-  assertStringIncludes(
-    virtualFiles[0].content,
-    'bootstrapClientIsland("1234abcd-0", Island_1234abcd, {"label":"0","_prerender":false})',
-  );
-  assertEquals(virtualFiles[0].content.includes("1234abcd-1"), false);
   assertStringIncludes(
     parse5.serialize(doc.document),
     '<script type="module" src="index-bootstrap.js"></script></html>',
   );
 });
 
-Deno.test("bootstrap is omitted without client or server islands", async () => {
+Deno.test("bootstrap script is omitted without client or server islands", async () => {
   const doc = collected(
     '<script type="application/static-island" src="./card.tsx"></script>',
     ["static"],
   );
-  const virtualFiles = await renderDocument(doc, context());
+  await renderDocument(doc, context());
 
-  assertEquals(virtualFiles, []);
   assertEquals(parse5.serialize(doc.document).includes("bootstrap"), false);
 });
 
